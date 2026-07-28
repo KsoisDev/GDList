@@ -24,6 +24,24 @@ export async function fetchDemonList() {
   return allDemons
 }
 
+export async function fetchListedDemons(max = 500) {
+  const all = []
+  let after = 0
+  while (all.length < max) {
+    const remaining = max - all.length
+    const limit = Math.min(remaining, 100)
+    const url = after ? `${GDL_BASE}/demons/listed/?limit=${limit}&after=${after}` : `${GDL_BASE}/demons/listed/?limit=${limit}`
+    const res = await fetch(url, { headers: { Accept: 'application/json' } })
+    if (!res.ok) throw new Error(`API error: ${res.status}`)
+    const data = await res.json()
+    if (!Array.isArray(data) || data.length === 0) break
+    all.push(...data)
+    if (data.length < limit) break
+    after = data[data.length - 1].position
+  }
+  return all
+}
+
 export async function fetchDemonById(id) {
   const res = await fetch(`${GDL_BASE}/demons/${id}`, {
     headers: { Accept: 'application/json' },

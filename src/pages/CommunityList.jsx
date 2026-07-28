@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PageShell from '../components/layout/PageShell'
 import Card from '../components/ui/Card'
@@ -9,9 +10,15 @@ import { formatDate } from '../utils/format'
 import { DIFFICULTY_COLORS } from '../utils/constants'
 import styles from './List.module.css'
 
+const TABS = [
+  { id: 'active', label: 'Active' },
+  { id: 'unverified', label: 'Niveles por Verificar' },
+]
+
 export default function CommunityList() {
   const [levels, setLevels] = useState([])
   const [loading, setLoading] = useState(true)
+  const [tab, setTab] = useState('active')
 
   useEffect(() => {
     async function load() {
@@ -29,21 +36,42 @@ export default function CommunityList() {
     load()
   }, [])
 
+  const active = levels.filter(l => (l.victoryCount || 0) > 0)
+  const unverified = levels.filter(l => (l.victoryCount || 0) === 0)
+
   const diffColor = (diff) => DIFFICULTY_COLORS[diff?.toLowerCase()] || '#ffffff'
 
   return (
     <PageShell title="Community Demon List" subtitle="Levels created and verified by our community members">
       <div className={styles.toolbar}>
-        <span className={styles.count}>{levels.length} levels</span>
+        <span className={styles.count}>
+          {tab === 'active' ? active.length : unverified.length} levels
+        </span>
+      </div>
+
+      <div className={styles.tabs}>
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            className={`${styles.tab} ${tab === t.id ? styles.tabActive : ''}`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {loading ? (
         <div className={styles.loading}>
           <Spinner size="lg" />
         </div>
-      ) : levels.length === 0 ? (
+      ) : tab === 'active' && active.length === 0 ? (
         <Card padding="lg" className={styles.empty}>
-          <p>No community levels yet. They will appear here once added by admins.</p>
+          <p>No active community levels yet. Levels appear here once they have at least one completion.</p>
+        </Card>
+      ) : tab === 'unverified' && unverified.length === 0 ? (
+        <Card padding="lg" className={styles.empty}>
+          <p>No unverified levels. New level submissions will appear here once approved by an admin.</p>
         </Card>
       ) : (
         <div className={styles.table}>
@@ -51,12 +79,12 @@ export default function CommunityList() {
             <span className={styles.colPos}>#</span>
             <span className={styles.colName}>Level</span>
             <span className={styles.colDiff}>Difficulty</span>
-            <span className={styles.colPoints}>Points</span>
-            <span className={styles.colVerifier}>Verifier</span>
-            <span className={styles.colCreator}>Creator</span>
+            {tab === 'active' && <span className={styles.colPoints}>Points</span>}
+            <span className={styles.colVerifier}>Creators</span>
+            <span className={styles.colCreator}>Submitter</span>
           </div>
 
-          {levels.map((level, i) => (
+          {(tab === 'active' ? active : unverified).map((level, i) => (
             <motion.div
               key={level.id}
               className={styles.tableRow}
@@ -70,7 +98,13 @@ export default function CommunityList() {
               <span className={styles.colName}>
                 <div className={styles.levelInfo}>
                   <div>
-                    <span className={styles.levelName}>{level.name}</span>
+                    {tab === 'active' ? (
+                      <Link to={`/levels/${level.id}`} className={styles.levelLink}>
+                        <span className={styles.levelName}>{level.name}</span>
+                      </Link>
+                    ) : (
+                      <span className={styles.levelName}>{level.name}</span>
+                    )}
                     <span className={styles.creator}>by {level.creator}</span>
                   </div>
                 </div>
@@ -80,14 +114,16 @@ export default function CommunityList() {
                   {level.difficulty}
                 </Badge>
               </span>
-              <span className={styles.colPoints}>
-                <span className={styles.points}>{level.points}</span>
-              </span>
+              {tab === 'active' && (
+                <span className={styles.colPoints}>
+                  <span className={styles.points}>{level.points}</span>
+                </span>
+              )}
               <span className={styles.colVerifier}>
-                <span className={styles.verifier}>{level.verifier}</span>
+                <span className={styles.verifier}>{level.creator}</span>
               </span>
               <span className={styles.colCreator}>
-                <span className={styles.creator}>{level.creator}</span>
+                <span className={styles.creator}>—</span>
               </span>
             </motion.div>
           ))}

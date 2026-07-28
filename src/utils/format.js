@@ -1,8 +1,9 @@
 export function formatNumber(num) {
   if (!num && num !== 0) return '0'
-  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
-  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
-  return num.toString()
+  if (num >= 1000000) return `${(num / 1000000).toFixed(2)}M`
+  if (num >= 1000) return `${(num / 1000).toFixed(2)}K`
+  const n = Number(num)
+  return Number.isInteger(n) ? n.toString() : n.toFixed(2)
 }
 
 export function formatDate(timestamp) {

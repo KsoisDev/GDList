@@ -192,23 +192,31 @@
   background: var(--accent-green-dim);
 }
 
-.submitNavBtn {
+.navDivider {
+  width: 1px;
+  height: 24px;
+  background: var(--border-glass);
+  margin: 0 8px;
+}
+
+.submitBtn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  margin-left: 4px;
-  border-radius: var(--radius-sm);
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  font-weight: 500;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  color: var(--accent-green);
+  font-size: 0.8125rem;
+  font-weight: 600;
   text-decoration: none;
+  border: 1px solid var(--accent-green);
   transition: all var(--transition-fast);
 }
 
-.submitNavBtn:hover {
-  color: var(--text-primary);
-  background: var(--bg-glass);
+.submitBtn:hover {
+  background: var(--accent-green);
+  color: var(--bg-primary);
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.2);
 }
 
 .mobileSubmitBtn {
@@ -227,4 +235,182 @@
 .mobileSubmitBtn:hover {
   color: var(--accent-green);
   background: var(--accent-green-dim);
+}
+
+.bellWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.bellBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: 1px solid var(--border-glass);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bellBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-glass);
+  border-color: var(--border-glass-hover);
+}
+
+.bellBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  background: var(--accent-red);
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 800;
+  border-radius: 100px;
+  line-height: 1;
+}
+
+.notifDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 360px;
+  max-height: 420px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+}
+
+.notifHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.notifTitle {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+}
+
+.notifMarkAll {
+  background: none;
+  border: none;
+  color: var(--accent-green);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.notifMarkAll:hover {
+  opacity: 0.8;
+}
+
+.notifList {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.notifEmpty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: 0.8125rem;
+}
+
+.notifItem {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.notifItem:last-child {
+  border-bottom: none;
+}
+
+.notifItem:hover {
+  background: var(--bg-card);
+}
+
+.notifUnread {
+  background: rgba(76, 175, 80, 0.04);
+}
+
+.notifIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+}
+
+.notifBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.notifType {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.notifItem:has(.notifIcon svg[style*="green"]) .notifType {
+  color: var(--accent-green);
+}
+
+.notifItem:has(.notifIcon svg[style*="red"]) .notifType {
+  color: var(--accent-red);
+}
+
+.notifLevel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notifNote {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notifTime {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6875rem;
+  color: var(--text-tertiary);
 }

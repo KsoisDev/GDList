@@ -1,21 +1,29 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Calendar, Trophy, Medal, List } from 'lucide-react'
+import { Calendar, Trophy, Medal, List, Youtube, Flag, Crown, Shield } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import Avatar from '../components/ui/Avatar'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
 import Spinner from '../components/ui/Spinner'
-import { getDocument, getCollection } from '../services/firestore'
+import { getDocument, getCollection, createDocument } from '../services/firestore'
 import { formatNumber, formatDate } from '../utils/format'
+import { hasAccess } from '../utils/constants'
+import Modal from '../components/ui/Modal'
+import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
 import styles from './Profile.module.css'
 
 export default function Profile() {
   const { userId } = useParams()
+  const { user, userData } = useAuth()
   const [profile, setProfile] = useState(null)
   const [completions, setCompletions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [reportModal, setReportModal] = useState(false)
+  const [reportReason, setReportReason] = useState('')
+  const [sendingReport, setSendingReport] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -45,6 +53,9 @@ export default function Profile() {
     if (userId) load()
   }, [userId])
 
+  const mainComps = completions.filter(c => c.levelType === 'main')
+  const communityComps = completions.filter(c => c.levelType === 'community')
+
   if (loading) {
     return (
       <PageShell>
@@ -72,8 +83,8 @@ export default function Profile() {
             <div className={styles.headerInfo}>
               <h1 className={styles.username}>{profile.username}</h1>
               <div className={styles.meta}>
-                <Badge variant={profile.role === 'admin' ? 'purple' : 'default'} size="sm">
-                  {profile.role === 'admin' ? 'Admin' : 'Player'}
+                <Badge variant={profile.role === 'owner' ? 'gold' : profile.role === 'admin' ? 'purple' : 'default'} size="sm">
+                  {profile.banned ? 'Banned' : profile.role === 'owner' ? <><Crown size={12} /> Owner</> : profile.role === 'admin' ? <><Shield size={12} /> Admin</> : 'Player'}
                 </Badge>
                 <span className={styles.joinDate}>
                   <Calendar size={14} /> Joined {formatDate(profile.createdAt)}
@@ -106,25 +117,98 @@ export default function Profile() {
           </Card>
         </div>
 
-        {completions.length > 0 && (
+        {user && user.uid !== userId && hasAccess(userData?.role || 'user', 'admin') && (
+          <div className={styles.actions}>
+            <Button variant="ghost" size="sm" icon={Flag} onClick={() => setReportModal(true)}>
+              Report User
+            </Button>
+          </div>
+        )}
+
+        <Modal isOpen={reportModal} onClose={() => setReportModal(false)} title="Report User">
+          <div className={styles.reportModal}>
+            <p className={styles.reportDesc}>Report this user to the owner.</p>
+            <Input placeholder="Reason..." value={reportReason} onChange={e => setReportReason(e.target.value)} />
+            <div className={styles.reportActions}>
+              <Button variant="ghost" onClick={() => setReportModal(false)} disabled={sendingReport}>Cancel</Button>
+              <Button variant="danger" onClick={async () => {
+                if (!reportReason.trim()) return
+                setSendingReport(true)
+                try {
+                  await createDocument('reports', null, {
+                    reporterId: user.uid,
+                    reporterName: userData?.username || 'Unknown',
+                    targetId: userId,
+                    reason: reportReason.trim(),
+                    status: 'open',
+                    createdAt: new Date(),
+                  })
+                  setReportModal(false)
+                  setReportReason('')
+                } catch (e) { console.error(e) } finally { setSendingReport(false) }
+              }} loading={sendingReport} disabled={!reportReason.trim()}>
+                Send Report
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
+        {mainComps.length > 0 && (
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Recent Completions</h2>
+            <h2 className={styles.sectionTitle}>Main List Completions ({mainComps.length})</h2>
             <div className={styles.completions}>
-              {completions.slice(0, 10).map((comp, i) => (
+              {mainComps.map((comp, i) => (
                 <motion.div
                   key={comp.id}
                   className={styles.completion}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 }}
+                  transition={{ delay: i * 0.03 }}
                 >
                   <div className={styles.compInfo}>
-                    <Badge variant={comp.levelType === 'main' ? 'green' : 'blue'} size="sm">
-                      {comp.levelType === 'main' ? 'Main' : 'Community'}
-                    </Badge>
-                    <span className={styles.compLevel}>{comp.levelName || 'Unknown Level'}</span>
+                    <span className={styles.compLevel}>
+                      <Link to={`/levels/${comp.levelId}`} className={styles.compLink}>{comp.levelName || 'Unknown Level'}</Link>
+                    </span>
+                    <span className={styles.compDate}>{formatDate(comp.completedAt)}</span>
                   </div>
-                  <span className={styles.compPoints}>+{comp.points} pts</span>
+                  <div className={styles.compRight}>
+                    <span className={styles.compPoints}>+{comp.points} pts</span>
+                    {comp.videoURL && (
+                      <a href={comp.videoURL} target="_blank" rel="noopener noreferrer" className={styles.compVideo}>
+                        <Youtube size={16} />
+                      </a>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {communityComps.length > 0 && (
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Community Completions ({communityComps.length})</h2>
+            <div className={styles.completions}>
+              {communityComps.map((comp, i) => (
+                <motion.div
+                  key={comp.id}
+                  className={styles.completion}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.03 }}
+                >
+                  <div className={styles.compInfo}>
+                    <span className={styles.compLevel}>{comp.levelName || 'Unknown Level'}</span>
+                    <span className={styles.compDate}>{formatDate(comp.completedAt)}</span>
+                  </div>
+                  <div className={styles.compRight}>
+                    <span className={styles.compPoints}>+{comp.points} pts</span>
+                    {comp.videoURL && (
+                      <a href={comp.videoURL} target="_blank" rel="noopener noreferrer" className={styles.compVideo}>
+                        <Youtube size={16} />
+                      </a>
+                    )}
+                  </div>
                 </motion.div>
               ))}
             </div>

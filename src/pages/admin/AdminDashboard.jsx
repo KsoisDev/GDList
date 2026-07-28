@@ -1,24 +1,26 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ListCheck, Users, Layers, FileText } from 'lucide-react'
+import { ListCheck, Users, Layers, FileText, Flag } from 'lucide-react'
 import PageShell from '../../components/layout/PageShell'
 import Card from '../../components/ui/Card'
 import Spinner from '../../components/ui/Spinner'
 import { useAuth } from '../../hooks/useAuth'
 import { getCollection } from '../../services/firestore'
+import { hasAccess } from '../../utils/constants'
 import styles from './Admin.module.css'
 
 export default function AdminDashboard() {
   const { user, userData, loading } = useAuth()
   const navigate = useNavigate()
+  const role = userData?.role || 'user'
   const [stats, setStats] = useState({ users: 0, levels: 0, pending: 0, completions: 0 })
   const [fetching, setFetching] = useState(true)
 
   useEffect(() => {
-    if (!loading && (!user || userData?.role !== 'admin')) {
+    if (!loading && (!user || !hasAccess(role, 'admin'))) {
       navigate('/')
     }
-  }, [user, userData, loading, navigate])
+  }, [user, role, loading, navigate])
 
   useEffect(() => {
     async function load() {
@@ -79,12 +81,20 @@ export default function AdminDashboard() {
           <Link to="/admin/submissions" className={styles.quickLink}>
             Review Pending Submissions
           </Link>
+          <Link to="/admin/submissions" className={styles.quickLink}>
+            Level Acceptance
+          </Link>
           <Link to="/admin/levels" className={styles.quickLink}>
             Manage Community Levels
           </Link>
           <Link to="/admin/users" className={styles.quickLink}>
             Manage Users
           </Link>
+          {role === 'owner' && (
+            <Link to="/admin/reports" className={styles.quickLink}>
+              <Flag size={16} /> User Reports
+            </Link>
+          )}
         </div>
       </div>
     </PageShell>

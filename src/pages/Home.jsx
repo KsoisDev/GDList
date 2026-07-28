@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Trophy, List, Users, Zap, Shield, Server } from 'lucide-react'
+import { ArrowRight, Trophy, List, Users, Zap, Shield, Youtube, Music, Upload } from 'lucide-react'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
 import styles from './Home.module.css'
@@ -9,38 +9,31 @@ const features = [
   {
     icon: List,
     title: 'Demon Lists',
-    desc: 'Browse the official Global Demon List and our community-created demon list.',
+    desc: 'Browse the main demon list and community-created levels.',
     link: '/list/main',
     color: 'var(--accent-green)',
   },
   {
     icon: Trophy,
     title: 'Leaderboards',
-    desc: 'Compete for the top spots on both main and community leaderboards.',
+    desc: 'Compete for top spots on both main and community rankings.',
     link: '/leaderboard/main',
     color: 'var(--accent-gold)',
   },
   {
     icon: Zap,
     title: 'Submit Records',
-    desc: 'Submit your completions and climb the ranks with verified records.',
+    desc: 'Submit your completions with video proof and get verified.',
     link: '/submit',
     color: 'var(--accent-blue)',
   },
   {
-    icon: Users,
-    title: 'Community',
-    desc: 'Join our Discord server and be part of the growing GD community.',
-    link: '#',
-    color: 'var(--accent-purple)',
+    icon: Upload,
+    title: 'Submit Levels',
+    desc: 'Request your own levels to be added to the community list.',
+    link: '/submit-level',
+    color: 'var(--accent-pink)',
   },
-]
-
-const stats = [
-  { value: '150+', label: 'Demons Listed', icon: Shield },
-  { value: '500+', label: 'Active Players', icon: Users },
-  { value: '1K+', label: 'Records Submitted', icon: Server },
-  { value: 'Top 100', label: 'Global Rankings', icon: Trophy },
 ]
 
 export default function Home() {
@@ -66,13 +59,11 @@ export default function Home() {
           </motion.div>
 
           <h1 className={styles.heroTitle}>
-            Welcome to{' '}
-            <span className={styles.gradientText}>WebList</span>
+            <span className={styles.gradientText}>Basement List</span>
           </h1>
 
           <p className={styles.heroSubtitle}>
-            The ultimate demon list and leaderboard platform for our Geometry Dash community.
-            Track your progress, compete with others, and showcase your achievements.
+            The demon list for the tnaillzxgd Discord community — track completions, compete on leaderboards, and showcase your achievements.
           </p>
 
           <motion.div
@@ -91,10 +82,22 @@ export default function Home() {
                 Rankings
               </Button>
             </Link>
-            <a href="#">
-              <Button variant="ghost" size="lg" icon={Users}>
-                Join Discord
-              </Button>
+          </motion.div>
+
+          <motion.div
+            className={styles.socialRow}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <a href="https://discord.gg/75FaX3gmM2" target="_blank" rel="noopener noreferrer">
+              <Button variant="ghost" size="sm" icon={Users}>Discord</Button>
+            </a>
+            <a href="https://www.tiktok.com/@tnaillzgd" target="_blank" rel="noopener noreferrer">
+              <Button variant="ghost" size="sm" icon={Music}>TikTok</Button>
+            </a>
+            <a href="https://www.youtube.com/@tNaiLLzxGd" target="_blank" rel="noopener noreferrer">
+              <Button variant="ghost" size="sm" icon={Youtube}>YouTube</Button>
             </a>
           </motion.div>
         </motion.div>
@@ -110,30 +113,24 @@ export default function Home() {
         </motion.div>
       </section>
 
-      <section className={styles.statsSection}>
-        <div className={styles.statsGrid}>
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              className={styles.statCard}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              viewport={{ once: true }}
-            >
-              <stat.icon className={styles.statIcon} size={24} />
-              <span className={styles.statValue}>{stat.value}</span>
-              <span className={styles.statLabel}>{stat.label}</span>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
       <section className={styles.featuresSection}>
-        <h2 className={styles.sectionTitle}>Everything you need</h2>
-        <p className={styles.sectionSubtitle}>
-          Track completions, compete on leaderboards, and connect with the community.
-        </p>
+        <motion.h2
+          className={styles.sectionTitle}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          Everything you need
+        </motion.h2>
+        <motion.p
+          className={styles.sectionSubtitle}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          viewport={{ once: true }}
+        >
+          Track completions, compete on leaderboards, and grow with the community.
+        </motion.p>
         <div className={styles.featuresGrid}>
           {features.map((feature, i) => (
             <motion.div
@@ -145,19 +142,40 @@ export default function Home() {
             >
               <Link to={feature.link} className={styles.featureLink}>
                 <Card hover>
-                  <div className={styles.featureIcon} style={{ color: feature.color }}>
-                    <feature.icon size={28} />
+                  <div className={styles.featureCardTop} style={{ background: feature.color }}>
+                    <feature.icon size={24} />
                   </div>
-                  <h3 className={styles.featureTitle}>{feature.title}</h3>
-                  <p className={styles.featureDesc}>{feature.desc}</p>
-                  <span className={styles.featureArrow}>
-                    Explore <ArrowRight size={14} />
-                  </span>
+                  <div className={styles.featureBody}>
+                    <h3 className={styles.featureTitle}>{feature.title}</h3>
+                    <p className={styles.featureDesc}>{feature.desc}</p>
+                    <span className={styles.featureArrow}>
+                      Explore <ArrowRight size={14} />
+                    </span>
+                  </div>
                 </Card>
               </Link>
             </motion.div>
           ))}
         </div>
+      </section>
+
+      <section className={styles.ctaSection}>
+        <motion.div
+          className={styles.ctaContent}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <h2 className={styles.ctaTitle}>Ready to start?</h2>
+          <p className={styles.ctaDesc}>
+            Join the tnaillzxgd community, submit your completions, and climb the ranks.
+          </p>
+          <Link to="/register">
+            <Button variant="primary" size="lg" icon={Users}>
+              Get Started
+            </Button>
+          </Link>
+        </motion.div>
       </section>
     </div>
   )

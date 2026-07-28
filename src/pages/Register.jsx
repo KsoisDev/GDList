@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Mail, Lock, User, UserPlus } from 'lucide-react'
+import GoogleLogo from '../components/ui/GoogleLogo'
 import { registerWithEmail, loginWithGoogle } from '../services/auth'
 import { useAuth } from '../hooks/useAuth'
 import Button from '../components/ui/Button'
@@ -112,7 +113,7 @@ export default function Register() {
             <span>or</span>
           </div>
 
-          <Button variant="secondary" fullWidth onClick={handleGoogle} loading={loading}>
+          <Button variant="secondary" fullWidth onClick={handleGoogle} loading={loading} icon={GoogleLogo}>
             Continue with Google
           </Button>
 

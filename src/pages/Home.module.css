@@ -74,6 +74,19 @@
   justify-content: center;
 }
 
+.socialRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 16px;
+  opacity: 0.7;
+}
+
+.socialRow:hover {
+  opacity: 1;
+}
+
 .heroVisual {
   position: absolute;
   inset: 0;
@@ -99,53 +112,6 @@
   border-radius: 50%;
   background: radial-gradient(circle, rgba(68, 136, 255, 0.06) 0%, transparent 70%);
   animation: float 10s ease-in-out infinite reverse;
-}
-
-.statsSection {
-  padding: 80px 24px;
-}
-
-.statsGrid {
-  max-width: 1000px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-
-@media (min-width: 768px) {
-  .statsGrid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.statCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 28px 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-lg);
-  text-align: center;
-}
-
-.statIcon {
-  color: var(--accent-green);
-  opacity: 0.6;
-}
-
-.statValue {
-  font-size: 1.75rem;
-  font-weight: 800;
-}
-
-.statLabel {
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .featuresSection {
@@ -186,8 +152,18 @@
   height: 100%;
 }
 
-.featureIcon {
-  margin-bottom: 16px;
+.featureCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  color: #fff;
+  opacity: 0.9;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.featureBody {
+  padding: 20px;
 }
 
 .featureTitle {
@@ -210,6 +186,39 @@
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--accent-green);
+}
+
+.featureLink:hover .featureArrow {
+  gap: 8px;
+}
+
+.ctaSection {
+  padding: 100px 24px;
+  text-align: center;
+  position: relative;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(0, 255, 136, 0.04) 0%, transparent 60%);
+}
+
+.ctaContent {
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.ctaTitle {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.ctaDesc {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 8px;
 }
 
 @keyframes float {

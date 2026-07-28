@@ -44,7 +44,7 @@
 @media (min-width: 768px) {
   .tableHeader {
     display: grid;
-    grid-template-columns: 60px 3fr 1.2fr 0.8fr 1fr 0.8fr;
+    grid-template-columns: 60px 3fr 1.2fr 0.8fr 1fr 1fr;
   }
 }
 
@@ -56,6 +56,8 @@
   border-bottom: 1px solid var(--border-glass);
   transition: background var(--transition-fast);
   align-items: center;
+  text-decoration: none;
+  color: inherit;
 }
 
 .tableRow:last-child {
@@ -68,7 +70,7 @@
 
 @media (min-width: 768px) {
   .tableRow {
-    grid-template-columns: 60px 3fr 1.2fr 0.8fr 1fr 0.8fr;
+    grid-template-columns: 60px 3fr 1.2fr 0.8fr 1fr 1fr;
   }
 }
 
@@ -138,18 +140,16 @@
 
 .colDiff,
   .colPoints,
-  .colVerifier,
-  .colPlayers,
-  .colCreator {
+  .colCreator,
+  .colVictories {
   display: none;
 }
 
 @media (min-width: 768px) {
   .colDiff,
     .colPoints,
-    .colVerifier,
-    .colPlayers,
-    .colCreator {
+    .colCreator,
+    .colVictories {
     display: flex;
     align-items: center;
   }
@@ -160,8 +160,64 @@
   color: var(--accent-green);
 }
 
-.verifier,
-.players {
+.creator {
   font-size: 0.875rem;
   color: var(--text-secondary);
+}
+
+.victories {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 4px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-glass);
+}
+
+.tabActive {
+  background: var(--accent-green);
+  color: var(--bg-primary);
+}
+
+.tabActive:hover {
+  background: var(--accent-green);
+  color: var(--bg-primary);
+}
+
+.levelLink {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.levelLink:hover {
+  color: var(--accent-green);
 }

@@ -270,3 +270,115 @@
     grid-template-columns: 1fr;
   }
 }
+
+.error {
+  font-size: 0.8125rem;
+  color: var(--accent-red);
+  text-align: center;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 4px;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-glass);
+}
+
+.tabActive {
+  background: var(--accent-green);
+  color: var(--bg-primary);
+}
+
+.tabActive:hover {
+  background: var(--accent-green);
+  color: var(--bg-primary);
+}
+
+.tabCount {
+  font-size: 0.75rem;
+  padding: 1px 7px;
+  border-radius: 99px;
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+}
+
+.tabActive .tabCount {
+  background: rgba(0,0,0,0.2);
+  color: var(--bg-primary);
+}
+
+.subNote {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+}
+
+.noteLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.noteText {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.reportModal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reportDesc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.reportActions {
+  display: flex;
+  gap: 12px;
+}
+
+.reportActions > * {
+  flex: 1;
+}

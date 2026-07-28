@@ -30,6 +30,8 @@
   --accent-gold-dim: rgba(255, 204, 0, 0.15);
   --accent-purple: #8844ff;
   --accent-purple-dim: rgba(136, 68, 255, 0.15);
+  --accent-pink: #ff44aa;
+  --accent-pink-dim: rgba(255, 68, 170, 0.15);
 
   --radius-sm: 8px;
   --radius-md: 12px;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Youtube, Send, ExternalLink } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import Card from '../components/ui/Card'
@@ -9,7 +9,7 @@ import Button from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
 import { getCollection, where, createDocument } from '../services/firestore'
-import { syncMainLevels } from '../services/cache'
+import { fetchListedDemons } from '../services/gdl'
 import { isValidYouTubeUrl } from '../utils/validators'
 import styles from './SubmitRecord.module.css'
 
@@ -17,9 +17,10 @@ export default function SubmitRecord() {
   const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [levelType, setLevelType] = useState('main')
-  const [levelId, setLevelId] = useState('')
+  const [selectedDemon, setSelectedDemon] = useState(null)
   const [videoUrl, setVideoUrl] = useState('')
-  const [levels, setLevels] = useState([])
+  const [demons, setDemons] = useState([])
+  const [communityLevels, setCommunityLevels] = useState([])
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -50,26 +51,17 @@ export default function SubmitRecord() {
     async function load() {
       setLoading(true)
       setLoadError('')
+      setSelectedDemon(null)
+      setManualMode(false)
+      setManualLevelName('')
+      setExternalUrl('')
       try {
-        let data = await getCollection('levels', [
-          where('type', '==', levelType),
-        ])
-        data = data.filter(l => l.isActive !== false).sort((a, b) => a.position - b.position)
-
-        if (data.length === 0 && levelType === 'main') {
-          await syncMainLevels(true)
-          data = await getCollection('levels', [
-            where('type', '==', levelType),
-          ])
-          data = data.filter(l => l.isActive !== false).sort((a, b) => a.position - b.position)
-        }
-
-        if (mounted) {
-          setLevels(data)
-          setLevelId('')
-          setManualMode(false)
-          setManualLevelName('')
-          setExternalUrl('')
+        if (levelType === 'community') {
+          const data = await getCollection('levels', [where('type', '==', 'community')])
+          if (mounted) setCommunityLevels(data.filter(l => l.isActive !== false).sort((a, b) => a.position - b.position))
+        } else {
+          const data = await fetchListedDemons(100)
+          if (mounted) setDemons(data)
         }
       } catch (err) {
         setLoadError('Failed to load levels. Try again later.')
@@ -83,14 +75,31 @@ export default function SubmitRecord() {
 
   const isValidExternalUrl = (url) => {
     if (!url) return true
-    return /^https?:\/\/(www\.)?(aredl\.net|demonlist\.org)\//.test(url)
+    return /^https?:\/\/(www\.)?demonlist\.org\//.test(url)
+  }
+
+  const getLevelOptions = () => {
+    if (levelType === 'community') {
+      return communityLevels.map(l => ({
+        value: l.id,
+        label: `#${l.position} - ${l.name}`,
+      }))
+    }
+    return demons.map(d => ({
+      value: String(d.id),
+      label: `#${d.position} - ${d.name}`,
+    }))
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
-    if (!manualMode && !levelId) {
+    if (!manualMode && levelType === 'main' && !selectedDemon) {
+      setError('Please select a level')
+      return
+    }
+    if (!manualMode && levelType === 'community' && !selectedDemon) {
       setError('Please select a level')
       return
     }
@@ -103,7 +112,7 @@ export default function SubmitRecord() {
       return
     }
     if (externalUrl && !isValidExternalUrl(externalUrl)) {
-      setError('Link must be from aredl.net or demonlist.org')
+      setError('Link must be from demonlist.org')
       return
     }
 
@@ -122,13 +131,19 @@ export default function SubmitRecord() {
       if (manualMode) {
         data.manualLevelName = manualLevelName.trim()
         if (externalUrl) data.externalUrl = externalUrl
-      } else {
-        data.levelId = levelId
+      } else if (levelType === 'main' && selectedDemon) {
+        data.demonName = selectedDemon.name
+        data.demonPosition = selectedDemon.position
+        data.demonApiId = String(selectedDemon.id)
+        data.demonCreator = selectedDemon.publisher?.name || (selectedDemon.creators?.[0]?.name) || 'Unknown'
+        data.demonVerifier = selectedDemon.verifier?.name || 'Unknown'
+      } else if (levelType === 'community' && selectedDemon) {
+        data.levelId = selectedDemon
       }
 
       await createDocument('submissions', null, data)
       setSuccess(true)
-      setLevelId('')
+      setSelectedDemon(null)
       setVideoUrl('')
       setManualLevelName('')
       setExternalUrl('')
@@ -161,10 +176,7 @@ export default function SubmitRecord() {
     )
   }
 
-  const levelOptions = levels.map(l => ({
-    value: l.id,
-    label: `#${l.position} - ${l.name} (${l.difficulty})`,
-  }))
+  const levelOptions = getLevelOptions()
 
   return (
     <PageShell title="Submit Record" subtitle="Submit a demon completion for verification">
@@ -198,22 +210,39 @@ export default function SubmitRecord() {
                   label="Level"
                   placeholder="Search for a level..."
                   options={levelOptions}
-                  value={levelId}
-                  onChange={e => setLevelId(e.target.value)}
-                  error={error && !levelId ? error : ''}
+                  value={levelType === 'main' ? (selectedDemon ? String(selectedDemon.id) : '') : (selectedDemon || '')}
+                  onChange={e => {
+                    if (levelType === 'main') {
+                      const demon = demons.find(d => String(d.id) === e.target.value)
+                      setSelectedDemon(demon || null)
+                    } else {
+                      setSelectedDemon(e.target.value || null)
+                    }
+                  }}
+                  error={error && !selectedDemon ? error : ''}
                   loading={loading}
                 />
-                <button
-                  type="button"
-                  className={styles.manualToggle}
-                  onClick={() => setManualMode(true)}
-                >
-                  <ExternalLink size={18} />
-                  <span>
-                    <strong>Level not listed?</strong> Enter it manually
-                  </span>
-                  <span className={styles.manualArrow}>→</span>
-                </button>
+                {levelType === 'community' ? (
+                  <Link to="/submit-level" className={styles.manualToggle}>
+                    <ExternalLink size={18} />
+                    <span>
+                      <strong>Level not listed?</strong> Submit the level
+                    </span>
+                    <span className={styles.manualArrow}>→</span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.manualToggle}
+                    onClick={() => setManualMode(true)}
+                  >
+                    <ExternalLink size={18} />
+                    <span>
+                      <strong>Level not listed?</strong> Enter it manually
+                    </span>
+                    <span className={styles.manualArrow}>→</span>
+                  </button>
+                )}
               </>
             ) : (
               <>
@@ -235,13 +264,13 @@ export default function SubmitRecord() {
                   error={error && !manualLevelName.trim() ? error : ''}
                 />
                 <Input
-                  label="Link (optional) — aredl.net or demonlist.org"
+                  label="Link (optional) — demonlist.org"
                   type="url"
-                  placeholder="https://aredl.net/list/..."
+                  placeholder="https://demonlist.org/list/..."
                   value={externalUrl}
                   onChange={e => setExternalUrl(e.target.value)}
                   icon={ExternalLink}
-                  error={externalUrl && !isValidExternalUrl(externalUrl) ? 'Must be from aredl.net or demonlist.org' : ''}
+                  error={externalUrl && !isValidExternalUrl(externalUrl) ? 'Must be from demonlist.org' : ''}
                 />
               </>
             )}

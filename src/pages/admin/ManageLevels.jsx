@@ -14,7 +14,7 @@ import {
   getCollection, createDocument, updateDocument, deleteDocument,
   where,
 } from '../../services/firestore'
-import { DIFFICULTIES, DIFFICULTY_COLORS } from '../../utils/constants'
+import { DIFFICULTIES, DIFFICULTY_COLORS, hasAccess } from '../../utils/constants'
 import styles from './Admin.module.css'
 
 export default function ManageLevels() {
@@ -27,7 +27,7 @@ export default function ManageLevels() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (!authLoading && (!user || userData?.role !== 'admin')) navigate('/')
+    if (!authLoading && (!user || !hasAccess(userData?.role || 'user', 'admin'))) navigate('/')
   }, [user, userData, authLoading, navigate])
 
   const loadLevels = async () => {
@@ -44,7 +44,7 @@ export default function ManageLevels() {
     }
   }
 
-  useEffect(() => { if (userData?.role === 'admin') loadLevels() }, [userData])
+  useEffect(() => { if (hasAccess(userData?.role || 'user', 'admin')) loadLevels() }, [userData])
 
   const handleSave = async () => {
     if (!form.name || !form.creator) return

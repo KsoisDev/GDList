@@ -10,6 +10,13 @@ export const DIFFICULTIES = [
 export const ROLES = {
   USER: 'user',
   ADMIN: 'admin',
+  OWNER: 'owner',
+}
+
+export const HIERARCHY = { user: 0, admin: 1, owner: 2 }
+
+export function hasAccess(role, minRole) {
+  return (HIERARCHY[role] || 0) >= (HIERARCHY[minRole] || 0)
 }
 
 export const SUBMISSION_STATUS = {

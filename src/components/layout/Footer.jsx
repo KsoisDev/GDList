@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { Github } from 'lucide-react'
 import styles from './Footer.module.css'
 
 export default function Footer() {
@@ -8,11 +7,11 @@ export default function Footer() {
       <div className={styles.container}>
         <div className={styles.brand}>
           <Link to="/" className={styles.logo}>
-            <span className={styles.logoText}>WebList</span>
+            <span className={styles.logoText}>Basement List</span>
             <span className={styles.logoAccent}>GD</span>
           </Link>
           <p className={styles.description}>
-            Geometry Dash community demon list & leaderboards.
+            Geometry Dash demon list for the tnaillzxgd Discord community.
           </p>
         </div>
         <div className={styles.links}>
@@ -28,16 +27,18 @@ export default function Footer() {
           </div>
           <div className={styles.column}>
             <h4 className={styles.columnTitle}>Community</h4>
-            <a href="#" className={styles.link}>Discord</a>
-            <a href="#" className={styles.link}>
-              <Github size={14} /> GitHub
-            </a>
+            <a href="https://discord.gg/75FaX3gmM2" target="_blank" rel="noopener noreferrer" className={styles.link}>Discord</a>
+            <a href="https://www.tiktok.com/@tnaillzgd" target="_blank" rel="noopener noreferrer" className={styles.link}>TikTok</a>
+            <a href="https://www.youtube.com/@tNaiLLzxGd" target="_blank" rel="noopener noreferrer" className={styles.link}>YouTube</a>
           </div>
         </div>
       </div>
       <div className={styles.bottom}>
         <p className={styles.copyright}>
-          &copy; {new Date().getFullYear()} WebList. Not affiliated with RobTop Games.
+          &copy; {new Date().getFullYear()} Basement List. Not affiliated with RobTop Games.
+        </p>
+        <p className={styles.credit}>
+          Web creada por <strong>Ksois</strong> con ayuda de IA
         </p>
       </div>
     </footer>
