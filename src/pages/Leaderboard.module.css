@@ -1,0 +1,89 @@
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.table {
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 60px 1fr 100px 120px;
+  padding: 12px 20px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-glass);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 60px 1fr 100px 120px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border-glass);
+  transition: background var(--transition-fast);
+  align-items: center;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableRow:hover {
+  background: var(--bg-card);
+}
+
+.colRank {
+  display: flex;
+  align-items: center;
+}
+
+.rank {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.playerInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.playerInfo:hover .username {
+  color: var(--accent-green);
+}
+
+.username {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  transition: color var(--transition-fast);
+}
+
+.points {
+  font-weight: 700;
+  color: var(--accent-green);
+  font-size: 0.9375rem;
+}
+
+.completions {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.empty {
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+}

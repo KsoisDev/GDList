@@ -1,0 +1,144 @@
+.container {
+  max-width: 560px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.typeToggle {
+  display: flex;
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.typeBtn {
+  flex: 1;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
+}
+
+.typeBtn.active {
+  background: var(--accent-green);
+  color: var(--bg-primary);
+}
+
+.typeBtn:not(.active):hover {
+  color: var(--text-primary);
+  background: var(--bg-glass);
+}
+
+.error {
+  font-size: 0.8125rem;
+  color: var(--accent-red);
+  text-align: center;
+}
+
+.loadingCenter {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.successCard {
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.successTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent-green);
+}
+
+.successText {
+  color: var(--text-secondary);
+}
+
+.successActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.manualToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 18px;
+  background: var(--bg-card);
+  border: 2px dashed var(--border-glass);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.manualToggle:hover {
+  border-color: var(--accent-gold);
+  background: rgba(255, 204, 0, 0.06);
+  color: var(--accent-gold);
+}
+
+.manualArrow {
+  font-size: 1.1rem;
+  transition: transform var(--transition-fast);
+}
+
+.manualToggle:hover .manualArrow {
+  transform: translateX(4px);
+}
+
+.manualToggle strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.manualToggle:hover strong {
+  color: var(--accent-gold);
+}
+
+.manualHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.manualLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--accent-green);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.backBtn:hover {
+  color: var(--text-primary);
+}

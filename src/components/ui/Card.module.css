@@ -1,0 +1,33 @@
+.card {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-glass);
+  transition: all var(--transition-base);
+}
+
+.default {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+}
+
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+}
+
+.hover:hover {
+  border-color: var(--border-glass-hover);
+  background: var(--bg-glass-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.pad-sm {
+  padding: 16px;
+}
+
+.pad-md {
+  padding: 24px;
+}
+
+.pad-lg {
+  padding: 32px;
+}
