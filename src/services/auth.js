@@ -12,7 +12,7 @@ import { auth } from './firebase'
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from './firebase'
 
-async function createUserDoc(user) {
+export async function createUserDoc(user) {
   const userRef = doc(db, 'users', user.uid)
   const snap = await getDoc(userRef)
   if (!snap.exists()) {
