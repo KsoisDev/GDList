@@ -2,7 +2,7 @@ import { createContext, useState, useEffect } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../services/firebase'
 import { getDocument } from '../services/firestore'
-import { handleGoogleRedirect, createUserDoc } from '../services/auth'
+import { createUserDoc } from '../services/auth'
 
 export const AuthContext = createContext(null)
 
@@ -12,30 +12,25 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    let unsubscribe
-    async function init() {
-      try { await handleGoogleRedirect() } catch (e) { console.error(e) }
-      unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-        setUser(firebaseUser)
-        if (firebaseUser) {
-          try {
-            let data = await getDocument('users', firebaseUser.uid)
-            if (!data) {
-              await createUserDoc(firebaseUser)
-              data = await getDocument('users', firebaseUser.uid)
-            }
-            setUserData(data)
-          } catch (e) {
-            console.error(e)
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser)
+      if (firebaseUser) {
+        try {
+          let data = await getDocument('users', firebaseUser.uid)
+          if (!data) {
+            await createUserDoc(firebaseUser)
+            data = await getDocument('users', firebaseUser.uid)
           }
-        } else {
-          setUserData(null)
+          setUserData(data)
+        } catch (e) {
+          console.error(e)
         }
-        setLoading(false)
-      })
-    }
-    init()
-    return () => { if (unsubscribe) unsubscribe() }
+      } else {
+        setUserData(null)
+      }
+      setLoading(false)
+    })
+    return unsubscribe
   }, [])
 
   const refreshUserData = async () => {

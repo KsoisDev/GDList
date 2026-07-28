@@ -42,8 +42,10 @@ export default function Login() {
     setLoading(true)
     try {
       await loginWithGoogle()
+      navigate('/profile')
     } catch (err) {
       setError(err.message.replace('Firebase: ', '').split('(')[0])
+    } finally {
       setLoading(false)
     }
   }

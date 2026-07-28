@@ -1,8 +1,7 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   GoogleAuthProvider,
   signOut,
   updateProfile,
@@ -66,15 +65,9 @@ export async function loginWithEmail(email, password) {
 
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider()
-  await signInWithRedirect(auth, provider)
-}
-
-export async function handleGoogleRedirect() {
-  const result = await getRedirectResult(auth)
-  if (result?.user) {
-    await createUserDoc(result.user)
-  }
-  return result?.user || null
+  const cred = await signInWithPopup(auth, provider)
+  await createUserDoc(cred.user)
+  return cred.user
 }
 
 export async function logout() {
