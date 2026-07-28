@@ -237,13 +237,13 @@
 @media (min-width: 768px) {
   .headerMain {
     display: grid;
-    grid-template-columns: 52px 52px 2.5fr 1.2fr 0.8fr 1fr 1fr;
+    grid-template-columns: 80px 80px 2.5fr 1.2fr 0.8fr 1fr 1fr;
   }
 }
 
 .rowMain {
   display: grid;
-  grid-template-columns: 40px 40px 1fr;
+  grid-template-columns: 70px 70px 1fr;
   gap: 8px;
   padding: 14px 20px;
   border-bottom: 1px solid var(--border-glass);
@@ -263,7 +263,7 @@
 
 @media (min-width: 768px) {
   .rowMain {
-    grid-template-columns: 52px 52px 2.5fr 1.2fr 0.8fr 1fr 1fr;
+    grid-template-columns: 80px 80px 2.5fr 1.2fr 0.8fr 1fr 1fr;
   }
 }
 

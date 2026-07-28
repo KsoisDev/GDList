@@ -47,8 +47,8 @@ export default function MainList() {
       ) : (
         <div className={styles.table}>
           <div className={styles.headerMain}>
-            <span className={styles.colWeb}>#PorLaWeb</span>
-            <span className={styles.colOff}>#Oficial</span>
+            <span className={styles.colWeb}>#Web</span>
+            <span className={styles.colOff}>#Official</span>
             <span className={styles.colName}>Level</span>
             <span className={styles.colDiff}>Difficulty</span>
             <span className={styles.colPoints}>Points</span>
@@ -65,7 +65,7 @@ export default function MainList() {
             >
               <Link to={`/levels/${level.id}`} className={styles.rowMain}>
                 <span className={styles.colWeb}>
-                  <span className={styles.webPos}>{i + 1}</span>
+                  <span className={styles.webPos}>#{i + 1}</span>
                 </span>
                 <span className={styles.colOff}>
                   <span className={styles.position}>#{level.position}</span>
