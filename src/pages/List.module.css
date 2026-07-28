@@ -221,3 +221,75 @@
 .levelLink:hover {
   color: var(--accent-green);
 }
+
+.dualLayout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .dualLayout {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.columnTitle {
+  font-size: 1.125rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.diffGroup {
+  margin-bottom: 20px;
+}
+
+.diffGroupTitle {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  opacity: 0.9;
+}
+
+.diffItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: inherit;
+  transition: background var(--transition-fast);
+}
+
+.diffItem:hover {
+  background: var(--bg-glass);
+}
+
+.diffItemPos {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  min-width: 36px;
+}
+
+.diffItemName {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diffItemPts {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--accent-green);
+  white-space: nowrap;
+}

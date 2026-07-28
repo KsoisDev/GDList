@@ -12,7 +12,7 @@ import styles from './List.module.css'
 
 const TABS = [
   { id: 'active', label: 'Active' },
-  { id: 'unverified', label: 'Niveles por Verificar' },
+  { id: 'unverified', label: 'Levels to Verify' },
 ]
 
 export default function CommunityList() {
