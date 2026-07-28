@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useAuth } from '../hooks/useAuth'
 import { Calendar, Trophy, Medal, List, Youtube, Flag, Crown, Shield } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import Avatar from '../components/ui/Avatar'
