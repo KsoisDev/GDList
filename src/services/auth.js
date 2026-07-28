@@ -1,7 +1,8 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   signOut,
   updateProfile,
@@ -10,6 +11,30 @@ import {
 import { auth } from './firebase'
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from './firebase'
+
+async function createUserDoc(user) {
+  const userRef = doc(db, 'users', user.uid)
+  const snap = await getDoc(userRef)
+  if (!snap.exists()) {
+    await setDoc(userRef, {
+      username: user.displayName || user.email.split('@')[0],
+      displayName: user.displayName || user.email.split('@')[0],
+      email: user.email,
+      avatarURL: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=111128&color=00ff88&bold=true`,
+      role: 'user',
+      stats: {
+        totalPoints: 0,
+        mainPoints: 0,
+        communityPoints: 0,
+        mainCompletions: 0,
+        communityCompletions: 0,
+        rank: 0,
+      },
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    })
+  }
+}
 
 export async function registerWithEmail(email, password, username) {
   const cred = await createUserWithEmailAndPassword(auth, email, password)
@@ -41,29 +66,15 @@ export async function loginWithEmail(email, password) {
 
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider()
-  const cred = await signInWithPopup(auth, provider)
-  const userRef = doc(db, 'users', cred.user.uid)
-  const snap = await getDoc(userRef)
-  if (!snap.exists()) {
-    await setDoc(userRef, {
-      username: cred.user.displayName || cred.user.email.split('@')[0],
-      displayName: cred.user.displayName || cred.user.email.split('@')[0],
-      email: cred.user.email,
-      avatarURL: cred.user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(cred.user.displayName || 'User')}&background=111128&color=00ff88&bold=true`,
-      role: 'user',
-      stats: {
-        totalPoints: 0,
-        mainPoints: 0,
-        communityPoints: 0,
-        mainCompletions: 0,
-        communityCompletions: 0,
-        rank: 0,
-      },
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    })
+  await signInWithRedirect(auth, provider)
+}
+
+export async function handleGoogleRedirect() {
+  const result = await getRedirectResult(auth)
+  if (result?.user) {
+    await createUserDoc(result.user)
   }
-  return cred.user
+  return result?.user || null
 }
 
 export async function logout() {
