@@ -211,6 +211,22 @@ export default function LevelDetail() {
                   <span className={styles.metaText}>Verified by {level.verifier}</span>
                 )}
               </div>
+              {level.type === 'community' && (level.tags || []).length > 0 && (
+                <div className={styles.levelTags}>
+                  {(level.tags || [])
+                    .map(id => tags.find(t => t.id === id))
+                    .filter(Boolean)
+                    .map(tag => (
+                      <span
+                        key={tag.id}
+                        className={styles.miniTag}
+                        style={{ background: tag.color }}
+                      >
+                        {tag.name}
+                      </span>
+                    ))}
+                </div>
+              )}
               {isAdmin && editing && (
                 <div className={styles.editFields}>
                   <Input label="Name" value={editFields.name} onChange={e => setEditFields({ ...editFields, name: e.target.value })} />

@@ -39,16 +39,6 @@ export default function SubmitRecord() {
     }
   }, [user, authLoading, navigate])
 
-  if (authLoading) {
-    return (
-      <PageShell title="Submit Record">
-        <div className={styles.loadingCenter}><Spinner size="lg" /></div>
-      </PageShell>
-    )
-  }
-
-  if (!user) return null
-
   useEffect(() => {
     let mounted = true
     async function load() {
@@ -89,6 +79,16 @@ export default function SubmitRecord() {
     }
     load()
   }, [levelType])
+
+  if (authLoading) {
+    return (
+      <PageShell title="Submit Record">
+        <div className={styles.loadingCenter}><Spinner size="lg" /></div>
+      </PageShell>
+    )
+  }
+
+  if (!user) return null
 
   const isValidExternalUrl = (url) => {
     if (!url) return true

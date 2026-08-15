@@ -93,7 +93,7 @@ export default function MainList() {
                 </span>
                 <span className={styles.colName}>
                   <div className={styles.levelInfo}>
-                    <div>
+                    <div className={styles.levelInfoText}>
                       <span className={styles.levelName}>{level.name}</span>
                       <span className={styles.creator}>by {level.creator}</span>
                     </div>

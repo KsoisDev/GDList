@@ -217,7 +217,10 @@ export default function ReviewSubmissions() {
         await updateDocument('submissions', subId, { levelId })
 
         if (sendToActive) {
-          const position = cfg.position && Number(cfg.position) > 0 ? Number(cfg.position) : 999
+          const inserted = await getDocument('levels', levelId)
+          const position = (inserted?.position && Number(inserted.position) > 0)
+            ? Number(inserted.position)
+            : (Number(cfg.position) || 999)
           const points = communityPoints(position)
           const completionId = await createDocument('completions', null, {
             userId: sub.userId,
@@ -278,8 +281,9 @@ export default function ReviewSubmissions() {
           let finalPosition = existing.position || 0
           if (isCommunity) {
             const wasVerified = (existing.victoryCount || 0) > 0
-            if (Number(cfg.position) > 0 || !wasVerified) {
-              await setCommunityPosition(levelId, Number(cfg.position) || 0)
+            const targetPos = Number(cfg.position) || 0
+            if (!wasVerified || (targetPos > 0 && targetPos !== (existing.position || 0))) {
+              await setCommunityPosition(levelId, targetPos)
               const refreshed = await getDocument('levels', levelId)
               finalPosition = refreshed ? (refreshed.position || finalPosition) : finalPosition
             }
@@ -591,7 +595,7 @@ export default function ReviewSubmissions() {
                         </span>
                         <span className={styles.autoInfoRow}>
                           <span className={styles.autoInfoLabel}>Points</span>
-                          <span className={styles.autoInfoValue}>{communityPoints(sub._existingLevel.position || 0)}</span>
+                          <span className={styles.autoInfoValue}>{sub._existingLevel.position ? communityPoints(sub._existingLevel.position) : '—'}</span>
                         </span>
                         <span className={styles.autoInfoRow}>
                           <span className={styles.autoInfoLabel}>Level ID</span>

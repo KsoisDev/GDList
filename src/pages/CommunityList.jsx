@@ -197,7 +197,7 @@ export default function CommunityList() {
                   {thumbnail && (
                     <img src={thumbnail} alt="" className={styles.thumbnail} loading="lazy" />
                   )}
-                  <div>
+                  <div className={styles.levelInfoText}>
                     {tab === 'active' ? (
                       <Link to={`/levels/${level.id}`} className={styles.levelLink}>
                         <span className={styles.levelName}>{level.name}</span>

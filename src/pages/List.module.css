@@ -297,6 +297,28 @@
   gap: 12px;
 }
 
+.levelInfoText {
+  flex: 1;
+  min-width: 0;
+}
+
+.levelNameWrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 640px) {
+  .levelInfo {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .levelTags {
+    display: none;
+  }
+}
+
 .thumbnail {
   width: 56px;
   height: 32px;
@@ -343,6 +365,7 @@
 
 .colDiff,
   .colPoints,
+  .colVerifier,
   .colCreator,
   .colVictories {
   display: none;
@@ -351,6 +374,7 @@
 @media (min-width: 768px) {
   .colDiff,
     .colPoints,
+    .colVerifier,
     .colCreator,
     .colVictories {
     display: flex;
