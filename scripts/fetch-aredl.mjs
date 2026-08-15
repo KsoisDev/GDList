@@ -146,6 +146,7 @@ async function main() {
       slug: old?.slug || slugify(l.name),
       name: l.name,
       position: l.position,
+      points: l.points != null ? l.points : Math.max(1, 1001 - (l.position || 0)),
       levelId: l.level_id,
       twoPlayer: Boolean(l.two_player),
       creators: n.publisher ? [n.publisher] : ['Unknown'],

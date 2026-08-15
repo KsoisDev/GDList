@@ -68,7 +68,11 @@ export default function ReviewSubmissions() {
 
           const suggestedPos = sub.demonPosition ? Number(sub.demonPosition) : 0
           const isCommunitySub = sub.levelType === 'community' || sub.requestType === 'level'
-          const suggestedPoints = isCommunitySub ? '' : (sub.adminLevelConfig?.points || (sub.demonPosition ? Math.max(1, 1001 - Number(sub.demonPosition)) : ''))
+          const aredlLevel = sub.demonApiId ? await lookupAredlLevel(sub.demonApiId) : null
+          const suggestedPoints = isCommunitySub
+            ? ''
+            : (sub.adminLevelConfig?.points
+                || (aredlLevel?.points != null ? aredlLevel.points : (sub.demonPosition ? Math.max(1, 1001 - Number(sub.demonPosition)) : '')))
 
           return {
             ...sub,
@@ -407,6 +411,7 @@ export default function ReviewSubmissions() {
       const creator = level.creators?.[0] || config[subId]?.creator || 'Unknown'
       const verifier = level.verifier || sub.demonVerifier || ''
       const position = Number(level.position) || 0
+      const aredlPoints = level.points != null ? level.points : (position ? Math.max(1, 1001 - position) : 0)
       const prev = config[subId] || sub._initialConfig || emptyConfig
 
       setConfig(prevCfg => ({
@@ -417,7 +422,7 @@ export default function ReviewSubmissions() {
           position: position || prev.position,
           points: prev.points !== '' && Number(prev.points) > 0
             ? prev.points
-            : (position ? Math.max(1, 1001 - position) : prev.points),
+            : aredlPoints,
         },
       }))
       setSubmissions(prev => prev.map(s =>
