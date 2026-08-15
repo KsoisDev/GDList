@@ -24,6 +24,21 @@
   position: relative;
 }
 
+@media (max-width: 640px) {
+  .hero {
+    padding: 96px 20px 56px;
+  }
+
+  .heroActions {
+    flex-direction: column;
+  }
+
+  .heroActions > *,
+  .heroActions a {
+    width: 100%;
+  }
+}
+
 .heroContent {
   max-width: 720px;
   text-align: center;

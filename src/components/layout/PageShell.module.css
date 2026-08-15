@@ -6,6 +6,12 @@
   padding: 100px 24px 48px;
 }
 
+@media (max-width: 640px) {
+  .shell {
+    padding: 84px 16px 40px;
+  }
+}
+
 .header {
   margin-bottom: 32px;
 }

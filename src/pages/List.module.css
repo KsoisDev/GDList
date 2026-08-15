@@ -29,6 +29,12 @@
   }
 }
 
+@media (max-width: 480px) {
+  .tagFilters {
+    padding: 10px 12px;
+  }
+}
+
 .clearFilter {
   display: inline-flex;
   align-items: center;
@@ -176,6 +182,12 @@
   align-items: center;
   text-decoration: none;
   color: inherit;
+}
+
+@media (max-width: 480px) {
+  .tableRow {
+    padding: 12px 14px;
+  }
 }
 
 .tableRow:last-child {
@@ -448,6 +460,14 @@
   align-items: center;
   text-decoration: none;
   color: inherit;
+}
+
+@media (max-width: 480px) {
+  .rowMain {
+    grid-template-columns: 44px 44px 1fr;
+    gap: 6px;
+    padding: 12px 14px;
+  }
 }
 
 .rowMain:last-child {

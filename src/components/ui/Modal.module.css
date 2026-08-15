@@ -21,6 +21,18 @@
   box-shadow: var(--shadow-lg);
 }
 
+@media (max-width: 480px) {
+  .overlay {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modal {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    max-height: 85vh;
+  }
+}
+
 .header {
   display: flex;
   align-items: center;
@@ -50,4 +62,10 @@
 
 .body {
   padding: 24px;
+}
+
+@media (max-width: 480px) {
+  .body {
+    padding: 20px;
+  }
 }

@@ -56,6 +56,18 @@
   gap: 24px;
 }
 
+@media (max-width: 560px) {
+  .links {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 380px) {
+  .links {
+    grid-template-columns: 1fr;
+  }
+}
+
 .column {
   display: flex;
   flex-direction: column;

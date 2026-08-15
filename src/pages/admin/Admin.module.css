@@ -290,6 +290,18 @@
   overflow: hidden;
 }
 
+@media (max-width: 767px) {
+  .table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tableHeader,
+  .tableRow {
+    min-width: 620px;
+  }
+}
+
 .tableHeader {
   display: grid;
   grid-template-columns: 32px 50px 1fr 90px 120px 80px 80px 100px;

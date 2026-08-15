@@ -297,6 +297,17 @@
   flex-direction: column;
 }
 
+@media (max-width: 480px) {
+  .notifDropdown {
+    position: fixed;
+    top: calc(var(--navbar-height) + 8px);
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-height: 60vh;
+  }
+}
+
 .notifHeader {
   display: flex;
   align-items: center;

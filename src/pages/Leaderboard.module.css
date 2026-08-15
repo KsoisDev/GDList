@@ -75,6 +75,24 @@
   align-items: center;
 }
 
+@media (max-width: 640px) {
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 44px 1fr 84px;
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .tableHeader > :nth-child(2),
+  .tableHeader > :nth-child(4) {
+    display: none;
+  }
+
+  .tableRow > :nth-child(4) {
+    display: none;
+  }
+}
+
 .rank {
   font-weight: 700;
   font-size: 0.9375rem;
