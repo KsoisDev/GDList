@@ -36,8 +36,11 @@ export default function ManageLevels() {
   useEffect(() => {
     if (!listRef.current) return
     const sortable = Sortable.create(listRef.current, {
-      handle: '.dragHandle',
+      handle: '[data-drag-handle]',
       animation: 150,
+      forceFallback: true,
+      fallbackOnBody: true,
+      fallbackClass: 'sortable-fallback',
       ghostClass: 'sortable-ghost',
       chosenClass: 'sortable-chosen',
       dragClass: 'sortable-drag',
@@ -255,7 +258,7 @@ export default function ManageLevels() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}
           >
             {(level.victoryCount || 0) > 0 ? (
-              <span className={styles.dragHandle} title="Drag to reorder">
+              <span className={styles.dragHandle} data-drag-handle title="Drag to reorder">
                 <GripVertical size={16} />
               </span>
             ) : (
