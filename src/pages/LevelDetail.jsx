@@ -14,7 +14,7 @@ import { useAuth } from '../hooks/useAuth'
 import { getDocument, updateDocument, getCollection } from '../services/firestore'
 import { setCommunityPosition } from '../services/communityList'
 import { getLevelChangelog, changelogActionLabel } from '../services/changelog'
-import { formatNumber, formatDate } from '../utils/format'
+import { formatNumber, formatDate, parseDecimal } from '../utils/format'
 import { DIFFICULTIES, DIFFICULTY_COLORS, hasAccess } from '../utils/constants'
 import { getYouTubeThumbnail } from '../utils/video'
 import styles from './LevelDetail.module.css'
@@ -99,7 +99,7 @@ export default function LevelDetail() {
           })
         }
       } else {
-        const newPoints = Number(editFields.points) || 0
+        const newPoints = parseDecimal(editFields.points) || 0
         const diff = parseFloat((newPoints - (level.points || 0)).toFixed(2))
 
         await updateDocument('levels', levelId, {

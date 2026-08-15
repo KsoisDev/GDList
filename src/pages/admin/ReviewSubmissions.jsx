@@ -14,7 +14,7 @@ import { getCollection, updateDocument, getDocument, createDocument } from '../.
 import { insertCommunityLevel, setCommunityPosition } from '../../services/communityList'
 import { lookupAredlLevel } from '../../services/aredl'
 import { communityPoints } from '../../utils/communityPoints'
-import { formatDateRelative } from '../../utils/format'
+import { formatDateRelative, parseDecimal } from '../../utils/format'
 import { hasAccess } from '../../utils/constants'
 import styles from './Admin.module.css'
 
@@ -138,7 +138,7 @@ export default function ReviewSubmissions() {
       if (status === 'approved') {
         updateData.adminLevelConfig = {
           difficulty: cfg.difficulty,
-          points: Number(cfg.points) || 0,
+          points: parseDecimal(cfg.points) || 0,
           position: Number(cfg.position) || 0,
           creator: cfg.creator || 'Unknown',
           gameId: cfg.gameId || '',
@@ -270,7 +270,7 @@ export default function ReviewSubmissions() {
             points = communityPoints(finalPosition)
           } else {
             finalPosition = Number(cfg.position) || finalPosition
-            points = Number(cfg.points) || existing.points
+            points = parseDecimal(cfg.points) || existing.points
           }
 
           const victors = existing.victors || []
@@ -340,7 +340,7 @@ export default function ReviewSubmissions() {
             points = communityPoints(targetPos)
             await insertCommunityLevel(levelId, levelData, targetPos)
           } else {
-            points = Number(cfg.points) || 0
+            points = parseDecimal(cfg.points) || 0
             await createDocument('levels', levelId, { ...levelData, position: Number(cfg.position) || 999, points })
           }
           await updateDocument('submissions', subId, { levelId })
@@ -420,7 +420,7 @@ export default function ReviewSubmissions() {
           ...prev,
           creator,
           position: position || prev.position,
-          points: prev.points !== '' && Number(prev.points) > 0
+          points: prev.points !== '' && parseDecimal(prev.points) > 0
             ? prev.points
             : aredlPoints,
         },
@@ -649,7 +649,7 @@ export default function ReviewSubmissions() {
                       size="sm"
                       icon={Check}
                       onClick={() => handleReview(sub.id, 'approved')}
-                      disabled={sub.requestType !== 'level' && config[sub.id]?.points !== '' && Number(config[sub.id]?.points) <= 0}
+                      disabled={sub.requestType !== 'level' && config[sub.id]?.points !== '' && parseDecimal(config[sub.id]?.points) <= 0}
                       loading={processing[sub.id]}
                     >
                       Approve

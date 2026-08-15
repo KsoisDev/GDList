@@ -1,3 +1,10 @@
+export function parseDecimal(value) {
+  if (value == null || value === '') return NaN
+  const normalized = String(value).trim().replace(',', '.')
+  const n = Number(normalized)
+  return Number.isFinite(n) ? n : NaN
+}
+
 export function formatNumber(num) {
   if (!num && num !== 0) return '0'
   if (num >= 1000000) return `${(num / 1000000).toFixed(2)}M`

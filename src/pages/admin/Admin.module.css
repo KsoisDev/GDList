@@ -292,7 +292,7 @@
 
 .tableHeader {
   display: grid;
-  grid-template-columns: 50px 1fr 90px 120px 80px 80px 100px;
+  grid-template-columns: 32px 50px 1fr 90px 120px 80px 80px 100px;
   padding: 12px 16px;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-glass);
@@ -304,7 +304,7 @@
 
 .tableRow {
   display: grid;
-  grid-template-columns: 50px 1fr 90px 120px 80px 80px 100px;
+  grid-template-columns: 32px 50px 1fr 90px 120px 80px 80px 100px;
   padding: 10px 16px;
   border-bottom: 1px solid var(--border-glass);
   align-items: center;
@@ -314,6 +314,43 @@
 
 .tableRow:last-child { border-bottom: none; }
 .tableRow:hover { background: var(--bg-card); }
+.tableRow:active { cursor: grabbing; }
+
+.dragHandle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  color: var(--text-tertiary);
+  opacity: 0.5;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+.dragHandleEmpty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tableRow:hover .dragHandle { opacity: 1; }
+.dragHandle:hover { color: var(--accent-blue); }
+.dragHandle:active { cursor: grabbing; }
+
+:global(.sortable-ghost) {
+  opacity: 0.35;
+  background: var(--bg-secondary);
+  outline: 1px dashed var(--accent-blue);
+  outline-offset: -1px;
+}
+
+:global(.sortable-chosen) {
+  background: var(--bg-secondary);
+}
+
+:global(.sortable-drag) {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  cursor: grabbing;
+}
 
 .position { font-weight: 700; color: var(--text-secondary); }
 .name { font-weight: 600; }

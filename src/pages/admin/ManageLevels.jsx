@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Plus, Edit3, Trash2, Save, X, RefreshCw } from 'lucide-react'
+import Sortable from 'sortablejs'
+import { Plus, Edit3, Trash2, Save, X, RefreshCw, GripVertical } from 'lucide-react'
 import PageShell from '../../components/layout/PageShell'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
@@ -26,10 +27,39 @@ export default function ManageLevels() {
   const [editing, setEditing] = useState(null)
   const [saving, setSaving] = useState(false)
   const inFlightRef = useRef(false)
+  const listRef = useRef(null)
 
   useEffect(() => {
     if (!authLoading && (!user || !hasAccess(userData?.role || 'user', 'admin'))) navigate('/')
   }, [user, userData, authLoading, navigate])
+
+  useEffect(() => {
+    if (!listRef.current) return
+    const sortable = Sortable.create(listRef.current, {
+      handle: '.dragHandle',
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      dragClass: 'sortable-drag',
+      onEnd: async (evt) => {
+        if (evt.oldIndex == null || evt.newIndex == null || evt.oldIndex === evt.newIndex) return
+        const ids = Array.from(listRef.current.querySelectorAll('[data-id]'))
+          .map(el => el.getAttribute('data-id'))
+          .filter(Boolean)
+        const ordered = ids
+          .map(id => levels.find(l => l.id === id))
+          .filter(Boolean)
+          .filter(l => (l.victoryCount || 0) > 0)
+        try {
+          await renumberCommunityLevels(ordered, false, true)
+          await loadLevels()
+        } catch (err) {
+          console.error(err)
+        }
+      },
+    })
+    return () => sortable.destroy()
+  }, [levels])
 
   const loadLevels = async () => {
     setLoading(true)
@@ -210,6 +240,7 @@ export default function ManageLevels() {
 
       <div className={styles.table}>
         <div className={styles.tableHeader}>
+          <span></span>
           <span>Pos</span>
           <span>Name</span>
           <span>Creator</span>
@@ -218,10 +249,18 @@ export default function ManageLevels() {
           <span>Points</span>
           <span>Actions</span>
         </div>
+        <div ref={listRef}>
         {levels.map((level, i) => (
-          <motion.div key={level.id} className={styles.tableRow}
+          <motion.div key={level.id} className={styles.tableRow} data-id={level.id}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}
           >
+            {(level.victoryCount || 0) > 0 ? (
+              <span className={styles.dragHandle} title="Drag to reorder">
+                <GripVertical size={16} />
+              </span>
+            ) : (
+              <span className={styles.dragHandleEmpty} />
+            )}
             <span className={styles.position}>
               {(level.victoryCount || 0) === 0 ? '—' : `#${level.position}`}
             </span>
@@ -247,6 +286,7 @@ export default function ManageLevels() {
             </span>
           </motion.div>
         ))}
+        </div>
       </div>
     </PageShell>
   )
