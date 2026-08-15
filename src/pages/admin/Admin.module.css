@@ -500,6 +500,39 @@
   color: var(--text-tertiary);
 }
 
+.autoInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--bg-hover, rgba(255, 255, 255, 0.04));
+  border-radius: var(--radius-sm);
+}
+
+.autoInfoRow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 0.8125rem;
+}
+
+.autoInfoLabel {
+  flex: 0 0 80px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.autoInfoValue {
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.autoInfoNote {
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: var(--accent-green, #2dd4bf);
+}
+
 .error {
   font-size: 0.8125rem;
   color: var(--accent-red);

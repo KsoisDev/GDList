@@ -14,6 +14,7 @@ import { updateDocument, getCollection, where } from '../services/firestore'
 import { communityPoints } from '../utils/communityPoints'
 import { computeBadges } from '../utils/badges'
 import { deleteAccount } from '../services/deleteAccount'
+import { deleteCompletionRecord } from '../services/deleteCompletion'
 import { logout } from '../services/auth'
 import Modal from '../components/ui/Modal'
 import { formatNumber, formatDate } from '../utils/format'
@@ -34,6 +35,9 @@ export default function MyProfile() {
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [completionDeleting, setCompletionDeleting] = useState(false)
+  const [completionDeleteError, setCompletionDeleteError] = useState('')
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -49,37 +53,38 @@ export default function MyProfile() {
     }
   }, [userData])
 
-  useEffect(() => {
-    async function load() {
-      if (!user) return
-      try {
-        const [comps, communityLevels] = await Promise.all([
-          getCollection('completions'),
-          getCollection('levels', [where('type', '==', 'community')]),
-        ])
-        const posMap = {}
-        communityLevels.forEach(l => { posMap[l.id] = l.position })
-        const userComps = comps
-          .filter(c => c.userId === user.uid)
-          .map(c => {
-            if (c.levelType === 'community') {
-              const pos = posMap[c.levelId]
-              if (pos) return { ...c, points: communityPoints(pos) }
-            }
-            return c
-          })
-          .sort((a, b) => {
-            const ta = a.completedAt?.toMillis?.() || 0
-            const tb = b.completedAt?.toMillis?.() || 0
-            return tb - ta
-          })
-        setCompletions(userComps)
-        setBadges(computeBadges(communityLevels, user.uid))
-      } catch (err) {
-        console.error('Failed to load completions:', err)
-      }
+  const loadCompletions = async () => {
+    if (!user) return
+    try {
+      const [comps, communityLevels] = await Promise.all([
+        getCollection('completions'),
+        getCollection('levels', [where('type', '==', 'community')]),
+      ])
+      const posMap = {}
+      communityLevels.forEach(l => { posMap[l.id] = l.position })
+      const userComps = comps
+        .filter(c => c.userId === user.uid)
+        .map(c => {
+          if (c.levelType === 'community') {
+            const pos = posMap[c.levelId]
+            if (pos) return { ...c, points: communityPoints(pos) }
+          }
+          return c
+        })
+        .sort((a, b) => {
+          const ta = a.completedAt?.toMillis?.() || 0
+          const tb = b.completedAt?.toMillis?.() || 0
+          return tb - ta
+        })
+      setCompletions(userComps)
+      setBadges(computeBadges(communityLevels, user.uid))
+    } catch (err) {
+      console.error('Failed to load completions:', err)
     }
-    load()
+  }
+
+  useEffect(() => {
+    loadCompletions()
   }, [user])
 
   const handleSave = async () => {
@@ -118,6 +123,22 @@ export default function MyProfile() {
       setDeleteError(err.message)
     } finally {
       setDeleting(false)
+    }
+  }
+
+  const handleDeleteCompletion = async () => {
+    if (!deleteTarget) return
+    setCompletionDeleting(true)
+    setCompletionDeleteError('')
+    try {
+      await deleteCompletionRecord(deleteTarget.id)
+      setDeleteTarget(null)
+      await loadCompletions()
+    } catch (err) {
+      console.error(err)
+      setCompletionDeleteError(err.message)
+    } finally {
+      setCompletionDeleting(false)
     }
   }
 
@@ -280,6 +301,30 @@ export default function MyProfile() {
           </div>
         </Modal>
 
+        <Modal isOpen={!!deleteTarget} onClose={() => !completionDeleting && setDeleteTarget(null)} title="Delete Record">
+          <div className={styles.reportModal}>
+            <AlertTriangle size={32} className={styles.deleteWarningIcon} />
+            <p className={styles.reportDesc}>
+              Delete this record? This will remove the completion, subtract its points from the player, and remove
+              them from the level's victor list. This cannot be undone.
+            </p>
+            {deleteTarget && (
+              <p className={styles.deleteTarget}>
+                <strong>{deleteTarget.levelName || 'Unknown Level'}</strong>
+                {deleteTarget.levelType === 'community' ? ' (Community)' : ' (Main List)'}
+                {' · +'} {deleteTarget.points} pts
+              </p>
+            )}
+            {completionDeleteError && <p className={styles.deleteError}>{completionDeleteError}</p>}
+            <div className={styles.reportActions}>
+              <Button variant="ghost" onClick={() => setDeleteTarget(null)} disabled={completionDeleting}>Cancel</Button>
+              <Button variant="danger" onClick={handleDeleteCompletion} loading={completionDeleting} icon={Trash2}>
+                Delete Record
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
         {(() => {
           return (
             <>
@@ -307,6 +352,15 @@ export default function MyProfile() {
                             <a href={comp.videoURL} target="_blank" rel="noopener noreferrer" className={styles.compVideo}>
                               <Youtube size={16} />
                             </a>
+                          )}
+                          {hasAccess(userData.role, 'admin') && (
+                            <button
+                              className={styles.compDelete}
+                              onClick={() => setDeleteTarget(comp)}
+                              title="Delete this record"
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           )}
                         </div>
                       </motion.div>
@@ -337,6 +391,15 @@ export default function MyProfile() {
                             <a href={comp.videoURL} target="_blank" rel="noopener noreferrer" className={styles.compVideo}>
                               <Youtube size={16} />
                             </a>
+                          )}
+                          {hasAccess(userData.role, 'admin') && (
+                            <button
+                              className={styles.compDelete}
+                              onClick={() => setDeleteTarget(comp)}
+                              title="Delete this record"
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           )}
                         </div>
                       </motion.div>

@@ -66,6 +66,10 @@ export default function ReviewSubmissions() {
           }
           const submitter = await getDocument('users', sub.userId)
 
+          const existingLevel = sub.levelType === 'community' && sub.levelId
+            ? await getDocument('levels', sub.levelId)
+            : null
+
           const suggestedPos = sub.demonPosition ? Number(sub.demonPosition) : 0
           const isCommunitySub = sub.levelType === 'community' || sub.requestType === 'level'
           const aredlLevel = sub.demonApiId ? await lookupAredlLevel(sub.demonApiId) : null
@@ -78,14 +82,15 @@ export default function ReviewSubmissions() {
             ...sub,
             levelName,
             submitterName: submitter?.username || 'Unknown',
+            _existingLevel: existingLevel,
             _initialConfig: {
-              difficulty: sub.adminLevelConfig?.difficulty || 'extreme',
+              difficulty: sub.adminLevelConfig?.difficulty || existingLevel?.difficulty || 'extreme',
               points: suggestedPoints,
-              position: sub.adminLevelConfig?.position || suggestedPos,
-              creator: sub.adminLevelConfig?.creator || sub.demonCreator || sub.creator || 'Unknown',
+              position: sub.adminLevelConfig?.position || existingLevel?.position || suggestedPos,
+              creator: sub.adminLevelConfig?.creator || existingLevel?.creator || sub.demonCreator || sub.creator || 'Unknown',
               externalUrl: sub.externalUrl || '',
-              gameId: sub.adminLevelConfig?.gameId || sub.gameId || '',
-              sendTo: sub.isVerified ? 'active' : 'unverified',
+              gameId: sub.adminLevelConfig?.gameId || existingLevel?.gameId || sub.gameId || '',
+              sendTo: (existingLevel?.victoryCount || sub.isVerified) ? 'active' : 'unverified',
             },
           }
         })
@@ -120,7 +125,18 @@ export default function ReviewSubmissions() {
     setProcessing(prev => ({ ...prev, [subId]: true }))
     try {
       const sub = submissions.find(s => s.id === subId)
-      const cfg = config[subId] || emptyConfig
+      const cfg = config[subId]
+        || (sub._existingLevel
+          ? {
+              ...emptyConfig,
+              difficulty: sub._existingLevel.difficulty || 'extreme',
+              creator: sub._existingLevel.creator || 'Unknown',
+              gameId: sub._existingLevel.gameId || '',
+              position: 0,
+              points: 0,
+              externalUrl: sub.externalUrl || '',
+            }
+          : emptyConfig)
 
       if (status === 'approved' && cfg.externalUrl && !isValidDemonlistUrl(cfg.externalUrl)) {
         setError('External URL must be from demonlist.org')
@@ -563,6 +579,36 @@ export default function ReviewSubmissions() {
                           }))}
                         />
                       </>
+                    ) : sub._existingLevel ? (
+                      <div className={styles.autoInfo}>
+                        <span className={styles.autoInfoRow}>
+                          <span className={styles.autoInfoLabel}>Position</span>
+                          <span className={styles.autoInfoValue}>#{sub._existingLevel.position}</span>
+                        </span>
+                        <span className={styles.autoInfoRow}>
+                          <span className={styles.autoInfoLabel}>Creator</span>
+                          <span className={styles.autoInfoValue}>{sub._existingLevel.creator}</span>
+                        </span>
+                        <span className={styles.autoInfoRow}>
+                          <span className={styles.autoInfoLabel}>Points</span>
+                          <span className={styles.autoInfoValue}>{communityPoints(sub._existingLevel.position || 0)}</span>
+                        </span>
+                        <span className={styles.autoInfoRow}>
+                          <span className={styles.autoInfoLabel}>Level ID</span>
+                          <span className={styles.autoInfoValue}>{sub._existingLevel.gameId || '—'}</span>
+                        </span>
+                        {sub.externalUrl && (
+                          <span className={styles.autoInfoRow}>
+                            <span className={styles.autoInfoLabel}>Link</span>
+                            <a href={sub.externalUrl} target="_blank" rel="noopener noreferrer" className={styles.autoInfoValue}>
+                              {sub.externalUrl}
+                            </a>
+                          </span>
+                        )}
+                        <span className={styles.autoInfoNote}>
+                          Auto config: uses the level's current position, creator and points. Approve directly.
+                        </span>
+                      </div>
                     ) : (
                       <>
                         {sub.levelType !== 'community' && (

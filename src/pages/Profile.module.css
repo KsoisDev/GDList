@@ -288,6 +288,40 @@
   flex: 1;
 }
 
+.compDelete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--text-tertiary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.compDelete:hover {
+  color: var(--accent-red);
+  background: var(--bg-glass);
+}
+
+.deleteTarget {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 10px 12px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+}
+
+.deleteError {
+  font-size: 0.8125rem;
+  color: var(--accent-red);
+}
+
 .dangerZone {
   margin-top: 16px;
 }
