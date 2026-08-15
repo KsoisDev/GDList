@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Trophy, Medal } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import Avatar from '../components/ui/Avatar'
+import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
 import { getCollection } from '../services/firestore'
 import { formatNumber } from '../utils/format'
@@ -12,6 +13,7 @@ import styles from './Leaderboard.module.css'
 export default function MainLeaderboard() {
   const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     async function load() {
@@ -31,6 +33,15 @@ export default function MainLeaderboard() {
     load()
   }, [])
 
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return players
+    return players.filter(p =>
+      p.username?.toLowerCase().includes(q) ||
+      p.displayName?.toLowerCase().includes(q)
+    )
+  }, [players, search])
+
   const getRankIcon = (pos) => {
     if (pos === 0) return <Trophy size={20} style={{ color: 'var(--accent-gold)' }} />
     if (pos === 1) return <Medal size={20} style={{ color: '#c0c0c0' }} />
@@ -40,6 +51,16 @@ export default function MainLeaderboard() {
 
   return (
     <PageShell title="Main Leaderboard" subtitle="Top players ranked by points from official demon completions">
+      <div className={styles.toolbar}>
+        <span className={styles.count}>{filtered.length} players</span>
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Search player..."
+          className={styles.searchBar}
+        />
+      </div>
+
       {loading ? (
         <div className={styles.loading}>
           <Spinner size="lg" />
@@ -53,7 +74,7 @@ export default function MainLeaderboard() {
             <span className={styles.colCompletions}>Completions</span>
           </div>
 
-          {players.map((player, i) => (
+          {filtered.map((player, i) => (
             <motion.div
               key={player.id}
               className={styles.tableRow}
@@ -81,9 +102,11 @@ export default function MainLeaderboard() {
             </motion.div>
           ))}
 
-          {players.length === 0 && (
+          {filtered.length === 0 && (
             <div className={styles.empty}>
-              <p>No players with points yet. Submit your first completion!</p>
+              {search
+                ? <p>No players match "{search}".</p>
+                : <p>No players with points yet. Submit your first completion!</p>}
             </div>
           )}
         </div>

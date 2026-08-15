@@ -8,8 +8,9 @@ import SearchSelect from '../components/ui/SearchSelect'
 import Button from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
-import { getCollection, where, createDocument } from '../services/firestore'
+import { getCollection, where, getDocument, createDocument } from '../services/firestore'
 import { fetchListedDemons } from '../services/gdl'
+import { fetchAredlLevels } from '../services/aredl'
 import { isValidYouTubeUrl } from '../utils/validators'
 import styles from './SubmitRecord.module.css'
 
@@ -29,6 +30,8 @@ export default function SubmitRecord() {
   const [manualMode, setManualMode] = useState(false)
   const [manualLevelName, setManualLevelName] = useState('')
   const [externalUrl, setExternalUrl] = useState('')
+  const [gameId, setGameId] = useState('')
+  const [sourceInfo, setSourceInfo] = useState(null)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -51,17 +54,31 @@ export default function SubmitRecord() {
     async function load() {
       setLoading(true)
       setLoadError('')
+      setSourceInfo(null)
       setSelectedDemon(null)
       setManualMode(false)
       setManualLevelName('')
       setExternalUrl('')
+      setGameId('')
       try {
         if (levelType === 'community') {
           const data = await getCollection('levels', [where('type', '==', 'community')])
           if (mounted) setCommunityLevels(data.filter(l => l.isActive !== false).sort((a, b) => a.position - b.position))
         } else {
-          const data = await fetchListedDemons(100)
-          if (mounted) setDemons(data)
+          try {
+            const data = await fetchAredlLevels()
+            if (mounted) {
+              setDemons(data)
+              setSourceInfo({ name: 'aredl', count: data.length })
+            }
+          } catch (err) {
+            console.warn('AREDL fetch failed, falling back to pointercrate:', err)
+            const data = await fetchListedDemons(100)
+            if (mounted) {
+              setDemons(data.map(d => ({ ...d, dataSource: 'pointercrate' })))
+              setSourceInfo({ name: 'pointercrate', count: data.length })
+            }
+          }
         }
       } catch (err) {
         setLoadError('Failed to load levels. Try again later.')
@@ -76,6 +93,44 @@ export default function SubmitRecord() {
   const isValidExternalUrl = (url) => {
     if (!url) return true
     return /^https?:\/\/(www\.)?demonlist\.org\//.test(url)
+  }
+
+  const findDuplicate = async () => {
+    const pending = await getCollection('submissions', [
+      where('userId', '==', user.uid),
+      where('status', '==', 'pending'),
+    ])
+    let dup = null
+    if (manualMode) {
+      dup = pending.find(s =>
+        (s.requestType || 'completion') === 'completion' &&
+        s.manualLevelName &&
+        s.manualLevelName.toLowerCase() === manualLevelName.trim().toLowerCase()
+      )
+    } else if (levelType === 'main' && selectedDemon) {
+      dup = pending.find(s => s.demonApiId === String(selectedDemon.id))
+    } else if (levelType === 'community' && selectedDemon) {
+      dup = pending.find(s => s.levelId === selectedDemon)
+    }
+    if (dup) return { duplicate: true }
+
+    const targetLevelId = levelType === 'main' && selectedDemon
+      ? `main_${selectedDemon.id}`
+      : levelType === 'community' && selectedDemon
+        ? selectedDemon
+        : manualMode
+          ? `manual_${manualLevelName.trim().replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()}`
+          : null
+    if (targetLevelId) {
+      const level = await getDocument('levels', targetLevelId)
+      if (level && (level.victors || []).some(v => v.userId === user.uid)) {
+        return { completed: true, levelName: level.name }
+      }
+      const completions = await getCollection('completions', [where('userId', '==', user.uid)])
+      const already = completions.find(c => c.levelId === targetLevelId)
+      if (already) return { completed: true, levelName: already.levelName }
+    }
+    return null
   }
 
   const getLevelOptions = () => {
@@ -116,6 +171,18 @@ export default function SubmitRecord() {
       return
     }
 
+    try {
+      const dup = await findDuplicate()
+      if (dup) {
+        setError(dup.completed
+          ? `You already have a verified completion for "${dup.levelName}".`
+          : 'You already have a pending submission for this level.')
+        return
+      }
+    } catch (err) {
+      console.warn('Duplicate check failed, continuing:', err)
+    }
+
     setSubmitting(true)
     try {
       const data = {
@@ -137,8 +204,11 @@ export default function SubmitRecord() {
         data.demonApiId = String(selectedDemon.id)
         data.demonCreator = selectedDemon.publisher?.name || (selectedDemon.creators?.[0]?.name) || 'Unknown'
         data.demonVerifier = selectedDemon.verifier?.name || 'Unknown'
+        data.demonGameId = selectedDemon.gameId || selectedDemon.level_id || ''
+        data.dataSource = selectedDemon.dataSource || 'pointercrate'
       } else if (levelType === 'community' && selectedDemon) {
         data.levelId = selectedDemon
+        if (gameId.trim()) data.gameId = gameId.trim()
       }
 
       await createDocument('submissions', null, data)
@@ -148,6 +218,7 @@ export default function SubmitRecord() {
       setManualLevelName('')
       setExternalUrl('')
       setManualMode(false)
+      setGameId('')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -222,6 +293,13 @@ export default function SubmitRecord() {
                   error={error && !selectedDemon ? error : ''}
                   loading={loading}
                 />
+                {levelType === 'main' && sourceInfo && !loading && (
+                  <p className={styles.sourceInfo}>
+                    {sourceInfo.name === 'aredl'
+                      ? `${sourceInfo.count} levels loaded from AREDL`
+                      : `AREDL unavailable — showing top ${sourceInfo.count} from Pointercrate`}
+                  </p>
+                )}
                 {levelType === 'community' ? (
                   <Link to="/submit-level" className={styles.manualToggle}>
                     <ExternalLink size={18} />
@@ -273,6 +351,16 @@ export default function SubmitRecord() {
                   error={externalUrl && !isValidExternalUrl(externalUrl) ? 'Must be from demonlist.org' : ''}
                 />
               </>
+            )}
+
+            {levelType === 'community' && (
+              <Input
+                label="Level ID (in-game)"
+                type="text"
+                placeholder="e.g. 10565740"
+                value={gameId}
+                onChange={e => setGameId(e.target.value)}
+              />
             )}
 
             <Input

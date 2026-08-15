@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Edit3, Save, X, Send, Shield, Youtube, Trash2, AlertTriangle } from 'lucide-react'
+import { Edit3, Save, X, Send, Shield, Youtube, Trash2, AlertTriangle, Crown } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import Card from '../components/ui/Card'
 import Avatar from '../components/ui/Avatar'
@@ -10,7 +10,9 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
-import { updateDocument, getCollection } from '../services/firestore'
+import { updateDocument, getCollection, where } from '../services/firestore'
+import { communityPoints } from '../utils/communityPoints'
+import { computeBadges } from '../utils/badges'
 import { deleteAccount } from '../services/deleteAccount'
 import { logout } from '../services/auth'
 import Modal from '../components/ui/Modal'
@@ -22,6 +24,7 @@ export default function MyProfile() {
   const { user, userData, loading: authLoading, refreshUserData } = useAuth()
   const navigate = useNavigate()
   const [completions, setCompletions] = useState([])
+  const [badges, setBadges] = useState({ firstVictor: false, verifier: false })
   const [editing, setEditing] = useState(false)
   const [displayName, setDisplayName] = useState('')
   const [avatarURL, setAvatarURL] = useState('')
@@ -50,15 +53,28 @@ export default function MyProfile() {
     async function load() {
       if (!user) return
       try {
-        const comps = await getCollection('completions')
+        const [comps, communityLevels] = await Promise.all([
+          getCollection('completions'),
+          getCollection('levels', [where('type', '==', 'community')]),
+        ])
+        const posMap = {}
+        communityLevels.forEach(l => { posMap[l.id] = l.position })
         const userComps = comps
           .filter(c => c.userId === user.uid)
+          .map(c => {
+            if (c.levelType === 'community') {
+              const pos = posMap[c.levelId]
+              if (pos) return { ...c, points: communityPoints(pos) }
+            }
+            return c
+          })
           .sort((a, b) => {
             const ta = a.completedAt?.toMillis?.() || 0
             const tb = b.completedAt?.toMillis?.() || 0
             return tb - ta
           })
         setCompletions(userComps)
+        setBadges(computeBadges(communityLevels, user.uid))
       } catch (err) {
         console.error('Failed to load completions:', err)
       }
@@ -116,6 +132,11 @@ export default function MyProfile() {
   if (!userData) return null
 
   const stats = userData.stats || {}
+  const mainComps = completions.filter(c => c.levelType === 'main')
+  const communityComps = completions.filter(c => c.levelType === 'community')
+  const communityPointsLive = communityComps.reduce((sum, c) => sum + (c.points || 0), 0)
+  const mainPoints = stats.mainPoints || 0
+  const totalPointsLive = parseFloat((mainPoints + communityPointsLive).toFixed(2))
 
   return (
     <PageShell>
@@ -166,6 +187,16 @@ export default function MyProfile() {
                       {userData.role === 'owner' ? <Shield size={12} /> : userData.role === 'admin' ? <Shield size={12} /> : null}
                       {userData.role === 'owner' ? 'Owner' : userData.role === 'admin' ? 'Admin' : 'Player'}
                     </Badge>
+                    {badges.firstVictor && (
+                      <Badge variant="gold" size="sm" title="First victor of a community level">
+                        <Crown size={12} /> First Victor
+                      </Badge>
+                    )}
+                    {badges.verifier && (
+                      <Badge variant="blue" size="sm" title="Verified a community level">
+                        <Shield size={12} /> Verifier
+                      </Badge>
+                    )}
                     <span className={styles.joinDate}>
                       Joined {formatDate(userData.createdAt)}
                     </span>
@@ -184,19 +215,19 @@ export default function MyProfile() {
 
         <div className={styles.statsGrid}>
           <Card className={styles.statCard}>
-            <span className={styles.statValue}>{formatNumber(stats.totalPoints || 0)}</span>
+            <span className={styles.statValue}>{formatNumber(totalPointsLive)}</span>
             <span className={styles.statLabel}>Total Points</span>
           </Card>
           <Card className={styles.statCard}>
-            <span className={styles.statValue}>{formatNumber(stats.mainPoints || 0)}</span>
+            <span className={styles.statValue}>{formatNumber(mainPoints)}</span>
             <span className={styles.statLabel}>Main Points</span>
           </Card>
           <Card className={styles.statCard}>
-            <span className={styles.statValue}>{formatNumber(stats.communityPoints || 0)}</span>
+            <span className={styles.statValue}>{formatNumber(communityPointsLive)}</span>
             <span className={styles.statLabel}>Community Points</span>
           </Card>
           <Card className={styles.statCard}>
-            <span className={styles.statValue}>{stats.mainCompletions + stats.communityCompletions || 0}</span>
+            <span className={styles.statValue}>{mainComps.length + communityComps.length}</span>
             <span className={styles.statLabel}>Completions</span>
           </Card>
         </div>
@@ -250,8 +281,6 @@ export default function MyProfile() {
         </Modal>
 
         {(() => {
-          const mainComps = completions.filter(c => c.levelType === 'main')
-          const communityComps = completions.filter(c => c.levelType === 'community')
           return (
             <>
               {mainComps.length > 0 && (

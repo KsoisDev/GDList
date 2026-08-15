@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Trophy } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import Badge from '../components/ui/Badge'
+import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
 import { getCollection } from '../services/firestore'
 import { formatNumber } from '../utils/format'
@@ -13,6 +14,7 @@ import styles from './List.module.css'
 export default function MainList() {
   const [levels, setLevels] = useState([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     async function load() {
@@ -32,18 +34,37 @@ export default function MainList() {
     load()
   }, [])
 
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return levels
+    return levels.filter(l =>
+      l.name?.toLowerCase().includes(q) ||
+      l.creator?.toLowerCase().includes(q)
+    )
+  }, [levels, search])
+
   const diffColor = (diff) => DIFFICULTY_COLORS[diff?.toLowerCase()] || '#ffffff'
 
   return (
     <PageShell title="Main Demon List" subtitle="Levels completed at least once by our community">
       <div className={styles.toolbar}>
-        <span className={styles.count}>{levels.length} levels</span>
+        <span className={styles.count}>{filtered.length} levels</span>
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Search level or creator..."
+          className={styles.searchBar}
+        />
       </div>
 
       {loading ? (
         <div className={styles.loading}><Spinner size="lg" /></div>
-      ) : levels.length === 0 ? (
-        <div className={styles.empty}><p>No levels completed yet. Submit your first record!</p></div>
+      ) : filtered.length === 0 ? (
+        <div className={styles.empty}>
+          {search
+            ? <p>No levels match "{search}".</p>
+            : <p>No levels completed yet. Submit your first record!</p>}
+        </div>
       ) : (
         <div className={styles.table}>
           <div className={styles.headerMain}>
@@ -56,7 +77,7 @@ export default function MainList() {
             <span className={styles.colVictories}>Victories</span>
           </div>
 
-          {levels.map((level, i) => (
+          {filtered.map((level, i) => (
             <motion.div
               key={level.id}
               initial={{ opacity: 0, y: 10 }}

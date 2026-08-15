@@ -3,6 +3,106 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
+  gap: 12px;
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.searchBar {
+  width: 100%;
+  max-width: 320px;
+}
+
+@media (max-width: 560px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchBar {
+    max-width: none;
+  }
+}
+
+.clearFilter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-glass);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.clearFilter:hover {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+
+.tagFilters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+}
+
+.tagFiltersLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.filterChip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-glass);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filterChip:hover {
+  border-color: var(--accent-blue);
+  color: var(--text-primary);
+}
+
+.filterChipActive {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.levelTags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.miniTag {
+  padding: 2px 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .count {
@@ -48,6 +148,24 @@
   }
 }
 
+.withActions .tableHeader,
+.withActions .tableRow {
+  grid-template-columns: 60px 3fr 1.2fr 0.8fr 1fr 1fr auto;
+}
+
+@media (max-width: 767px) {
+  .withActions .tableRow {
+    grid-template-columns: 40px 1fr auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .withActions .tableHeader {
+    display: grid;
+    grid-template-columns: 60px 3fr 1.2fr 0.8fr 1fr 1fr auto;
+  }
+}
+
 .tableRow {
   display: grid;
   grid-template-columns: 40px 1fr;
@@ -79,6 +197,74 @@
   align-items: center;
 }
 
+.colActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.editBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-glass);
+  background: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.editBtn:hover {
+  color: var(--accent-green);
+  border-color: rgba(74, 222, 128, 0.4);
+  background: rgba(74, 222, 128, 0.1);
+}
+
+.deleteBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-glass);
+  background: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.deleteBtn:hover {
+  color: #ff4d4d;
+  border-color: rgba(255, 77, 77, 0.4);
+  background: rgba(255, 77, 77, 0.1);
+}
+
+.videoBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-glass);
+  background: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.videoBtn:hover {
+  color: #ff4d4d;
+  border-color: rgba(255, 0, 0, 0.4);
+  background: rgba(255, 0, 0, 0.1);
+}
+
 .position {
   font-weight: 700;
   font-size: 0.875rem;
@@ -100,17 +286,22 @@
 }
 
 .thumbnail {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
+  width: 56px;
+  height: 32px;
+  border-radius: 6px;
   object-fit: cover;
-  display: none;
+  flex-shrink: 0;
+  border: 1px solid var(--border-glass);
+  background: var(--bg-glass);
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
 }
 
-@media (min-width: 480px) {
-  .thumbnail {
-    display: block;
-  }
+.tableRow:hover .thumbnail {
+  border-color: var(--border-glass-hover);
+}
+
+.levelInfo:hover .thumbnail {
+  transform: scale(1.05);
 }
 
 .levelName {
@@ -158,6 +349,12 @@
 .points {
   font-weight: 700;
   color: var(--accent-green);
+}
+
+.gameId {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--accent-blue);
 }
 
 .creator {

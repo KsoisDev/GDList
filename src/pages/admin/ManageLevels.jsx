@@ -1,30 +1,31 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Plus, Edit3, Trash2, Save, X } from 'lucide-react'
+import { Plus, Edit3, Trash2, Save, X, RefreshCw } from 'lucide-react'
 import PageShell from '../../components/layout/PageShell'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
-import Select from '../../components/ui/Select'
-import Badge from '../../components/ui/Badge'
 import Spinner from '../../components/ui/Spinner'
 import { useAuth } from '../../hooks/useAuth'
+import { updateDocument, getCollection } from '../../services/firestore'
 import {
-  getCollection, createDocument, updateDocument, deleteDocument,
-  where,
-} from '../../services/firestore'
-import { DIFFICULTIES, DIFFICULTY_COLORS, hasAccess } from '../../utils/constants'
+  getCommunityLevels, insertCommunityLevel, deleteCommunityLevel, moveCommunityLevel,
+  setCommunityPosition, renumberCommunityLevels,
+} from '../../services/communityList'
+import { hasAccess } from '../../utils/constants'
 import styles from './Admin.module.css'
 
 export default function ManageLevels() {
   const { user, userData, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [levels, setLevels] = useState([])
+  const [tags, setTags] = useState([])
   const [loading, setLoading] = useState(true)
-  const [form, setForm] = useState({ name: '', creator: '', verifier: '', difficulty: 'insane', points: 100, description: '' })
+  const [form, setForm] = useState({ name: '', creator: '', verifier: '', gameId: '', description: '', position: '', videoURL: '', tags: [] })
   const [editing, setEditing] = useState(null)
   const [saving, setSaving] = useState(false)
+  const inFlightRef = useRef(false)
 
   useEffect(() => {
     if (!authLoading && (!user || !hasAccess(userData?.role || 'user', 'admin'))) navigate('/')
@@ -33,10 +34,8 @@ export default function ManageLevels() {
   const loadLevels = async () => {
     setLoading(true)
     try {
-      const data = await getCollection('levels', [
-        where('type', '==', 'community'),
-      ])
-      setLevels(data.sort((a, b) => a.position - b.position))
+      const data = await getCommunityLevels()
+      setLevels(data)
     } catch (err) {
       console.error(err)
     } finally {
@@ -44,30 +43,71 @@ export default function ManageLevels() {
     }
   }
 
-  useEffect(() => { if (hasAccess(userData?.role || 'user', 'admin')) loadLevels() }, [userData])
+  useEffect(() => {
+    if (hasAccess(userData?.role || 'user', 'admin')) {
+      loadLevels()
+      getCollection('tags')
+        .then(data => setTags(data))
+        .catch(err => console.error('Failed to load tags:', err))
+    }
+  }, [userData])
+
+  const emptyForm = { name: '', creator: '', verifier: '', gameId: '', description: '', position: '', videoURL: '', tags: [] }
+
+  const toggleTag = (id) => {
+    setForm(prev => ({
+      ...prev,
+      tags: prev.tags.includes(id) ? prev.tags.filter(t => t !== id) : [...prev.tags, id],
+    }))
+  }
 
   const handleSave = async () => {
     if (!form.name || !form.creator) return
+    if (inFlightRef.current) return
+    inFlightRef.current = true
     setSaving(true)
     try {
-      const data = {
-        ...form,
-        type: 'community',
-        position: levels.length + 1,
-        isActive: true,
-        points: Number(form.points),
-      }
       if (editing) {
-        await updateDocument('levels', editing, data)
+        await updateDocument('levels', editing, {
+          name: form.name,
+          creator: form.creator,
+          verifier: form.verifier,
+          gameId: form.gameId,
+          description: form.description,
+          videoURL: form.videoURL,
+          tags: form.tags,
+        })
+        const edited = levels.find(l => l.id === editing)
+        if (form.position && edited && (edited.victoryCount || 0) > 0) {
+          await setCommunityPosition(editing, Number(form.position))
+        }
       } else {
-        await createDocument('levels', `community_${Date.now()}`, data)
+        await insertCommunityLevel(
+          `community_${Date.now()}`,
+          {
+            type: 'community',
+            name: form.name,
+            creator: form.creator,
+            verifier: form.verifier,
+            gameId: form.gameId,
+            description: form.description,
+            videoURL: form.videoURL,
+            isActive: true,
+            victoryCount: 0,
+            victors: [],
+            tags: form.tags,
+            thumbnail: '',
+          },
+          form.position ? Number(form.position) : undefined
+        )
       }
-      setForm({ name: '', creator: '', verifier: '', difficulty: 'insane', points: 100, description: '' })
+      setForm(emptyForm)
       setEditing(null)
       await loadLevels()
     } catch (err) {
       console.error(err)
     } finally {
+      inFlightRef.current = false
       setSaving(false)
     }
   }
@@ -77,9 +117,11 @@ export default function ManageLevels() {
       name: level.name,
       creator: level.creator,
       verifier: level.verifier || '',
-      difficulty: level.difficulty?.toLowerCase() || 'insane',
-      points: level.points || 100,
+      gameId: level.gameId || '',
       description: level.description || '',
+      position: level.position || '',
+      videoURL: level.videoURL || '',
+      tags: level.tags || [],
     })
     setEditing(level.id)
   }
@@ -87,7 +129,7 @@ export default function ManageLevels() {
   const handleDelete = async (id) => {
     if (!confirm('Delete this level?')) return
     try {
-      await deleteDocument('levels', id)
+      await deleteCommunityLevel(id)
       await loadLevels()
     } catch (err) {
       console.error(err)
@@ -95,28 +137,27 @@ export default function ManageLevels() {
   }
 
   const handleMove = async (id, direction) => {
-    const idx = levels.findIndex(l => l.id === id)
-    if (idx === -1) return
-    const newIdx = idx + direction
-    if (newIdx < 0 || newIdx >= levels.length) return
-    const temp = [...levels]
-    const currentPos = temp[idx].position
-    temp[idx].position = temp[newIdx].position
-    temp[newIdx].position = currentPos
-    const [moved] = temp.splice(idx, 1)
-    temp.splice(newIdx, 0, moved)
-    setLevels(temp)
-    await Promise.all([
-      updateDocument('levels', temp[idx].id, { position: temp[idx].position }),
-      updateDocument('levels', temp[newIdx].id, { position: temp[newIdx].position }),
-    ])
+    try {
+      await moveCommunityLevel(id, direction)
+      await loadLevels()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleRenumber = async () => {
+    if (!confirm('Renumber all community levels (1..n) and recalculate points by position?')) return
+    try {
+      await renumberCommunityLevels(null, false, true)
+      await loadLevels()
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   if (authLoading || loading) {
     return <PageShell><div className={styles.loading}><Spinner size="lg" /></div></PageShell>
   }
-
-  const diffOptions = DIFFICULTIES.map(d => ({ value: d.id, label: `${d.label} (${d.points} pts)` }))
 
   return (
     <PageShell title="Manage Community Levels" subtitle="Add, edit, reorder, and remove community levels">
@@ -126,19 +167,44 @@ export default function ManageLevels() {
           <Input label="Level Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Level name" />
           <Input label="Creator" value={form.creator} onChange={e => setForm({ ...form, creator: e.target.value })} placeholder="Creator name" />
           <Input label="Verifier" value={form.verifier} onChange={e => setForm({ ...form, verifier: e.target.value })} placeholder="Verifier name" />
-          <Select label="Difficulty" options={diffOptions} value={form.difficulty} onChange={e => setForm({ ...form, difficulty: e.target.value })} />
-          <Input label="Points" type="number" value={form.points} onChange={e => setForm({ ...form, points: e.target.value })} />
+          <Input label="Level ID (in-game)" value={form.gameId} onChange={e => setForm({ ...form, gameId: e.target.value })} placeholder="e.g. 10565740" />
+          <Input label="Position (blank = end)" type="number" value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} placeholder="e.g. 1" />
+          <Input label="Showcase Video URL" type="url" value={form.videoURL} onChange={e => setForm({ ...form, videoURL: e.target.value })} placeholder="https://youtu.be/..." />
           <Input label="Description (optional)" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Brief description" />
         </div>
+        {tags.length > 0 && (
+          <div className={styles.levelTagsField}>
+            <span className={styles.tagColorLabel}>Tags</span>
+            <div className={styles.tagChips}>
+              {tags.map(tag => {
+                const active = form.tags.includes(tag.id)
+                return (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    className={`${styles.formTagChip} ${active ? styles.formTagChipActive : ''}`}
+                    style={active ? { background: tag.color, borderColor: tag.color } : undefined}
+                    onClick={() => toggleTag(tag.id)}
+                  >
+                    {tag.name}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
         <div className={styles.formActions}>
           <Button variant="primary" size="sm" onClick={handleSave} loading={saving} icon={editing ? Save : Plus}>
             {editing ? 'Update' : 'Add Level'}
           </Button>
           {editing && (
-            <Button variant="ghost" size="sm" onClick={() => { setEditing(null); setForm({ name: '', creator: '', verifier: '', difficulty: 'insane', points: 100, description: '' }) }} icon={X}>
+            <Button variant="ghost" size="sm" onClick={() => { setEditing(null); setForm(emptyForm) }} icon={X}>
               Cancel
             </Button>
           )}
+          <Button variant="ghost" size="sm" onClick={handleRenumber} icon={RefreshCw}>
+            Renumber List
+          </Button>
         </div>
       </Card>
 
@@ -147,7 +213,8 @@ export default function ManageLevels() {
           <span>Pos</span>
           <span>Name</span>
           <span>Creator</span>
-          <span>Difficulty</span>
+          <span>Tags</span>
+          <span>ID</span>
           <span>Points</span>
           <span>Actions</span>
         </div>
@@ -155,10 +222,22 @@ export default function ManageLevels() {
           <motion.div key={level.id} className={styles.tableRow}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}
           >
-            <span className={styles.position}>#{level.position}</span>
+            <span className={styles.position}>
+              {(level.victoryCount || 0) === 0 ? '—' : `#${level.position}`}
+            </span>
             <span className={styles.name}>{level.name}</span>
             <span className={styles.creator}>{level.creator}</span>
-            <span><Badge size="sm" style={{ color: DIFFICULTY_COLORS[level.difficulty?.toLowerCase()] }}>{level.difficulty}</Badge></span>
+            <span className={styles.tableTags}>
+              {(level.tags || []).map(tid => {
+                const tag = tags.find(t => t.id === tid)
+                return tag ? (
+                  <span key={tid} className={styles.miniTag} style={{ background: tag.color }}>
+                    {tag.name}
+                  </span>
+                ) : null
+              })}
+            </span>
+            <span className={styles.gameId}>{level.gameId || '—'}</span>
             <span className={styles.points}>{level.points}</span>
             <span className={styles.actions}>
               <Button variant="ghost" size="sm" onClick={() => handleMove(level.id, -1)} disabled={i === 0}>↑</Button>

@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, LogOut, User, Shield, ChevronDown, Plus, Bell, Check, X as XIcon, Clock, Flag } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import { useSiteConfig } from '../../hooks/useSiteConfig'
 import { logout } from '../../services/auth'
 import { getCollection, updateDocument } from '../../services/firestore'
 import { NAV_LINKS, hasAccess } from '../../utils/constants'
@@ -13,6 +14,7 @@ import styles from './Navbar.module.css'
 
 export default function Navbar() {
   const { user, userData } = useAuth()
+  const { maintenance } = useSiteConfig()
   const location = useLocation()
   const [open, setOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
@@ -21,6 +23,7 @@ export default function Navbar() {
   const notifRef = useRef(null)
 
   const isActive = (path) => location.pathname === path
+  const canSubmit = !maintenance || hasAccess(userData?.role || 'user', 'admin')
 
   useEffect(() => {
     if (!user) { setNotifications([]); return }
@@ -84,14 +87,18 @@ export default function Navbar() {
             </Link>
           ))}
           <div className={styles.navDivider} />
-          <Link to="/submit" className={styles.submitBtn}>
-            <Plus size={15} />
-            Record
-          </Link>
-          <Link to="/submit-level" className={styles.submitBtn}>
-            <Plus size={15} />
-            Level
-          </Link>
+          {canSubmit && (
+            <>
+              <Link to="/submit" className={styles.submitBtn}>
+                <Plus size={15} />
+                Record
+              </Link>
+              <Link to="/submit-level" className={styles.submitBtn}>
+                <Plus size={15} />
+                Level
+              </Link>
+            </>
+          )}
         </div>
 
         <div className={styles.actions}>
@@ -230,14 +237,18 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <Link to="/submit" className={styles.mobileSubmitBtn} onClick={() => setOpen(false)}>
-              <Plus size={16} />
-              Submit Record
-            </Link>
-            <Link to="/submit-level" className={styles.mobileSubmitBtn} onClick={() => setOpen(false)}>
-              <Plus size={16} />
-              Submit Level
-            </Link>
+            {canSubmit && (
+              <>
+                <Link to="/submit" className={styles.mobileSubmitBtn} onClick={() => setOpen(false)}>
+                  <Plus size={16} />
+                  Submit Record
+                </Link>
+                <Link to="/submit-level" className={styles.mobileSubmitBtn} onClick={() => setOpen(false)}>
+                  <Plus size={16} />
+                  Submit Level
+                </Link>
+              </>
+            )}
             {user ? (
               <>
                 <Link to="/profile" className={styles.mobileLink} onClick={() => setOpen(false)}>

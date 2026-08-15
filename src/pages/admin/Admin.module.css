@@ -11,6 +11,28 @@
   margin-bottom: 40px;
 }
 
+.statusLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  margin-bottom: 16px;
+}
+
+.statusCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  font-size: 0.875rem;
+}
+
+.statusEdit {
+  margin-left: auto;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 @media (min-width: 768px) {
   .grid {
     grid-template-columns: repeat(4, 1fr);
@@ -106,6 +128,157 @@
   gap: 8px;
 }
 
+.tagColorLabel {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.tagColorRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+}
+
+.tagColorInput {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+}
+
+.tagSwatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast);
+}
+
+.tagSwatch:hover {
+  transform: scale(1.1);
+}
+
+.tagSwatchActive {
+  border-color: var(--text-primary);
+}
+
+.tagSwatchCheck {
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.tagsTable {
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.tagsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-glass);
+  align-items: center;
+  transition: background var(--transition-fast);
+}
+
+.tagsRow:last-child { border-bottom: none; }
+.tagsRow:hover { background: var(--bg-card); }
+
+.tagPreview {
+  justify-self: start;
+  padding: 4px 12px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.tagId {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tagsActions {
+  display: flex;
+  gap: 6px;
+}
+
+.levelTagsField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tagChips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.formTagChip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-glass);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.formTagChip:hover {
+  border-color: var(--accent-blue);
+  color: var(--text-primary);
+}
+
+.formTagChipActive {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.tableTags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.miniTag {
+  padding: 2px 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+}
+
 .emptyCard {
   text-align: center;
   color: var(--text-secondary);
@@ -119,7 +292,7 @@
 
 .tableHeader {
   display: grid;
-  grid-template-columns: 1fr 100px 80px 80px 100px;
+  grid-template-columns: 50px 1fr 90px 120px 80px 80px 100px;
   padding: 12px 16px;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-glass);
@@ -131,7 +304,7 @@
 
 .tableRow {
   display: grid;
-  grid-template-columns: 1fr 100px 80px 80px 100px;
+  grid-template-columns: 50px 1fr 90px 120px 80px 80px 100px;
   padding: 10px 16px;
   border-bottom: 1px solid var(--border-glass);
   align-items: center;
@@ -145,6 +318,7 @@
 .position { font-weight: 700; color: var(--text-secondary); }
 .name { font-weight: 600; }
 .creator { color: var(--text-secondary); }
+.gameId { font-weight: 600; color: var(--accent-blue); }
 .points { font-weight: 700; color: var(--accent-green); }
 
 .userCell {
@@ -269,6 +443,18 @@
   .configGrid {
     grid-template-columns: 1fr;
   }
+}
+
+.autoFillRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.autoFillHint {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
 }
 
 .error {

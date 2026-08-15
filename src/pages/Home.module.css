@@ -192,6 +192,178 @@
   gap: 8px;
 }
 
+.highlightsSection {
+  padding: 40px 24px 80px;
+  text-align: center;
+}
+
+.highlightsGrid {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 760px) {
+  .highlightsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.highlightCardWrap {
+  display: flex;
+}
+
+.highlightLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  flex: 1;
+}
+
+.highlightCard {
+  height: 100%;
+  text-align: left;
+}
+
+.highlightTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+.highlightTitle::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  box-shadow: 0 0 8px var(--accent-green);
+}
+
+.topPlayers {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.topPlayer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  padding: 6px;
+  border-radius: var(--radius-md);
+}
+
+.topPlayer:hover {
+  background: var(--bg-glass);
+}
+
+.topRank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-tertiary);
+}
+
+.topName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topPoints {
+  margin-left: auto;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--accent-green);
+}
+
+.recentList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recentRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.recentRow strong {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.recentRow em {
+  color: var(--text-primary);
+  font-style: normal;
+  font-weight: 600;
+}
+
+.newLevelsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.newLevelRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+}
+
+.newLevelRow:hover {
+  background: var(--bg-glass);
+}
+
+.newLevelName {
+  color: var(--text-primary);
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.newLevelCreator {
+  color: var(--text-secondary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.newLevelArrow {
+  color: var(--accent-green);
+  flex-shrink: 0;
+}
+
 .ctaSection {
   padding: 100px 24px;
   text-align: center;

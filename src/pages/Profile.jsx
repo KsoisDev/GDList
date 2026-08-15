@@ -8,7 +8,9 @@ import Avatar from '../components/ui/Avatar'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
 import Spinner from '../components/ui/Spinner'
-import { getDocument, getCollection, createDocument } from '../services/firestore'
+import { getDocument, getCollection, createDocument, where } from '../services/firestore'
+import { communityPoints } from '../utils/communityPoints'
+import { computeBadges } from '../utils/badges'
 import { formatNumber, formatDate } from '../utils/format'
 import { hasAccess } from '../utils/constants'
 import Modal from '../components/ui/Modal'
@@ -21,6 +23,7 @@ export default function Profile() {
   const { user, userData } = useAuth()
   const [profile, setProfile] = useState(null)
   const [completions, setCompletions] = useState([])
+  const [badges, setBadges] = useState({ firstVictor: false, verifier: false })
   const [loading, setLoading] = useState(true)
   const [reportModal, setReportModal] = useState(false)
   const [reportReason, setReportReason] = useState('')
@@ -43,7 +46,21 @@ export default function Profile() {
               const tb = b.completedAt?.toMillis?.() || 0
               return tb - ta
             })
-          setCompletions(userComps)
+
+          const communityLevels = await getCollection('levels', [where('type', '==', 'community')])
+          const posMap = {}
+          communityLevels.forEach(l => { posMap[l.id] = l.position })
+
+          const withLivePoints = userComps.map(c => {
+            if (c.levelType === 'community') {
+              const pos = posMap[c.levelId]
+              if (pos) return { ...c, points: communityPoints(pos) }
+            }
+            return c
+          })
+
+          setCompletions(withLivePoints)
+          setBadges(computeBadges(communityLevels, uid))
         }
       } catch (err) {
         console.error('Failed to load profile:', err)
@@ -74,6 +91,9 @@ export default function Profile() {
   }
 
   const stats = profile.stats || {}
+  const mainPoints = stats.mainPoints || 0
+  const communityPointsLive = communityComps.reduce((sum, c) => sum + (c.points || 0), 0)
+  const totalPointsLive = parseFloat((mainPoints + communityPointsLive).toFixed(2))
 
   return (
     <PageShell>
@@ -87,6 +107,16 @@ export default function Profile() {
                 <Badge variant={profile.role === 'owner' ? 'gold' : profile.role === 'admin' ? 'purple' : 'default'} size="sm">
                   {profile.banned ? 'Banned' : profile.role === 'owner' ? <><Crown size={12} /> Owner</> : profile.role === 'admin' ? <><Shield size={12} /> Admin</> : 'Player'}
                 </Badge>
+                {badges.firstVictor && (
+                  <Badge variant="gold" size="sm" title="First victor of a community level">
+                    <Crown size={12} /> First Victor
+                  </Badge>
+                )}
+                {badges.verifier && (
+                  <Badge variant="blue" size="sm" title="Verified a community level">
+                    <Shield size={12} /> Verifier
+                  </Badge>
+                )}
                 <span className={styles.joinDate}>
                   <Calendar size={14} /> Joined {formatDate(profile.createdAt)}
                 </span>
@@ -98,22 +128,22 @@ export default function Profile() {
         <div className={styles.statsGrid}>
           <Card className={styles.statCard}>
             <Trophy size={20} className={styles.statIcon} style={{ color: 'var(--accent-gold)' }} />
-            <span className={styles.statValue}>{formatNumber(stats.totalPoints || 0)}</span>
+            <span className={styles.statValue}>{formatNumber(totalPointsLive)}</span>
             <span className={styles.statLabel}>Total Points</span>
           </Card>
           <Card className={styles.statCard}>
             <Medal size={20} className={styles.statIcon} style={{ color: 'var(--accent-green)' }} />
-            <span className={styles.statValue}>{formatNumber(stats.mainPoints || 0)}</span>
+            <span className={styles.statValue}>{formatNumber(mainPoints)}</span>
             <span className={styles.statLabel}>Main Points</span>
           </Card>
           <Card className={styles.statCard}>
             <Medal size={20} className={styles.statIcon} style={{ color: 'var(--accent-blue)' }} />
-            <span className={styles.statValue}>{formatNumber(stats.communityPoints || 0)}</span>
+            <span className={styles.statValue}>{formatNumber(communityPointsLive)}</span>
             <span className={styles.statLabel}>Community Points</span>
           </Card>
           <Card className={styles.statCard}>
             <List size={20} className={styles.statIcon} style={{ color: 'var(--accent-purple)' }} />
-            <span className={styles.statValue}>{stats.mainCompletions + stats.communityCompletions || 0}</span>
+            <span className={styles.statValue}>{mainComps.length + communityComps.length}</span>
             <span className={styles.statLabel}>Completions</span>
           </Card>
         </div>

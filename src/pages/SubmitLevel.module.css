@@ -14,6 +14,120 @@
   text-align: center;
 }
 
+.verifiedRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+  padding: 12px 14px;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  transition: all var(--transition-fast);
+}
+
+.verifiedRow:hover {
+  border-color: var(--accent-green);
+  background: var(--bg-glass);
+}
+
+.verifiedChecked {
+  border-color: var(--accent-green);
+  background: rgba(74, 222, 128, 0.08);
+}
+
+.verifiedRow input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.verifiedBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--text-tertiary);
+  background: var(--bg-card);
+  color: transparent;
+  transition: all var(--transition-fast);
+}
+
+.verifiedChecked .verifiedBox {
+  border-color: var(--accent-green);
+  background: var(--accent-green);
+  color: #fff;
+}
+
+.verifiedMark {
+  width: 12px;
+  height: 12px;
+  display: block;
+  transform: scale(0);
+  transition: transform var(--transition-fast);
+}
+
+.verifiedChecked .verifiedMark {
+  transform: scale(1);
+}
+
+.verifiedLabel {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.verifiedHint {
+  color: var(--text-tertiary);
+  font-weight: 400;
+}
+
+.tagsField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tagsLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.tagsRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tagChip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-glass);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tagChip:hover {
+  border-color: var(--accent-blue);
+  color: var(--text-primary);
+}
+
+.tagChipActive {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
 .loadingCenter {
   display: flex;
   justify-content: center;

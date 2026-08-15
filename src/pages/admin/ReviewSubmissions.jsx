@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Check, X, ExternalLink } from 'lucide-react'
+import { Check, X, RefreshCw, ExternalLink } from 'lucide-react'
 import PageShell from '../../components/layout/PageShell'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
@@ -11,8 +11,11 @@ import Select from '../../components/ui/Select'
 import Spinner from '../../components/ui/Spinner'
 import { useAuth } from '../../hooks/useAuth'
 import { getCollection, updateDocument, getDocument, createDocument } from '../../services/firestore'
+import { insertCommunityLevel, setCommunityPosition } from '../../services/communityList'
+import { lookupAredlLevel } from '../../services/aredl'
+import { communityPoints } from '../../utils/communityPoints'
 import { formatDateRelative } from '../../utils/format'
-import { DIFFICULTIES, hasAccess } from '../../utils/constants'
+import { hasAccess } from '../../utils/constants'
 import styles from './Admin.module.css'
 
 const TABS = [
@@ -21,7 +24,7 @@ const TABS = [
   { id: 'levels', label: 'Level Acceptance' },
 ]
 
-const emptyConfig = { difficulty: 'extreme', points: 0, position: 0, externalUrl: '' }
+const emptyConfig = { difficulty: 'extreme', points: 0, position: 0, externalUrl: '', creator: 'Unknown', gameId: '', sendTo: 'unverified' }
 
 export default function ReviewSubmissions() {
   const { user, userData, loading: authLoading } = useAuth()
@@ -32,7 +35,9 @@ export default function ReviewSubmissions() {
   const [note, setNote] = useState({})
   const [config, setConfig] = useState({})
   const [processing, setProcessing] = useState({})
+  const [autoFill, setAutoFill] = useState({})
   const [error, setError] = useState('')
+  const inFlightRef = useRef(new Set())
 
   useEffect(() => {
     if (!authLoading && (!user || !hasAccess(userData?.role || 'user', 'admin'))) navigate('/')
@@ -62,7 +67,8 @@ export default function ReviewSubmissions() {
           const submitter = await getDocument('users', sub.userId)
 
           const suggestedPos = sub.demonPosition ? Number(sub.demonPosition) : 0
-          const suggestedPoints = sub.adminLevelConfig?.points || (sub.demonPosition ? Math.max(1, 1001 - Number(sub.demonPosition)) : '')
+          const isCommunitySub = sub.levelType === 'community' || sub.requestType === 'level'
+          const suggestedPoints = isCommunitySub ? '' : (sub.adminLevelConfig?.points || (sub.demonPosition ? Math.max(1, 1001 - Number(sub.demonPosition)) : ''))
 
           return {
             ...sub,
@@ -74,6 +80,8 @@ export default function ReviewSubmissions() {
               position: sub.adminLevelConfig?.position || suggestedPos,
               creator: sub.adminLevelConfig?.creator || sub.demonCreator || sub.creator || 'Unknown',
               externalUrl: sub.externalUrl || '',
+              gameId: sub.adminLevelConfig?.gameId || sub.gameId || '',
+              sendTo: sub.isVerified ? 'active' : 'unverified',
             },
           }
         })
@@ -96,16 +104,14 @@ export default function ReviewSubmissions() {
     return (s.requestType || 'completion') === 'completion' && (s.levelType || 'main') === tab
   })
 
-  const diffOptions = DIFFICULTIES.filter(d =>
-    ['easy', 'medium', 'hard', 'insane', 'extreme'].includes(d.id)
-  ).map(d => ({ value: d.id, label: d.label }))
-
   const isValidDemonlistUrl = (url) => {
     if (!url) return true
     return /^https?:\/\/(www\.)?demonlist\.org\//.test(url)
   }
 
   const handleReview = async (subId, status) => {
+    if (processing[subId] || inFlightRef.current.has(subId)) return
+    inFlightRef.current.add(subId)
     setError('')
     setProcessing(prev => ({ ...prev, [subId]: true }))
     try {
@@ -131,6 +137,7 @@ export default function ReviewSubmissions() {
           points: Number(cfg.points) || 0,
           position: Number(cfg.position) || 0,
           creator: cfg.creator || 'Unknown',
+          gameId: cfg.gameId || '',
         }
         if (cfg.externalUrl) updateData.externalUrl = cfg.externalUrl
       }
@@ -149,26 +156,87 @@ export default function ReviewSubmissions() {
       if (status === 'approved' && sub.requestType === 'level') {
         const sanitized = (sub.levelName || 'unknown').replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()
         const levelId = `community_${sanitized}_${Date.now()}`
+        const sendToActive = cfg.sendTo === 'active'
+        const now = new Date()
 
-        await createDocument('levels', levelId, {
+        const submitter = await getDocument('users', sub.userId)
+        const submitterName = submitter?.username || 'Unknown'
+
+        const levelData = {
           type: 'community',
           name: sub.levelName || 'Unknown',
-          creator: cfg.creator || 'Unknown',
-          difficulty: cfg.difficulty,
-          position: Number(cfg.position) || 999,
-          points: 0,
+          creator: sub.creator || 'Unknown',
+          gameId: cfg.gameId || sub.gameId || '',
           thumbnail: '',
-          victoryCount: 0,
-          victors: [],
+          videoURL: sub.videoURL || '',
+          tags: sub.tags || [],
           isActive: true,
-        })
+        }
+
+        if (sendToActive) {
+          levelData.victoryCount = 1
+          levelData.victors = [{
+            userId: sub.userId,
+            username: submitterName,
+            completionId: '',
+            completedAt: now,
+            videoURL: sub.videoURL || '',
+          }]
+          levelData.firstCompletedAt = now
+        } else {
+          levelData.victoryCount = 0
+          levelData.victors = []
+        }
+
+        await insertCommunityLevel(
+          levelId,
+          levelData,
+          cfg.position && Number(cfg.position) > 0 ? Number(cfg.position) : undefined
+        )
 
         await updateDocument('submissions', subId, { levelId })
+
+        if (sendToActive) {
+          const position = cfg.position && Number(cfg.position) > 0 ? Number(cfg.position) : 999
+          const points = communityPoints(position)
+          const completionId = await createDocument('completions', null, {
+            userId: sub.userId,
+            levelId,
+            levelType: 'community',
+            levelName: sub.levelName || 'Unknown',
+            submissionId: subId,
+            points,
+            videoURL: sub.videoURL || '',
+            completedAt: now,
+          })
+
+          await updateDocument('levels', levelId, {
+            victors: [{
+              userId: sub.userId,
+              username: submitterName,
+              completionId,
+              completedAt: now,
+              videoURL: sub.videoURL || '',
+            }],
+          })
+
+          const userDoc = await getDocument('users', sub.userId)
+          const udStats = userDoc?.stats || {}
+          await updateDocument('users', sub.userId, {
+            stats: {
+              ...udStats,
+              totalPoints: parseFloat(((udStats.totalPoints || 0) + points).toFixed(2)),
+              communityPoints: parseFloat(((udStats.communityPoints || 0) + points).toFixed(2)),
+              communityCompletions: (udStats.communityCompletions || 0) + 1,
+            },
+          })
+        }
       }
 
       if (status === 'approved' && sub.requestType !== 'level') {
         let levelId = sub.levelId
         const levelName = sub.levelName
+        const isCommunity = sub.levelType === 'community'
 
         if (sub.demonApiId) {
           levelId = `main_${sub.demonApiId}`
@@ -183,16 +251,32 @@ export default function ReviewSubmissions() {
 
         const existing = await getDocument('levels', levelId)
         const now = new Date()
-        const points = Number(cfg.points) || 0
+        let points = 0
+        let alreadyVictor = false
 
         if (existing) {
+          let finalPosition = existing.position || 0
+          if (isCommunity) {
+            const wasVerified = (existing.victoryCount || 0) > 0
+            if (Number(cfg.position) > 0 || !wasVerified) {
+              await setCommunityPosition(levelId, Number(cfg.position) || 0)
+              const refreshed = await getDocument('levels', levelId)
+              finalPosition = refreshed ? (refreshed.position || finalPosition) : finalPosition
+            }
+            points = communityPoints(finalPosition)
+          } else {
+            finalPosition = Number(cfg.position) || finalPosition
+            points = Number(cfg.points) || existing.points
+          }
+
           const victors = existing.victors || []
-          const alreadyVictor = victors.some(v => v.userId === sub.userId)
+          alreadyVictor = victors.some(v => v.userId === sub.userId)
+          let newLevelPoints = points || existing.points
           if (!alreadyVictor) {
             await updateDocument('levels', levelId, {
-              position: Number(cfg.position) || existing.position,
+              position: finalPosition,
               difficulty: cfg.difficulty,
-              points: points || existing.points,
+              points: newLevelPoints,
               creator: cfg.creator || existing.creator,
               victoryCount: (existing.victoryCount || 0) + 1,
               victors: [...victors, {
@@ -205,6 +289,26 @@ export default function ReviewSubmissions() {
             })
           }
           await updateDocument('submissions', subId, { levelId })
+
+          const pointsDiff = parseFloat((newLevelPoints - (existing.points || 0)).toFixed(2))
+          const prevVictors = (existing.victors || []).filter(v => v.userId !== sub.userId)
+          if (pointsDiff !== 0 && prevVictors.length > 0) {
+            const updates = prevVictors.map(victor =>
+              getDocument('users', victor.userId).then(userDoc => {
+                if (!userDoc) return
+                const s = userDoc.stats || {}
+                return updateDocument('users', victor.userId, {
+                  stats: {
+                    ...s,
+                    totalPoints: parseFloat(((s.totalPoints || 0) + pointsDiff).toFixed(2)),
+                    mainPoints: parseFloat(((s.mainPoints || 0) + pointsDiff).toFixed(2)),
+                    communityPoints: s.communityPoints || 0,
+                  },
+                })
+              })
+            )
+            await Promise.all(updates)
+          }
         } else {
           const victorEntry = {
             userId: sub.userId,
@@ -215,12 +319,11 @@ export default function ReviewSubmissions() {
           }
           const levelData = {
             type: sub.levelType || 'main',
-            position: Number(cfg.position) || 999,
             name: levelName,
             creator: cfg.creator || sub.demonCreator || 'Unknown',
             verifier: sub.demonVerifier || 'Unknown',
             difficulty: cfg.difficulty,
-            points: points || 0,
+            gameId: cfg.gameId || '',
             thumbnail: '',
             victoryCount: 1,
             victors: [victorEntry],
@@ -228,41 +331,54 @@ export default function ReviewSubmissions() {
             isActive: true,
             percentage: 100,
           }
-          await createDocument('levels', levelId, levelData)
+          if (isCommunity) {
+            const targetPos = (cfg.position && Number(cfg.position) > 0) ? Number(cfg.position) : 999
+            points = communityPoints(targetPos)
+            await insertCommunityLevel(levelId, levelData, targetPos)
+          } else {
+            points = Number(cfg.points) || 0
+            await createDocument('levels', levelId, { ...levelData, position: Number(cfg.position) || 999, points })
+          }
           await updateDocument('submissions', subId, { levelId })
         }
 
-        const completionId = await createDocument('completions', null, {
-          userId: sub.userId,
-          levelId,
-          levelType: sub.levelType,
-          levelName,
-          submissionId: subId,
-          points,
-          videoURL: sub.videoURL || '',
-          completedAt: now,
-        })
-
-        const levelDoc = await getDocument('levels', levelId)
-        if (levelDoc) {
-          const updatedVictor = (levelDoc.victors || []).map(v =>
-            v.userId === sub.userId && !v.completionId
-              ? { ...v, completionId }
-              : v
-          )
-          await updateDocument('levels', levelId, { victors: updatedVictor })
+        if (cfg.gameId) {
+          await updateDocument('levels', levelId, { gameId: cfg.gameId })
         }
 
-        const userDoc = await getDocument('users', sub.userId)
-        const stats = userDoc?.stats || {}
-        await updateDocument('users', sub.userId, {
-          stats: {
-            ...stats,
-            totalPoints: parseFloat(((stats.totalPoints || 0) + points).toFixed(2)),
-            [`${sub.levelType}Points`]: parseFloat(((stats[`${sub.levelType}Points`] || 0) + points).toFixed(2)),
-            [`${sub.levelType}Completions`]: (stats[`${sub.levelType}Completions`] || 0) + 1,
-          },
-        })
+        if (!alreadyVictor) {
+          const completionId = await createDocument('completions', null, {
+            userId: sub.userId,
+            levelId,
+            levelType: sub.levelType,
+            levelName,
+            submissionId: subId,
+            points,
+            videoURL: sub.videoURL || '',
+            completedAt: now,
+          })
+
+          const levelDoc = await getDocument('levels', levelId)
+          if (levelDoc) {
+            const updatedVictor = (levelDoc.victors || []).map(v =>
+              v.userId === sub.userId && !v.completionId
+                ? { ...v, completionId }
+                : v
+            )
+            await updateDocument('levels', levelId, { victors: updatedVictor })
+          }
+
+          const userDoc = await getDocument('users', sub.userId)
+          const stats = userDoc?.stats || {}
+          await updateDocument('users', sub.userId, {
+            stats: {
+              ...stats,
+              totalPoints: parseFloat(((stats.totalPoints || 0) + points).toFixed(2)),
+              [`${sub.levelType}Points`]: parseFloat(((stats[`${sub.levelType}Points`] || 0) + points).toFixed(2)),
+              [`${sub.levelType}Completions`]: (stats[`${sub.levelType}Completions`] || 0) + 1,
+            },
+          })
+        }
       }
 
       await loadSubmissions()
@@ -272,7 +388,51 @@ export default function ReviewSubmissions() {
       setError(err.message)
       console.error(err)
     } finally {
+      inFlightRef.current.delete(subId)
       setProcessing(prev => ({ ...prev, [subId]: false }))
+    }
+  }
+
+  const handleAutoFill = async (subId) => {
+    if (processing[subId] || autoFill[subId]) return
+    setError('')
+    setAutoFill(prev => ({ ...prev, [subId]: true }))
+    try {
+      const sub = submissions.find(s => s.id === subId)
+      const level = await lookupAredlLevel(sub?.demonApiId)
+      if (!level) {
+        setError('Level not found in AREDL data')
+        return
+      }
+      const creator = level.creators?.[0] || config[subId]?.creator || 'Unknown'
+      const verifier = level.verifier || sub.demonVerifier || ''
+      const position = Number(level.position) || 0
+      const prev = config[subId] || sub._initialConfig || emptyConfig
+
+      setConfig(prevCfg => ({
+        ...prevCfg,
+        [subId]: {
+          ...prev,
+          creator,
+          position: position || prev.position,
+          points: prev.points !== '' && Number(prev.points) > 0
+            ? prev.points
+            : (position ? Math.max(1, 1001 - position) : prev.points),
+        },
+      }))
+      setSubmissions(prev => prev.map(s =>
+        s.id === subId ? { ...s, demonCreator: creator, demonVerifier: verifier, demonPosition: position || s.demonPosition } : s
+      ))
+      await updateDocument('submissions', subId, {
+        demonCreator: creator,
+        demonVerifier: verifier,
+        demonPosition: position || sub.demonPosition,
+      })
+    } catch (err) {
+      console.error('Failed to auto-fill AREDL data:', err)
+      setError('Failed to fetch AREDL data: ' + err.message)
+    } finally {
+      setAutoFill(prev => ({ ...prev, [subId]: false }))
     }
   }
 
@@ -358,12 +518,24 @@ export default function ReviewSubmissions() {
                     {sub.requestType === 'level' ? (
                       <>
                         <Select
-                          label="Difficulty"
-                          options={diffOptions}
-                          value={config[sub.id]?.difficulty || 'extreme'}
+                          label="Send to"
+                          value={config[sub.id]?.sendTo ?? 'unverified'}
                           onChange={e => setConfig(prev => ({
                             ...prev,
-                            [sub.id]: { ...prev[sub.id], difficulty: e.target.value },
+                            [sub.id]: { ...prev[sub.id], sendTo: e.target.value },
+                          }))}
+                          options={[
+                            { value: 'active', label: 'Active (verified)' },
+                            { value: 'unverified', label: 'Levels to Verify' },
+                          ]}
+                        />
+                        <Input
+                          label="Level ID (in-game)"
+                          placeholder="e.g. 10565740"
+                          value={config[sub.id]?.gameId ?? ''}
+                          onChange={e => setConfig(prev => ({
+                            ...prev,
+                            [sub.id]: { ...prev[sub.id], gameId: e.target.value },
                           }))}
                         />
                         <Input
@@ -388,16 +560,18 @@ export default function ReviewSubmissions() {
                       </>
                     ) : (
                       <>
-                        <Input
-                          label="Points"
-                          type="number"
-                          placeholder="e.g. 350"
-                          value={config[sub.id]?.points ?? ''}
-                          onChange={e => setConfig(prev => ({
-                            ...prev,
-                            [sub.id]: { ...prev[sub.id], points: e.target.value },
-                          }))}
-                        />
+                        {sub.levelType !== 'community' && (
+                          <Input
+                            label="Points"
+                            type="number"
+                            placeholder="e.g. 350"
+                            value={config[sub.id]?.points ?? ''}
+                            onChange={e => setConfig(prev => ({
+                              ...prev,
+                              [sub.id]: { ...prev[sub.id], points: e.target.value },
+                            }))}
+                          />
+                        )}
                         <Input
                           label="Position"
                           type="number"
@@ -408,6 +582,17 @@ export default function ReviewSubmissions() {
                             [sub.id]: { ...prev[sub.id], position: e.target.value },
                           }))}
                         />
+                        {sub.levelType === 'community' && (
+                          <Input
+                            label="Level ID (in-game)"
+                            placeholder="e.g. 10565740"
+                            value={config[sub.id]?.gameId ?? ''}
+                            onChange={e => setConfig(prev => ({
+                              ...prev,
+                              [sub.id]: { ...prev[sub.id], gameId: e.target.value },
+                            }))}
+                          />
+                        )}
                         <Input
                           label="External URL"
                           placeholder="https://demonlist.org/..."
@@ -429,9 +614,24 @@ export default function ReviewSubmissions() {
                       </>
                     )}
                   </div>
-                </div>
+                  {(sub.requestType !== 'level' && sub.levelType === 'main' && sub.dataSource === 'aredl') && (
+                  <div className={styles.autoFillRow}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={RefreshCw}
+                      loading={autoFill[sub.id]}
+                      disabled={processing[sub.id]}
+                      onClick={() => handleAutoFill(sub.id)}
+                    >
+                      Auto-fill (AREDL)
+                    </Button>
+                    <span className={styles.autoFillHint}>Fetch creator, verifier and position from AREDL</span>
+                  </div>
+                )}
+              </div>
 
-                <div className={styles.subActions}>
+              <div className={styles.subActions}>
                   <input
                     className={styles.noteInput}
                     placeholder="Optional review note..."

@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ListCheck, Users, Layers, FileText, Flag } from 'lucide-react'
+import { ListCheck, Users, Layers, FileText, Flag, Wrench, Tag } from 'lucide-react'
 import PageShell from '../../components/layout/PageShell'
 import Card from '../../components/ui/Card'
 import Spinner from '../../components/ui/Spinner'
 import { useAuth } from '../../hooks/useAuth'
+import { useSiteConfig } from '../../hooks/useSiteConfig'
 import { getCollection } from '../../services/firestore'
 import { hasAccess } from '../../utils/constants'
 import styles from './Admin.module.css'
 
 export default function AdminDashboard() {
   const { user, userData, loading } = useAuth()
+  const { maintenance, loading: configLoading } = useSiteConfig()
   const navigate = useNavigate()
   const role = userData?.role || 'user'
   const [stats, setStats] = useState({ users: 0, levels: 0, pending: 0, completions: 0 })
@@ -63,6 +65,21 @@ export default function AdminDashboard() {
 
   return (
     <PageShell title="Admin Dashboard" subtitle="Manage the community platform">
+      {!configLoading && (
+        <Link to="/admin/settings" className={styles.statusLink}>
+          <Card className={styles.statusCard}>
+            <Wrench size={18} style={{ color: maintenance ? 'var(--accent-red)' : 'var(--accent-green)' }} />
+            <span>
+              Maintenance mode is{' '}
+              <strong style={{ color: maintenance ? 'var(--accent-red)' : 'var(--accent-green)' }}>
+                {maintenance ? 'ENABLED' : 'DISABLED'}
+              </strong>
+            </span>
+            <span className={styles.statusEdit}>Edit settings →</span>
+          </Card>
+        </Link>
+      )}
+
       <div className={styles.grid}>
         {cards.map(card => (
           <Link to={card.link} key={card.label} className={styles.cardLink}>
@@ -95,6 +112,12 @@ export default function AdminDashboard() {
               <Flag size={16} /> User Reports
             </Link>
           )}
+          <Link to="/admin/settings" className={styles.quickLink}>
+            <Wrench size={16} /> Site Settings
+          </Link>
+          <Link to="/admin/tags" className={styles.quickLink}>
+            <Tag size={16} /> Manage Tags
+          </Link>
         </div>
       </div>
     </PageShell>

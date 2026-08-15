@@ -43,6 +43,12 @@
   text-align: center;
 }
 
+.sourceInfo {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
 .loadingCenter {
   display: flex;
   justify-content: center;
