@@ -20,7 +20,7 @@ function mergeLive(localLevels, liveLevels) {
     const base = byLevelId.get(String(live.level_id)) || localLevels.find(l => l.slug === slugify(live.name))
     if (base) {
       base.position = live.position
-      if (live.points != null) base.points = live.points
+      if (live.points != null) base.points = live.points / 10
     }
   }
   return localLevels
