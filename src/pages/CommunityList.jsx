@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Edit3, Trash2, Youtube, X } from 'lucide-react'
+import { Edit3, Trash2, Youtube, X, Trophy } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import Card from '../components/ui/Card'
 import SearchBar from '../components/ui/SearchBar'
@@ -19,7 +19,7 @@ const TABS = [
 ]
 
 export default function CommunityList() {
-  const { userData } = useAuth()
+  const { user, userData } = useAuth()
   const isAdmin = hasAccess(userData?.role || 'user', 'admin')
   const [levels, setLevels] = useState([])
   const [tags, setTags] = useState([])
@@ -174,6 +174,7 @@ export default function CommunityList() {
           </div>
 
           {visible.map((level, i) => {
+            const completed = !!user && (level.victors || []).some(v => v.userId === user.uid)
             const videoURL = tab === 'active'
               ? (level.victors || [])[0]?.videoURL
               : level.videoURL
@@ -182,7 +183,7 @@ export default function CommunityList() {
             return (
             <motion.div
               key={level.id}
-              className={styles.tableRow}
+              className={`${styles.tableRow} ${completed ? styles.completed : ''}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.02 }}
@@ -200,14 +201,23 @@ export default function CommunityList() {
                   <div className={styles.levelInfoText}>
                     {tab === 'active' ? (
                       <Link to={`/levels/${level.id}`} className={styles.levelLink}>
-                        <span className={styles.levelName}>{level.name}</span>
+                        <span className={styles.levelNameWrap}>
+                          <span className={styles.levelName}>{level.name}</span>
+                          {completed && <Trophy size={14} className={styles.completedTrophy} />}
+                        </span>
                       </Link>
                     ) : isAdmin ? (
                       <Link to={`/levels/${level.id}`} className={styles.levelLink}>
-                        <span className={styles.levelName}>{level.name}</span>
+                        <span className={styles.levelNameWrap}>
+                          <span className={styles.levelName}>{level.name}</span>
+                          {completed && <Trophy size={14} className={styles.completedTrophy} />}
+                        </span>
                       </Link>
                     ) : (
-                      <span className={styles.levelName}>{level.name}</span>
+                      <span className={styles.levelNameWrap}>
+                        <span className={styles.levelName}>{level.name}</span>
+                        {completed && <Trophy size={14} className={styles.completedTrophy} />}
+                      </span>
                     )}
                     <span className={styles.creator}>by {level.creator}</span>
                     {levelTags.length > 0 && (

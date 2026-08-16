@@ -194,8 +194,27 @@
   border-bottom: none;
 }
 
+.tableRow.completed {
+  border-left: 3px solid rgba(255, 209, 102, 0.65);
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.10), rgba(255, 209, 102, 0.03));
+}
+
+.tableRow.completed .levelName {
+  color: var(--accent-gold);
+}
+
+.completedTrophy {
+  color: var(--accent-gold);
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 3px rgba(255, 209, 102, 0.45));
+}
+
 .tableRow:hover {
   background: var(--bg-card);
+}
+
+.tableRow.completed:hover {
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.15), rgba(255, 209, 102, 0.05));
 }
 
 @media (min-width: 768px) {
@@ -498,8 +517,21 @@
   border-bottom: none;
 }
 
+.rowMain.completed {
+  border-left: 3px solid rgba(255, 209, 102, 0.65);
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.10), rgba(255, 209, 102, 0.03));
+}
+
+.rowMain.completed .levelName {
+  color: var(--accent-gold);
+}
+
 .rowMain:hover {
   background: var(--bg-card);
+}
+
+.rowMain.completed:hover {
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.15), rgba(255, 209, 102, 0.05));
 }
 
 @media (min-width: 768px) {

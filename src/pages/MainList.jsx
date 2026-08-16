@@ -6,12 +6,14 @@ import PageShell from '../components/layout/PageShell'
 import Badge from '../components/ui/Badge'
 import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
+import { useAuth } from '../hooks/useAuth'
 import { getCollection } from '../services/firestore'
 import { formatNumber } from '../utils/format'
 import { DIFFICULTY_COLORS } from '../utils/constants'
 import styles from './List.module.css'
 
 export default function MainList() {
+  const { user } = useAuth()
   const [levels, setLevels] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -77,14 +79,16 @@ export default function MainList() {
             <span className={styles.colVictories}>Victories</span>
           </div>
 
-          {filtered.map((level, i) => (
+          {filtered.map((level, i) => {
+            const completed = !!user && (level.victors || []).some(v => v.userId === user.uid)
+            return (
             <motion.div
               key={level.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.02 }}
             >
-              <Link to={`/levels/${level.id}`} className={styles.rowMain}>
+              <Link to={`/levels/${level.id}`} className={`${styles.rowMain} ${completed ? styles.completed : ''}`}>
                 <span className={styles.colWeb}>
                   <span className={styles.webPos}>#{i + 1}</span>
                 </span>
@@ -94,7 +98,10 @@ export default function MainList() {
                 <span className={styles.colName}>
                   <div className={styles.levelInfo}>
                     <div className={styles.levelInfoText}>
-                      <span className={styles.levelName}>{level.name}</span>
+                      <span className={styles.levelNameWrap}>
+                        <span className={styles.levelName}>{level.name}</span>
+                        {completed && <Trophy size={14} className={styles.completedTrophy} />}
+                      </span>
                       <span className={styles.creator}>by {level.creator}</span>
                     </div>
                   </div>
@@ -118,7 +125,8 @@ export default function MainList() {
                 </span>
               </Link>
             </motion.div>
-          ))}
+            )
+          })}
         </div>
       )}
     </PageShell>
