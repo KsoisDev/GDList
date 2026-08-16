@@ -1,8 +1,55 @@
 import { getCollection, writeBatch, doc, where } from './firestore'
 import { db } from './firebase'
 import { roundPoints } from '../utils/communityPoints'
+import { fetchAredlLevels } from './aredl'
 
 const normalizeName = name => String(name || '').trim().toLowerCase()
+
+const BATCH_LIMIT = 400
+
+export async function syncMainLevelsFromAredl() {
+  const aredl = await fetchAredlLevels()
+  const byName = new Map()
+  const byGameId = new Map()
+  aredl.forEach(l => {
+    const key = normalizeName(l.name)
+    if (key && !byName.has(key)) byName.set(key, l)
+    if (l.gameId && !byGameId.has(String(l.gameId))) byGameId.set(String(l.gameId), l)
+  })
+
+  const levels = await getMainLevels()
+  const updated = []
+  const unmatched = []
+
+  for (const level of levels) {
+    let match = byName.get(normalizeName(level.name))
+    if (!match && level.gameId) match = byGameId.get(String(level.gameId))
+    if (!match) {
+      unmatched.push(level.id)
+      continue
+    }
+    updated.push({
+      id: level.id,
+      name: level.name,
+      position: match.position,
+      points: match.points != null ? match.points : Math.max(1, 1001 - (match.position || 0)),
+    })
+  }
+
+  for (let i = 0; i < updated.length; i += BATCH_LIMIT) {
+    const batch = writeBatch(db)
+    updated.slice(i, i + BATCH_LIMIT).forEach(u => {
+      batch.update(doc(db, 'levels', u.id), {
+        position: u.position,
+        points: roundPoints(u.points),
+      })
+    })
+    await batch.commit()
+  }
+
+  return { total: levels.length, updated: updated.length, unmatched }
+}
+
 
 export async function getMainLevels() {
   const data = await getCollection('levels', [where('type', '==', 'main')])

@@ -90,8 +90,25 @@
   color: var(--text-secondary);
   font-size: 0.875rem;
   font-weight: 500;
+  font-family: inherit;
   text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   transition: all var(--transition-fast);
+}
+
+.quickLink:disabled {
+  opacity: 0.7;
+}
+
+.syncingSpin {
+  animation: syncing-spin 1s linear infinite;
+}
+
+@keyframes syncing-spin {
+  to { transform: rotate(360deg); }
 }
 
 .quickLink:hover {
