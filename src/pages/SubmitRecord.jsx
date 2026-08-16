@@ -11,6 +11,7 @@ import { useAuth } from '../hooks/useAuth'
 import { getCollection, where, getDocument, createDocument } from '../services/firestore'
 import { fetchListedDemons } from '../services/gdl'
 import { fetchAredlLevels } from '../services/aredl'
+import { findMainLevelByName } from '../services/mainLevels'
 import { isValidYouTubeUrl } from '../utils/validators'
 import styles from './SubmitRecord.module.css'
 
@@ -129,6 +130,20 @@ export default function SubmitRecord() {
       const completions = await getCollection('completions', [where('userId', '==', user.uid)])
       const already = completions.find(c => c.levelId === targetLevelId)
       if (already) return { completed: true, levelName: already.levelName }
+    }
+    if (levelType === 'main') {
+      const searchName = manualMode ? manualLevelName.trim() : (selectedDemon ? String(selectedDemon.name || '') : '')
+      if (searchName) {
+        const byName = await findMainLevelByName(searchName)
+        if (byName) {
+          if ((byName.victors || []).some(v => v.userId === user.uid)) {
+            return { completed: true, levelName: byName.name }
+          }
+          const completions = await getCollection('completions', [where('userId', '==', user.uid)])
+          const already = completions.find(c => c.levelId === byName.id)
+          if (already) return { completed: true, levelName: already.levelName || byName.name }
+        }
+      }
     }
     return null
   }

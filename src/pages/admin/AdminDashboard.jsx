@@ -118,6 +118,9 @@ export default function AdminDashboard() {
           <Link to="/admin/tags" className={styles.quickLink}>
             <Tag size={16} /> Manage Tags
           </Link>
+          <Link to="/admin/merge" className={styles.quickLink}>
+            <Layers size={16} /> Merge Duplicate Levels
+          </Link>
         </div>
       </div>
     </PageShell>

@@ -12,6 +12,7 @@ import Spinner from '../../components/ui/Spinner'
 import { useAuth } from '../../hooks/useAuth'
 import { getCollection, updateDocument, getDocument, createDocument } from '../../services/firestore'
 import { insertCommunityLevel, setCommunityPosition } from '../../services/communityList'
+import { findMainLevelByName } from '../../services/mainLevels'
 import { lookupAredlLevel } from '../../services/aredl'
 import { communityPoints } from '../../utils/communityPoints'
 import { formatDateRelative, parseDecimal } from '../../utils/format'
@@ -272,7 +273,16 @@ export default function ReviewSubmissions() {
         const submitter = await getDocument('users', sub.userId)
         const submitterName = submitter?.username || 'Unknown'
 
-        const existing = await getDocument('levels', levelId)
+        let existing = await getDocument('levels', levelId)
+
+        if (!existing && !isCommunity && levelName && levelName !== 'Unknown') {
+          const byName = await findMainLevelByName(levelName)
+          if (byName) {
+            levelId = byName.id
+            existing = byName
+          }
+        }
+
         const now = new Date()
         let points = 0
         let alreadyVictor = false

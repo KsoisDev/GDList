@@ -25,6 +25,7 @@ import ManageUsers from './pages/admin/ManageUsers'
 import ManageReports from './pages/admin/ManageReports'
 import ManageTags from './pages/admin/ManageTags'
 import SiteSettings from './pages/admin/SiteSettings'
+import MergeMainLevels from './pages/admin/MergeMainLevels'
 import NotFound from './pages/NotFound'
 
 const queryClient = new QueryClient()
@@ -57,6 +58,7 @@ export default function App() {
               <Route path="/admin/reports" element={<ManageReports />} />
               <Route path="/admin/tags" element={<ManageTags />} />
               <Route path="/admin/settings" element={<SiteSettings />} />
+              <Route path="/admin/merge" element={<MergeMainLevels />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Footer />
