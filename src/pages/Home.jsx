@@ -6,7 +6,8 @@ import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
 import Avatar from '../components/ui/Avatar'
 import { getCollection } from '../services/firestore'
-import { formatNumber } from '../utils/format'
+import { formatNumber, getDisplayName } from '../utils/format'
+import { getFlagUrl } from '../utils/countries'
 import styles from './Home.module.css'
 
 const features = [
@@ -53,7 +54,7 @@ export default function Home() {
     ])
       .then(([users, completions, levels]) => {
         const byUsername = Object.fromEntries(users
-          .map(u => [u.id, u.username || 'Unknown']))
+          .map(u => [u.id, getDisplayName(u)]))
         const topMain = users
           .filter(u => (u.stats?.mainPoints || 0) > 0)
           .sort((a, b) => (b.stats?.mainPoints || 0) - (a.stats?.mainPoints || 0))
@@ -250,8 +251,11 @@ export default function Home() {
                       {highlights.topMain.map((p, i) => (
                         <Link to={`/profile/${p.id}`} className={styles.topPlayer} key={p.id}>
                           <span className={styles.topRank}>{i === 0 ? <Crown size={16} style={{ color: 'var(--accent-gold)' }} /> : `#${i + 1}`}</span>
-                          <Avatar src={p.avatarURL} alt={p.username} size="sm" />
-                          <span className={styles.topName}>{p.username}</span>
+                          <Avatar src={p.avatarURL} alt={getDisplayName(p)} size="sm" />
+                          <span className={styles.topName}>{getDisplayName(p)}</span>
+                          {getFlagUrl(p.country) && (
+                            <img src={getFlagUrl(p.country)} alt={p.country} className={styles.flagImg} loading="lazy" />
+                          )}
                           <span className={styles.topPoints}>{formatNumber(p.stats?.mainPoints || 0)}</span>
                         </Link>
                       ))}

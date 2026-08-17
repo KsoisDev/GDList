@@ -13,6 +13,10 @@ export function formatNumber(num) {
   return Number.isInteger(n) ? n.toString() : n.toFixed(2)
 }
 
+export function getDisplayName(user) {
+  return user?.displayName || user?.username || 'Unknown'
+}
+
 export function formatDate(timestamp) {
   if (!timestamp) return 'N/A'
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)

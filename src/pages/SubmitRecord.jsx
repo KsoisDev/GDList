@@ -12,7 +12,7 @@ import { getCollection, where, getDocument, createDocument } from '../services/f
 import { fetchListedDemons } from '../services/gdl'
 import { fetchAredlLevels } from '../services/aredl'
 import { findMainLevelByName } from '../services/mainLevels'
-import { isValidYouTubeUrl } from '../utils/validators'
+import { isValidVideoUrl } from '../utils/validators'
 import styles from './SubmitRecord.module.css'
 
 export default function SubmitRecord() {
@@ -177,8 +177,8 @@ export default function SubmitRecord() {
       setError('Please enter the level name')
       return
     }
-    if (!isValidYouTubeUrl(videoUrl)) {
-      setError('Please provide a valid YouTube URL')
+    if (!isValidVideoUrl(videoUrl)) {
+      setError('Please provide a valid video URL (YouTube, Medal, TikTok or Google Drive)')
       return
     }
     if (externalUrl && !isValidExternalUrl(externalUrl)) {
@@ -379,13 +379,13 @@ export default function SubmitRecord() {
             )}
 
             <Input
-              label="YouTube Video URL"
+              label="Video URL"
               type="url"
-              placeholder="https://youtu.be/..."
+              placeholder="https://youtu.be/..., https://medal.tv/..., https://tiktok.com/..., https://drive.google.com/..."
               value={videoUrl}
               onChange={e => setVideoUrl(e.target.value)}
               icon={Youtube}
-              error={error && !isValidYouTubeUrl(videoUrl) ? error : ''}
+              error={error && !isValidVideoUrl(videoUrl) ? error : ''}
             />
 
             {error && (

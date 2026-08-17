@@ -109,6 +109,14 @@
   color: inherit;
 }
 
+.flagImg {
+  width: 18px;
+  height: auto;
+  border-radius: 3px;
+  margin-left: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
 .playerInfo:hover .username {
   color: var(--accent-green);
 }

@@ -8,16 +8,19 @@ import Avatar from '../components/ui/Avatar'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
 import { updateDocument, getCollection, where } from '../services/firestore'
 import { communityPoints } from '../utils/communityPoints'
 import { computeBadges } from '../utils/badges'
+import { getDisplayName, formatNumber, formatDate } from '../utils/format'
+import { COUNTRIES, getFlagUrl } from '../utils/countries'
 import { deleteAccount } from '../services/deleteAccount'
 import { deleteCompletionRecord } from '../services/deleteCompletion'
+import { syncVictorsSnapshot } from '../services/syncUsernames'
 import { logout } from '../services/auth'
 import Modal from '../components/ui/Modal'
-import { formatNumber, formatDate } from '../utils/format'
 import { hasAccess } from '../utils/constants'
 import styles from './Profile.module.css'
 
@@ -30,6 +33,7 @@ export default function MyProfile() {
   const [displayName, setDisplayName] = useState('')
   const [avatarURL, setAvatarURL] = useState('')
   const [bio, setBio] = useState('')
+  const [country, setCountry] = useState('')
   const [saving, setSaving] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
@@ -50,6 +54,7 @@ export default function MyProfile() {
       setDisplayName(userData.displayName || '')
       setAvatarURL(userData.avatarURL || '')
       setBio(userData.bio || '')
+      setCountry(userData.country || '')
     }
   }, [userData])
 
@@ -95,7 +100,13 @@ export default function MyProfile() {
         displayName: displayName.trim(),
         avatarURL: avatarURL.trim() || '',
         bio: bio.trim() || '',
+        country: country,
       })
+      try {
+        await syncVictorsSnapshot(user.uid, { username: displayName.trim(), displayName: displayName.trim(), country })
+      } catch (syncErr) {
+        console.warn('Victors name sync failed:', syncErr)
+      }
       await refreshUserData()
       setEditing(false)
     } catch (err) {
@@ -110,6 +121,7 @@ export default function MyProfile() {
     setDisplayName(userData?.displayName || '')
     setAvatarURL(userData?.avatarURL || '')
     setBio(userData?.bio || '')
+    setCountry(userData?.country || '')
   }
 
   const handleDeleteAccount = async () => {
@@ -164,7 +176,7 @@ export default function MyProfile() {
       <div className={styles.profile}>
         <Card padding="lg" className={styles.header}>
           <div className={styles.headerContent}>
-            {!editing && <Avatar src={userData.avatarURL} alt={userData.username} size="xl" />}
+            {!editing && <Avatar src={userData.avatarURL} alt={getDisplayName(userData)} size="xl" />}
             <div className={styles.headerInfo}>
               {editing ? (
                 <div className={styles.editForm}>
@@ -180,6 +192,13 @@ export default function MyProfile() {
                     value={displayName}
                     onChange={e => setDisplayName(e.target.value)}
                     placeholder="Display name"
+                  />
+                  <Select
+                    label="Country"
+                    value={country}
+                    onChange={e => setCountry(e.target.value)}
+                    placeholder="Select your country..."
+                    options={COUNTRIES.map(c => ({ value: c.code, label: c.name }))}
                   />
                   <div className={styles.fieldGroup}>
                     <label className={styles.fieldLabel}>Bio</label>
@@ -202,7 +221,12 @@ export default function MyProfile() {
                 </div>
               ) : (
                 <>
-                  <h1 className={styles.username}>{userData.displayName || userData.username}</h1>
+                  <h1 className={styles.username}>
+                    {getDisplayName(userData)}
+                    {getFlagUrl(userData.country) && (
+                      <img src={getFlagUrl(userData.country)} alt={userData.country} className={styles.flagImg} loading="lazy" />
+                    )}
+                  </h1>
                   <div className={styles.meta}>
                     <Badge variant={userData.role === 'owner' ? 'gold' : userData.role === 'admin' ? 'purple' : 'default'} size="sm">
                       {userData.role === 'owner' ? <Shield size={12} /> : userData.role === 'admin' ? <Shield size={12} /> : null}

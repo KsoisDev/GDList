@@ -15,7 +15,7 @@ import { insertCommunityLevel, setCommunityPosition } from '../../services/commu
 import { findMainLevelByName } from '../../services/mainLevels'
 import { lookupAredlLevel } from '../../services/aredl'
 import { communityPoints } from '../../utils/communityPoints'
-import { formatDateRelative, parseDecimal } from '../../utils/format'
+import { formatDateRelative, parseDecimal, getDisplayName } from '../../utils/format'
 import { hasAccess } from '../../utils/constants'
 import styles from './Admin.module.css'
 
@@ -82,7 +82,7 @@ export default function ReviewSubmissions() {
           return {
             ...sub,
             levelName,
-            submitterName: submitter?.username || 'Unknown',
+            submitterName: getDisplayName(submitter),
             _existingLevel: existingLevel,
             _initialConfig: {
               difficulty: sub.adminLevelConfig?.difficulty || existingLevel?.difficulty || 'extreme',
@@ -181,7 +181,7 @@ export default function ReviewSubmissions() {
         const now = new Date()
 
         const submitter = await getDocument('users', sub.userId)
-        const submitterName = submitter?.username || 'Unknown'
+        const submitterName = getDisplayName(submitter)
 
         const levelData = {
           type: 'community',
@@ -199,6 +199,8 @@ export default function ReviewSubmissions() {
           levelData.victors = [{
             userId: sub.userId,
             username: submitterName,
+            displayName: submitterName,
+            country: submitter?.country || '',
             completionId: '',
             completedAt: now,
             videoURL: sub.videoURL || '',
@@ -271,7 +273,7 @@ export default function ReviewSubmissions() {
         }
 
         const submitter = await getDocument('users', sub.userId)
-        const submitterName = submitter?.username || 'Unknown'
+        const submitterName = getDisplayName(submitter)
 
         let existing = await getDocument('levels', levelId)
 
@@ -316,6 +318,8 @@ export default function ReviewSubmissions() {
               victors: [...victors, {
                 userId: sub.userId,
                 username: submitterName,
+                displayName: submitterName,
+                country: submitter?.country || '',
                 completionId: '',
                 completedAt: now,
                 videoURL: sub.videoURL || '',
@@ -347,6 +351,8 @@ export default function ReviewSubmissions() {
           const victorEntry = {
             userId: sub.userId,
             username: submitterName,
+            displayName: submitterName,
+            country: submitter?.country || '',
             completionId: '',
             completedAt: now,
             videoURL: sub.videoURL || '',

@@ -202,7 +202,7 @@ export default function ManageLevels() {
           <Input label="Verifier" value={form.verifier} onChange={e => setForm({ ...form, verifier: e.target.value })} placeholder="Verifier name" />
           <Input label="Level ID (in-game)" value={form.gameId} onChange={e => setForm({ ...form, gameId: e.target.value })} placeholder="e.g. 10565740" />
           <Input label="Position (blank = end)" type="number" value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} placeholder="e.g. 1" />
-          <Input label="Showcase Video URL" type="url" value={form.videoURL} onChange={e => setForm({ ...form, videoURL: e.target.value })} placeholder="https://youtu.be/..." />
+          <Input label="Showcase Video URL" type="url" value={form.videoURL} onChange={e => setForm({ ...form, videoURL: e.target.value })} placeholder="https://youtu.be/..., https://medal.tv/..., https://tiktok.com/..., https://drive.google.com/..." />
           <Input label="Description (optional)" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Brief description" />
         </div>
         {tags.length > 0 && (

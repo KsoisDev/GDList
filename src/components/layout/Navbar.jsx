@@ -7,7 +7,8 @@ import { useSiteConfig } from '../../hooks/useSiteConfig'
 import { logout } from '../../services/auth'
 import { getCollection, updateDocument } from '../../services/firestore'
 import { NAV_LINKS, hasAccess } from '../../utils/constants'
-import { formatDateRelative } from '../../utils/format'
+import { formatDateRelative, getDisplayName } from '../../utils/format'
+import { getFlagUrl } from '../../utils/countries'
 import Button from '../ui/Button'
 import Avatar from '../ui/Avatar'
 import styles from './Navbar.module.css'
@@ -173,8 +174,11 @@ export default function Navbar() {
                   className={styles.profileBtn}
                   onClick={() => setProfileOpen(!profileOpen)}
                 >
-                  <Avatar src={userData?.avatarURL} alt={userData?.username || 'User'} size="sm" />
-                  <span className={styles.username}>{userData?.username || 'User'}</span>
+                  <Avatar src={userData?.avatarURL} alt={getDisplayName(userData) || 'User'} size="sm" />
+                  <span className={styles.username}>{getDisplayName(userData) || 'User'}</span>
+                  {getFlagUrl(userData?.country) && (
+                    <img src={getFlagUrl(userData?.country)} alt={userData?.country} className={styles.flagImg} loading="lazy" />
+                  )}
                   <ChevronDown size={14} />
                 </button>
                 <AnimatePresence>

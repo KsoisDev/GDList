@@ -12,7 +12,8 @@ import Modal from '../../components/ui/Modal'
 import Input from '../../components/ui/Input'
 import { useAuth } from '../../hooks/useAuth'
 import { getCollection, updateDocument, createDocument } from '../../services/firestore'
-import { formatNumber } from '../../utils/format'
+import { formatNumber, getDisplayName } from '../../utils/format'
+import { getFlagUrl } from '../../utils/countries'
 import { hasAccess } from '../../utils/constants'
 import styles from './Admin.module.css'
 
@@ -74,7 +75,7 @@ export default function ManageUsers() {
     try {
       await createDocument('reports', null, {
         reporterId: user.uid,
-        reporterName: userData?.username || 'Unknown',
+        reporterName: getDisplayName(userData),
         targetId: reportModal,
         reason: reportReason.trim(),
         status: 'open',
@@ -110,8 +111,11 @@ export default function ManageUsers() {
           >
             <span className={styles.userCell}>
               <Link to={`/profile/${u.id}`} className={styles.userLink}>
-                <Avatar src={u.avatarURL} alt={u.username} size="sm" />
-                <span>{u.username}</span>
+                <Avatar src={u.avatarURL} alt={getDisplayName(u)} size="sm" />
+                <span>{getDisplayName(u)}</span>
+                {getFlagUrl(u.country) && (
+                  <img src={getFlagUrl(u.country)} alt={u.country} className={styles.flagImg} loading="lazy" />
+                )}
                 {u.banned && <Badge variant="danger" size="sm">Banned</Badge>}
               </Link>
             </span>

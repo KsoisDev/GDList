@@ -7,7 +7,8 @@ import Avatar from '../components/ui/Avatar'
 import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
 import { getCollection } from '../services/firestore'
-import { formatNumber } from '../utils/format'
+import { formatNumber, getDisplayName } from '../utils/format'
+import { getFlagUrl } from '../utils/countries'
 import styles from './Leaderboard.module.css'
 
 export default function MainLeaderboard() {
@@ -89,8 +90,11 @@ export default function MainLeaderboard() {
               </span>
               <span className={styles.colPlayer}>
                 <Link to={`/profile/${player.id}`} className={styles.playerInfo}>
-                  <Avatar src={player.avatarURL} alt={player.username} size="sm" />
-                  <span className={styles.username}>{player.username}</span>
+                  <Avatar src={player.avatarURL} alt={getDisplayName(player)} size="sm" />
+                  <span className={styles.username}>{getDisplayName(player)}</span>
+                  {getFlagUrl(player.country) && (
+                    <img src={getFlagUrl(player.country)} alt={player.country} className={styles.flagImg} loading="lazy" />
+                  )}
                 </Link>
               </span>
               <span className={styles.colPoints}>

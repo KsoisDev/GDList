@@ -16,7 +16,8 @@ import { setCommunityPosition } from '../services/communityList'
 import { getLevelChangelog, changelogActionLabel } from '../services/changelog'
 import { formatNumber, formatDate, parseDecimal } from '../utils/format'
 import { DIFFICULTIES, DIFFICULTY_COLORS, hasAccess } from '../utils/constants'
-import { getYouTubeThumbnail } from '../utils/video'
+import { getFlagUrl } from '../utils/countries'
+import { getVideoThumbnail } from '../utils/video'
 import styles from './LevelDetail.module.css'
 
 export default function LevelDetail() {
@@ -161,7 +162,7 @@ export default function LevelDetail() {
   const diffColor = DIFFICULTY_COLORS[level.difficulty?.toLowerCase()] || '#ffffff'
   const victors = level.victors || []
   const levelVideoURL = level.videoURL || victors[0]?.videoURL
-  const thumbnail = getYouTubeThumbnail(levelVideoURL)
+  const thumbnail = getVideoThumbnail(levelVideoURL)
 
   return (
     <PageShell>
@@ -246,7 +247,7 @@ export default function LevelDetail() {
                       type="url"
                       value={editFields.videoURL || ''}
                       onChange={e => setEditFields({ ...editFields, videoURL: e.target.value })}
-                      placeholder="https://youtu.be/..."
+                      placeholder="https://youtu.be/..., https://medal.tv/..., https://tiktok.com/..., https://drive.google.com/..."
                     />
                   )}
                   {level?.type === 'community' && tags.length > 0 && (
@@ -323,8 +324,11 @@ export default function LevelDetail() {
                   transition={{ delay: i * 0.03 }}
                 >
                   <Link to={`/profile/${victor.userId}`} className={styles.victorInfo}>
-                    <Avatar src={victor.avatarURL} alt={victor.username} size="sm" />
-                    <span className={styles.victorName}>{victor.username}</span>
+                    <Avatar src={victor.avatarURL} alt={victor.displayName || victor.username} size="sm" />
+                    <span className={styles.victorName}>{victor.displayName || victor.username}</span>
+                    {getFlagUrl(victor.country) && (
+                      <img src={getFlagUrl(victor.country)} alt={victor.country} className={styles.flagImg} loading="lazy" />
+                    )}
                   </Link>
                   <div className={styles.victorMeta}>
                     <span className={styles.victorDate}>{formatDate(victor.completedAt)}</span>

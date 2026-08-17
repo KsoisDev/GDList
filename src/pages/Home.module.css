@@ -281,6 +281,13 @@
   background: var(--bg-glass);
 }
 
+.flagImg {
+  width: 18px;
+  height: auto;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
 .topRank {
   display: flex;
   align-items: center;

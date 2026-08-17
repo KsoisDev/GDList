@@ -8,7 +8,7 @@ import Button from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
 import { getCollection, where, createDocument } from '../services/firestore'
-import { isValidYouTubeUrl } from '../utils/validators'
+import { isValidVideoUrl } from '../utils/validators'
 import styles from './SubmitLevel.module.css'
 
 export default function SubmitLevel() {
@@ -53,7 +53,7 @@ export default function SubmitLevel() {
     setError('')
 
     if (!levelName.trim()) { setError('Please enter the level name'); return }
-    if (!isValidYouTubeUrl(videoUrl)) { setError('Please provide a valid YouTube URL'); return }
+    if (!isValidVideoUrl(videoUrl)) { setError('Please provide a valid video URL (YouTube, Medal, TikTok or Google Drive)'); return }
     if (!creator.trim()) { setError('Please enter the creator name'); return }
 
     try {
@@ -151,13 +151,13 @@ export default function SubmitLevel() {
               error={error && !creator.trim() ? error : ''}
             />
             <Input
-              label="Showcase YouTube URL"
+              label="Showcase Video URL"
               type="url"
-              placeholder="https://youtu.be/..."
+              placeholder="https://youtu.be/..., https://medal.tv/..., https://tiktok.com/..., https://drive.google.com/..."
               value={videoUrl}
               onChange={e => setVideoUrl(e.target.value)}
               icon={Youtube}
-              error={error && !isValidYouTubeUrl(videoUrl) ? error : ''}
+              error={error && !isValidVideoUrl(videoUrl) ? error : ''}
             />
             <Input
               label="Level ID (in-game)"

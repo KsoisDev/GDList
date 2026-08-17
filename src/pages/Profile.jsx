@@ -12,7 +12,8 @@ import { getDocument, getCollection, createDocument, where } from '../services/f
 import { deleteCompletionRecord } from '../services/deleteCompletion'
 import { communityPoints } from '../utils/communityPoints'
 import { computeBadges } from '../utils/badges'
-import { formatNumber, formatDate } from '../utils/format'
+import { formatNumber, formatDate, getDisplayName } from '../utils/format'
+import { getFlagUrl } from '../utils/countries'
 import { hasAccess } from '../utils/constants'
 import Modal from '../components/ui/Modal'
 import Button from '../components/ui/Button'
@@ -122,9 +123,14 @@ export default function Profile() {
       <div className={styles.profile}>
         <Card padding="lg" className={styles.header}>
           <div className={styles.headerContent}>
-            <Avatar src={profile.avatarURL} alt={profile.username} size="xl" />
+            <Avatar src={profile.avatarURL} alt={getDisplayName(profile)} size="xl" />
             <div className={styles.headerInfo}>
-              <h1 className={styles.username}>{profile.username}</h1>
+              <h1 className={styles.username}>
+                {getDisplayName(profile)}
+                {getFlagUrl(profile.country) && (
+                  <img src={getFlagUrl(profile.country)} alt={profile.country} className={styles.flagImg} loading="lazy" />
+                )}
+              </h1>
               <div className={styles.meta}>
                 <Badge variant={profile.role === 'owner' ? 'gold' : profile.role === 'admin' ? 'purple' : 'default'} size="sm">
                   {profile.banned ? 'Banned' : profile.role === 'owner' ? <><Crown size={12} /> Owner</> : profile.role === 'admin' ? <><Shield size={12} /> Admin</> : 'Player'}
@@ -190,7 +196,7 @@ export default function Profile() {
                 try {
                   await createDocument('reports', null, {
                     reporterId: user.uid,
-                    reporterName: userData?.username || 'Unknown',
+                    reporterName: getDisplayName(userData),
                     targetId: userId,
                     reason: reportReason.trim(),
                     status: 'open',

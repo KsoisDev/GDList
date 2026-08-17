@@ -110,6 +110,13 @@
   font-weight: 600;
 }
 
+.flagImg {
+  width: 16px;
+  height: auto;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
 .dropdown {
   position: absolute;
   top: calc(100% + 8px);

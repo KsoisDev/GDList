@@ -10,7 +10,7 @@ import { useAuth } from '../hooks/useAuth'
 import { getCollection } from '../services/firestore'
 import { getCommunityLevels, deleteCommunityLevel } from '../services/communityList'
 import { hasAccess } from '../utils/constants'
-import { getYouTubeThumbnail } from '../utils/video'
+import { getVideoThumbnail } from '../utils/video'
 import styles from './List.module.css'
 
 const TABS = [
@@ -178,7 +178,7 @@ export default function CommunityList() {
             const videoURL = tab === 'active'
               ? (level.victors || [])[0]?.videoURL
               : level.videoURL
-            const thumbnail = getYouTubeThumbnail(videoURL)
+            const thumbnail = getVideoThumbnail(videoURL)
             const levelTags = levelTagsMap(level)
             return (
             <motion.div

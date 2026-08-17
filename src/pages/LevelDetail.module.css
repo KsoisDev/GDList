@@ -323,6 +323,14 @@
   transition: color var(--transition-fast);
 }
 
+.flagImg {
+  width: 16px;
+  height: auto;
+  border-radius: 2px;
+  margin-left: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
 .victorMeta {
   display: flex;
   align-items: center;
