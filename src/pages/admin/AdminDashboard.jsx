@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ListCheck, Users, Layers, FileText, Flag, Wrench, Tag } from 'lucide-react'
+import { ListCheck, Users, Layers, FileText, Flag, Wrench, Tag, RefreshCw } from 'lucide-react'
 import PageShell from '../../components/layout/PageShell'
 import Card from '../../components/ui/Card'
 import Spinner from '../../components/ui/Spinner'
 import { useAuth } from '../../hooks/useAuth'
 import { useSiteConfig } from '../../hooks/useSiteConfig'
 import { getCollection } from '../../services/firestore'
+import { syncMainLevelsFromAredl } from '../../services/mainLevels'
 import { hasAccess } from '../../utils/constants'
 import styles from './Admin.module.css'
 
@@ -17,6 +18,29 @@ export default function AdminDashboard() {
   const role = userData?.role || 'user'
   const [stats, setStats] = useState({ users: 0, levels: 0, pending: 0, completions: 0 })
   const [fetching, setFetching] = useState(true)
+  const [syncing, setSyncing] = useState(false)
+  const [syncMessage, setSyncMessage] = useState('')
+  const [syncError, setSyncError] = useState(false)
+
+  const handleSync = async () => {
+    if (syncing) return
+    if (!confirm('Update position and points of all existing main-list levels from AREDL? Only existing levels are updated, nothing is created or deleted.')) return
+    setSyncing(true)
+    setSyncMessage('')
+    setSyncError(false)
+    try {
+      const result = await syncMainLevelsFromAredl()
+      const unmatchedText = result.unmatched.length > 0 ? ` · ${result.unmatched.length} without match` : ''
+      setSyncMessage(`Updated ${result.updated} of ${result.total} main levels with AREDL positions/points${unmatchedText}.`)
+    } catch (err) {
+      console.error(err)
+      setSyncError(true)
+      setSyncMessage('Sync failed: ' + (err.message || err))
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   useEffect(() => {
     if (!loading && (!user || !hasAccess(role, 'admin'))) {
       navigate('/')
@@ -34,12 +58,9 @@ export default function AdminDashboard() {
         ])
         setStats({
           users: users.length,
-          levels: levels.filter(level => level.type === 'community').length,
-          pending: submissions.filter(submission =>
-            submission.status === 'pending'
-            && (submission.requestType === 'level' || submission.levelType === 'community')
-          ).length,
-          completions: completions.filter(completion => completion.levelType === 'community').length,
+          levels: levels.length,
+          pending: submissions.filter(s => s.status === 'pending').length,
+          completions: completions.length,
         })
       } catch (err) {
         console.error(err)
@@ -120,7 +141,24 @@ export default function AdminDashboard() {
           <Link to="/admin/tags" className={styles.quickLink}>
             <Tag size={16} /> Manage Tags
           </Link>
+          <Link to="/admin/merge" className={styles.quickLink}>
+            <Layers size={16} /> Merge Duplicate Levels
+          </Link>
+          <button
+            type="button"
+            className={styles.quickLink}
+            onClick={handleSync}
+            disabled={syncing}
+          >
+            <RefreshCw size={16} className={syncing ? styles.syncingSpin : ''} />
+            {syncing ? 'Syncing Main List...' : 'Sync Main List from AREDL'}
+          </button>
         </div>
+        {syncMessage && (
+          <p className={styles.error} style={{ marginTop: 16, color: syncError ? 'var(--accent-red)' : 'var(--accent-green)' }}>
+            {syncMessage}
+          </p>
+        )}
       </div>
     </PageShell>
   )

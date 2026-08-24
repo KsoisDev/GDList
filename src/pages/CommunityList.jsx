@@ -44,7 +44,7 @@ export default function CommunityList() {
       setLevels(data)
     } catch (err) {
       console.error('Failed to load community levels:', err)
-      setLoadError('The Basement list could not be loaded. Check your connection and try again.')
+      setLoadError('The community list could not be loaded. Check your connection and try again.')
     } finally {
       setLoading(false)
     }
@@ -98,7 +98,7 @@ export default function CommunityList() {
   }
 
   return (
-    <PageShell title="Basement Demon List" subtitle="Levels submitted and verified through Basement List">
+    <PageShell title="Community Demon List" subtitle="Levels created and verified by our community members">
       <div className={styles.toolbar}>
         <div className={styles.toolbarLeft}>
           <span className={styles.count}>

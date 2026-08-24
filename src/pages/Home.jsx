@@ -30,8 +30,8 @@ import styles from './Home.module.css'
 const communityBenefits = [
   {
     icon: Layers3,
-    title: 'Built inside Basement',
-    description: 'Every listed level is submitted and approved through the Basement community.',
+    title: 'Two lists, one community',
+    description: 'Track official demons and the levels created inside the Basement community.',
   },
   {
     icon: ShieldCheck,
@@ -40,8 +40,8 @@ const communityBenefits = [
   },
   {
     icon: Trophy,
-    title: 'One ranking that feels earned',
-    description: 'Climb the Basement leaderboard as your verified completion history grows.',
+    title: 'Rankings that feel earned',
+    description: 'Climb separate main and community leaderboards as your completion history grows.',
   },
 ]
 
@@ -156,7 +156,7 @@ export default function Home() {
       id: `level-${level.id}`,
       type: 'level',
       title: level.name,
-      text: `joined the Basement list · by ${level.creator || 'Unknown'}`,
+      text: `joined the community list · by ${level.creator || 'Unknown'}`,
       time: formatDateRelative(level.createdAt || level.firstCompletedAt),
       href: `/levels/${level.id}`,
     }))
@@ -280,14 +280,14 @@ export default function Home() {
             {!loading && previewLevels.length === 0 && (
               <div className={styles.previewEmpty}>
                 <List size={20} />
-                <strong>Basement list</strong>
+                <strong>Community list</strong>
                 <span>Ranked levels will appear here as soon as the database is connected.</span>
               </div>
             )}
           </div>
 
           <Link className={styles.spotlightFooter} to={activeListHref}>
-            Browse every submitted level
+            Browse every community level
             <ArrowRight size={15} />
           </Link>
         </motion.aside>
