@@ -5,7 +5,7 @@ import { getCollection, getDocument } from './firestore'
 import { recalculateCommunityScores } from './communityList'
 
 export async function deleteAccount(userId) {
-  const results = { submissions: 0, completions: 0, notifications: 0, levels: 0, usernames: 0 }
+  const results = { submissions: 0, completions: 0, notifications: 0, levels: 0, usernames: 0, staff: 0 }
   const errors = []
 
   try {
@@ -54,6 +54,14 @@ export async function deleteAccount(userId) {
       await recalculateCommunityScores()
     }
   } catch (e) { errors.push(`levels: ${e.message}`) }
+
+  try {
+    const staff = await getDocument('staff', userId)
+    if (staff) {
+      await deleteDoc(doc(db, 'staff', userId))
+      results.staff++
+    }
+  } catch (e) { errors.push(`staff: ${e.message}`) }
 
   try {
     await deleteDoc(doc(db, 'users', userId))

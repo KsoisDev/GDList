@@ -130,7 +130,7 @@ export default function AdminDashboard() {
           <Link to="/admin/users" className={styles.quickLink}>
             Manage Users
           </Link>
-          {role === 'owner' && (
+          {hasAccess(role, 'owner') && (
             <Link to="/admin/reports" className={styles.quickLink}>
               <Flag size={16} /> User Reports
             </Link>

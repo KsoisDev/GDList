@@ -38,7 +38,7 @@ export default function ManageReports() {
         setLoading(false)
       }
     }
-    if (userData?.role === 'owner') load()
+    if (hasAccess(userData?.role || 'user', 'owner')) load()
   }, [userData])
 
   const resolveReport = async (reportId, newStatus) => {

@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { Calendar, Trophy, Medal, List, Youtube, Flag, Crown, Shield, Trash2, AlertTriangle, Share2 } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import ProfileProgress from '../components/profile/ProfileProgress'
+import RoleBadge from '../components/profile/RoleBadge'
 import Avatar from '../components/ui/Avatar'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
@@ -44,10 +45,11 @@ export default function Profile() {
   const load = async (uid = userId) => {
     setLoading(true)
     try {
-      const [profileResult, completionsResult, levelsResult] = await Promise.allSettled([
+      const [profileResult, completionsResult, levelsResult, staffResult] = await Promise.allSettled([
         getDocument('users', uid),
         getCollection('completions', [where('userId', '==', uid)]),
         getCollection('levels'),
+        getDocument('staff', uid),
       ])
       const allLevels = levelsResult.status === 'fulfilled' ? levelsResult.value : []
       const communityLevels = allLevels.filter(level => level.type === 'community')
@@ -85,14 +87,24 @@ export default function Profile() {
       }
 
       const privateProfile = profileResult.status === 'fulfilled' ? profileResult.value : null
+      const staffProfile = staffResult.status === 'fulfilled' ? staffResult.value : null
       const fallbackProfile = snapshotProfile || (withLivePoints.length > 0 ? {
         id: uid,
         username: 'Basement player',
         displayName: 'Basement player',
         role: 'user',
         createdAt: withLivePoints.at(-1)?.completedAt || null,
+      } : staffProfile ? {
+        id: uid,
+        username: staffProfile.displayName || 'Basement developer',
+        displayName: staffProfile.displayName || 'Basement developer',
+        role: 'developer',
       } : null)
-      setProfile(privateProfile || fallbackProfile)
+      const resolvedProfile = privateProfile || fallbackProfile
+      setProfile(resolvedProfile ? {
+        ...resolvedProfile,
+        teamTitle: staffProfile?.title || '',
+      } : null)
       setCompletions(withLivePoints)
       setBadges(computeBadges(communityLevels, uid))
     } catch (err) {
@@ -170,9 +182,7 @@ export default function Profile() {
                 )}
               </h1>
               <div className={styles.meta}>
-                <Badge variant={profile.role === 'owner' ? 'gold' : profile.role === 'admin' ? 'purple' : 'default'} size="sm">
-                  {profile.banned ? 'Banned' : profile.role === 'owner' ? <><Crown size={12} /> Owner</> : profile.role === 'admin' ? <><Shield size={12} /> Admin</> : 'Player'}
-                </Badge>
+                <RoleBadge role={profile.role} title={profile.teamTitle} banned={profile.banned} />
                 {badges.firstVictor && (
                   <Badge variant="gold" size="sm" title="First victor of a community level">
                     <Crown size={12} /> First Victor

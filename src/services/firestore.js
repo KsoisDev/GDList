@@ -17,6 +17,7 @@ import {
 import { db } from './firebase'
 
 const READ_TIMEOUT_MS = 10000
+const ASSIGNABLE_ROLES = new Set(['user', 'admin', 'owner', 'developer'])
 
 function withReadTimeout(promise, label) {
   let timer
@@ -56,6 +57,31 @@ export async function updateDocument(collectionName, id, data) {
   const ref = doc(db, collectionName, id)
   await updateDoc(ref, { ...data, updatedAt: serverTimestamp() })
   return id
+}
+
+export async function updateUserRole(userId, nextRole, displayName = '') {
+  if (!ASSIGNABLE_ROLES.has(nextRole)) {
+    throw new Error('That account role is not supported.')
+  }
+
+  const batch = writeBatch(db)
+  const now = serverTimestamp()
+  batch.update(doc(db, 'users', userId), { role: nextRole, updatedAt: now })
+
+  const staffRef = doc(db, 'staff', userId)
+  if (nextRole === 'developer') {
+    batch.set(staffRef, {
+      userId,
+      title: 'List Developer',
+      displayName,
+      updatedAt: now,
+    }, { merge: true })
+  } else {
+    batch.delete(staffRef)
+  }
+
+  await batch.commit()
+  return userId
 }
 
 export async function deleteDocument(collectionName, id) {

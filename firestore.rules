@@ -19,11 +19,11 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return activeAccount() && account().role in ['admin', 'owner'];
+      return activeAccount() && account().role in ['admin', 'owner', 'developer'];
     }
 
     function isOwner() {
-      return activeAccount() && account().role == 'owner';
+      return activeAccount() && account().role in ['owner', 'developer'];
     }
 
     function verifiedAccount() {
@@ -31,7 +31,7 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read: if true;
+      allow read: if isSelf(userId) || isAdmin();
 
       allow create: if isSelf(userId)
         && request.resource.data.keys().hasOnly([
@@ -50,7 +50,8 @@ service cloud.firestore {
         && existsAfter(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower))
         && getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower)).data.uid == userId;
 
-      allow update: if isOwner()
+      allow update: if (isOwner()
+          && request.resource.data.role in ['user', 'admin', 'owner', 'developer'])
         || (isAdmin() && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['stats', 'updatedAt']))
         || (isSelf(userId) && activeAccount()
@@ -70,6 +71,17 @@ service cloud.firestore {
         && !exists(/databases/$(database)/documents/usernames/$(username));
       allow update: if false;
       allow delete: if isOwner() || (signedIn() && resource.data.uid == request.auth.uid);
+    }
+
+    match /staff/{userId} {
+      allow read: if true;
+      allow create, update: if isOwner()
+        && request.resource.data.keys().hasOnly([
+          'userId', 'title', 'displayName', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.userId == userId
+        && request.resource.data.title == 'List Developer';
+      allow delete: if isOwner();
     }
 
     match /levels/{levelId} {

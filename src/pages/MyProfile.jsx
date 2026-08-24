@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Edit3, Save, X, Send, Shield, Youtube, Trash2, AlertTriangle, Crown, KeyRound, MailCheck, Share2 } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import ProfileProgress from '../components/profile/ProfileProgress'
+import RoleBadge from '../components/profile/RoleBadge'
 import Card from '../components/ui/Card'
 import Avatar from '../components/ui/Avatar'
 import Badge from '../components/ui/Badge'
@@ -310,10 +311,7 @@ export default function MyProfile() {
                     )}
                   </h1>
                   <div className={styles.meta}>
-                    <Badge variant={userData.role === 'owner' ? 'gold' : userData.role === 'admin' ? 'purple' : 'default'} size="sm">
-                      {userData.role === 'owner' ? <Shield size={12} /> : userData.role === 'admin' ? <Shield size={12} /> : null}
-                      {userData.role === 'owner' ? 'Owner' : userData.role === 'admin' ? 'Admin' : 'Player'}
-                    </Badge>
+                    <RoleBadge role={userData.role} banned={userData.banned} />
                     {badges.firstVictor && (
                       <Badge variant="gold" size="sm" title="First victor of a community level">
                         <Crown size={12} /> First Victor

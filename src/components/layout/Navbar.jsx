@@ -263,7 +263,7 @@ export default function Navbar() {
                           <Shield size={16} /> Admin Panel
                         </Link>
                       )}
-                      {!accountSuspended && userData?.role === 'owner' && (
+                      {!accountSuspended && hasAccess(userData?.role || 'user', 'owner') && (
                         <Link to="/admin/reports" className={styles.dropdownItem}>
                           <Flag size={16} /> Reports
                         </Link>
