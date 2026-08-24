@@ -147,7 +147,7 @@ export default function Home() {
       })
 
     return () => { mounted = false }
-  }, [retryKey])
+  }, [retryKey, user?.uid])
 
   const activity = useMemo(() => {
     const records = highlights.recent.map(record => ({
@@ -369,7 +369,7 @@ export default function Home() {
         </motion.aside>
       </section>
 
-      {(highlights.topMain.length > 0 || highlights.topCommunity.length > 0) && (
+      {!loading && (
         <section className={styles.leaderboards} aria-label="Top player rankings">
           <article className={styles.leaders}>
             <div className={styles.leadersHeading}>
@@ -392,7 +392,7 @@ export default function Home() {
                 </Link>
               ))}
               {highlights.topMain.length === 0 && (
-                <p className={styles.leaderEmpty}>No Main List points yet.</p>
+                <p className={styles.leaderEmpty}>Main rankings are temporarily unavailable.</p>
               )}
             </div>
           </article>
@@ -418,7 +418,7 @@ export default function Home() {
                 </Link>
               ))}
               {highlights.topCommunity.length === 0 && (
-                <p className={styles.leaderEmpty}>No Community List points yet.</p>
+                <p className={styles.leaderEmpty}>Community rankings are temporarily unavailable.</p>
               )}
             </div>
           </article>
