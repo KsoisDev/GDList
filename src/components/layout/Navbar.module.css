@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   z-index: 100;
-  background: rgba(10, 10, 26, 0.85);
+  background: rgba(8, 15, 28, 0.9);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-glass);
   height: var(--navbar-height);
@@ -36,7 +36,7 @@
 .logoAccent {
   font-size: 1.25rem;
   font-weight: 800;
-  color: var(--accent-green);
+  color: var(--accent-blue);
 }
 
 .desktopNav {
@@ -67,8 +67,8 @@
 }
 
 .active {
-  color: var(--accent-green) !important;
-  background: var(--accent-green-dim) !important;
+  color: var(--accent-blue) !important;
+  background: var(--accent-blue-dim) !important;
 }
 
 .actions {
@@ -177,7 +177,7 @@
 
 .mobileNav {
   overflow: hidden;
-  background: rgba(10, 10, 26, 0.95);
+  background: rgba(8, 15, 28, 0.97);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-glass);
 }
@@ -195,8 +195,8 @@
 
 .mobileLink:hover,
 .mobileLink.active {
-  color: var(--accent-green);
-  background: var(--accent-green-dim);
+  color: var(--accent-blue);
+  background: var(--accent-blue-dim);
 }
 
 .navDivider {
@@ -212,16 +212,16 @@
   gap: 5px;
   padding: 6px 12px;
   border-radius: 100px;
-  color: var(--accent-green);
+  color: var(--accent-blue);
   font-size: 0.8125rem;
   font-weight: 600;
   text-decoration: none;
-  border: 1px solid var(--accent-green);
+  border: 1px solid var(--accent-blue);
   transition: all var(--transition-fast);
 }
 
 .submitBtn:hover {
-  background: var(--accent-green);
+  background: var(--accent-blue);
   color: var(--bg-primary);
   box-shadow: 0 0 12px rgba(0, 255, 136, 0.2);
 }
@@ -240,8 +240,8 @@
 }
 
 .mobileSubmitBtn:hover {
-  color: var(--accent-green);
-  background: var(--accent-green-dim);
+  color: var(--accent-blue);
+  background: var(--accent-blue-dim);
 }
 
 .bellWrapper {
@@ -334,7 +334,7 @@
 .notifMarkAll {
   background: none;
   border: none;
-  color: var(--accent-green);
+  color: var(--accent-blue);
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -400,7 +400,7 @@
 }
 
 .notifItem:has(.notifIcon svg[style*="green"]) .notifType {
-  color: var(--accent-green);
+  color: var(--accent-blue);
 }
 
 .notifItem:has(.notifIcon svg[style*="red"]) .notifType {
