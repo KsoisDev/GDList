@@ -34,10 +34,8 @@ export const LEVEL_TYPES = {
 
 export const NAV_LINKS = [
   { path: '/', label: 'Home' },
-  { path: '/list/main', label: 'Main List' },
-  { path: '/list/community', label: 'Community List' },
-  { path: '/leaderboard/main', label: 'Main Rankings' },
-  { path: '/leaderboard/community', label: 'Community Rankings' },
+  { path: '/list/community', label: 'Demon List' },
+  { path: '/leaderboard/community', label: 'Rankings' },
 ]
 
 export const DIFFICULTY_COLORS = {

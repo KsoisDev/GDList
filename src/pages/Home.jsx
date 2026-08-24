@@ -22,6 +22,7 @@ import {
 import Avatar from '../components/ui/Avatar'
 import { useAuth } from '../hooks/useAuth'
 import { getCollection } from '../services/firestore'
+import { computeUserCommunityPoints } from '../services/communityList'
 import { formatDateRelative, formatNumber, getDisplayName } from '../utils/format'
 import { getFlagUrl } from '../utils/countries'
 import styles from './Home.module.css'
@@ -29,8 +30,8 @@ import styles from './Home.module.css'
 const communityBenefits = [
   {
     icon: Layers3,
-    title: 'Two lists, one community',
-    description: 'Track official demons and the levels created inside the Basement community.',
+    title: 'Built inside Basement',
+    description: 'Every listed level is submitted and approved through the Basement community.',
   },
   {
     icon: ShieldCheck,
@@ -39,16 +40,15 @@ const communityBenefits = [
   },
   {
     icon: Trophy,
-    title: 'Rankings that feel earned',
-    description: 'Climb separate main and community leaderboards as your completion history grows.',
+    title: 'One ranking that feels earned',
+    description: 'Climb the Basement leaderboard as your verified completion history grows.',
   },
 ]
 
 const emptyHighlights = {
-  topMain: [],
+  topPlayers: [],
   recent: [],
   newLevels: [],
-  mainLevels: [],
   communityLevels: [],
   stats: { users: 0, records: 0, levels: 0 },
 }
@@ -59,26 +59,38 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [retryKey, setRetryKey] = useState(0)
-  const [listMode, setListMode] = useState('main')
 
   useEffect(() => {
     let mounted = true
     setLoading(true)
     setLoadError('')
 
-    Promise.all([
+    Promise.allSettled([
       getCollection('users'),
       getCollection('completions'),
       getCollection('levels'),
     ])
-      .then(([users, completions, levels]) => {
+      .then(([usersResult, completionsResult, levelsResult]) => {
+        const users = usersResult.status === 'fulfilled' ? usersResult.value : []
+        const completions = completionsResult.status === 'fulfilled' ? completionsResult.value : []
+        const levels = levelsResult.status === 'fulfilled' ? levelsResult.value : []
+        const communityLevels = levels.filter(level => level.type === 'community')
+        const communityLevelIds = new Set(communityLevels.map(level => level.id))
+        const communityCompletions = completions.filter(completion =>
+          completion.status !== 'rejected'
+          && (completion.levelType === 'community' || communityLevelIds.has(completion.levelId))
+        )
         const namesById = Object.fromEntries(users.map(user => [user.id, getDisplayName(user)]))
-        const topMain = users
-          .filter(user => (user.stats?.mainPoints || 0) > 0)
-          .sort((a, b) => (b.stats?.mainPoints || 0) - (a.stats?.mainPoints || 0))
+        const pointsMap = Object.fromEntries(
+          communityLevels.filter(level => (level.position || 0) > 0).map(level => [level.id, level.position]),
+        )
+        const { totals } = computeUserCommunityPoints(communityCompletions, pointsMap)
+        const topPlayers = users
+          .map(user => ({ ...user, livePoints: totals[user.id] || 0 }))
+          .filter(user => user.livePoints > 0)
+          .sort((a, b) => b.livePoints - a.livePoints)
           .slice(0, 3)
-        const recent = completions
-          .filter(completion => completion.status !== 'rejected')
+        const recent = communityCompletions
           .sort((a, b) => {
             const aTime = a.completedAt?.toMillis?.() || a.createdAt?.toMillis?.() || 0
             const bTime = b.completedAt?.toMillis?.() || b.createdAt?.toMillis?.() || 0
@@ -95,28 +107,29 @@ export default function Home() {
           || level.firstCompletedAt?.toMillis?.()
           || 0
         )
-        const newLevels = levels
-          .filter(level => level.type === 'community')
+        const newLevels = communityLevels
           .sort((a, b) => levelTime(b) - levelTime(a))
           .slice(0, 3)
-        const rankedLevels = type => levels
-          .filter(level => level.type === type && (level.position || 0) > 0)
+        const rankedLevels = communityLevels
+          .filter(level => (level.position || 0) > 0)
           .sort((a, b) => (a.position || Number.MAX_SAFE_INTEGER) - (b.position || Number.MAX_SAFE_INTEGER))
           .slice(0, 5)
 
         if (mounted) {
           setHighlights({
-            topMain,
+            topPlayers,
             recent,
             newLevels,
-            mainLevels: rankedLevels('main'),
-            communityLevels: rankedLevels('community'),
+            communityLevels: rankedLevels,
             stats: {
               users: users.length,
-              records: completions.filter(completion => completion.status !== 'rejected').length,
-              levels: levels.length,
+              records: communityCompletions.length,
+              levels: communityLevels.length,
             },
           })
+          const partialFailure = [usersResult, completionsResult, levelsResult]
+            .some(result => result.status === 'rejected')
+          setLoadError(partialFailure ? 'Some live community data could not be loaded.' : '')
         }
       })
       .catch(error => {
@@ -137,13 +150,13 @@ export default function Home() {
       title: record.username,
       text: `completed ${record.levelName || 'a demon'}`,
       time: formatDateRelative(record.completedAt || record.createdAt),
-      href: record.levelId ? `/levels/${record.levelId}` : '/list/main',
+      href: record.levelId ? `/levels/${record.levelId}` : '/list/community',
     }))
     const levels = highlights.newLevels.map(level => ({
       id: `level-${level.id}`,
       type: 'level',
       title: level.name,
-      text: `joined the community list · by ${level.creator || 'Unknown'}`,
+      text: `joined the Basement list · by ${level.creator || 'Unknown'}`,
       time: formatDateRelative(level.createdAt || level.firstCompletedAt),
       href: `/levels/${level.id}`,
     }))
@@ -156,8 +169,8 @@ export default function Home() {
     { icon: Trophy, value: highlights.stats.records, label: 'Records' },
     { icon: List, value: highlights.stats.levels, label: 'Levels' },
   ]
-  const previewLevels = listMode === 'main' ? highlights.mainLevels : highlights.communityLevels
-  const activeListHref = listMode === 'main' ? '/list/main' : '/list/community'
+  const previewLevels = highlights.communityLevels
+  const activeListHref = '/list/community'
 
   return (
     <main id="main-content" className={styles.page} tabIndex={-1}>
@@ -202,14 +215,14 @@ export default function Home() {
           </div>
 
           <div className={styles.heroActions}>
-            <Link className={styles.primaryAction} to="/list/main">
+            <Link className={styles.primaryAction} to="/list/community">
               Explore the list <ArrowRight size={17} />
             </Link>
             <Link className={styles.secondaryAction} to="/submit">
               Submit a record <Trophy size={17} />
             </Link>
-            <Link className={styles.secondaryAction} to="/list/community">
-              Community list <Layers3 size={17} />
+            <Link className={styles.secondaryAction} to="/submit-level">
+              Submit a level <Upload size={17} />
             </Link>
           </div>
 
@@ -247,25 +260,6 @@ export default function Home() {
             <Link to={activeListHref}>Open full list <ArrowRight size={14} /></Link>
           </div>
 
-          <div className={styles.listSwitcher} role="group" aria-label="Choose a list">
-            <button
-              type="button"
-              className={listMode === 'main' ? styles.activeListButton : ''}
-              aria-pressed={listMode === 'main'}
-              onClick={() => setListMode('main')}
-            >
-              Main list
-            </button>
-            <button
-              type="button"
-              className={listMode === 'community' ? styles.activeListButton : ''}
-              aria-pressed={listMode === 'community'}
-              onClick={() => setListMode('community')}
-            >
-              Community
-            </button>
-          </div>
-
           <div className={styles.previewList}>
             {loading && [0, 1, 2, 3, 4].map(item => (
               <div className={styles.previewSkeleton} key={item} />
@@ -286,14 +280,14 @@ export default function Home() {
             {!loading && previewLevels.length === 0 && (
               <div className={styles.previewEmpty}>
                 <List size={20} />
-                <strong>{listMode === 'main' ? 'Main list' : 'Community list'}</strong>
+                <strong>Basement list</strong>
                 <span>Ranked levels will appear here as soon as the database is connected.</span>
               </div>
             )}
           </div>
 
           <Link className={styles.spotlightFooter} to={activeListHref}>
-            Browse every {listMode === 'main' ? 'main-list' : 'community'} level
+            Browse every submitted level
             <ArrowRight size={15} />
           </Link>
         </motion.aside>
@@ -311,7 +305,7 @@ export default function Home() {
               <Activity size={18} />
               <h2>Recent activity</h2>
             </div>
-            <Link to="/list/main">View all <ArrowRight size={14} /></Link>
+            <Link to="/list/community">View all <ArrowRight size={14} /></Link>
           </header>
 
           <div className={styles.activityList}>
@@ -369,17 +363,17 @@ export default function Home() {
         </motion.aside>
       </section>
 
-      {highlights.topMain.length > 0 && (
+      {highlights.topPlayers.length > 0 && (
         <section className={styles.leaders}>
           <div className={styles.leadersHeading}>
             <div>
               <Crown size={18} />
               <span>Players leading the Basement</span>
             </div>
-            <Link to="/leaderboard/main">Full leaderboard <ArrowRight size={14} /></Link>
+            <Link to="/leaderboard/community">Full leaderboard <ArrowRight size={14} /></Link>
           </div>
           <div className={styles.leaderList}>
-            {highlights.topMain.map((player, index) => (
+            {highlights.topPlayers.map((player, index) => (
               <Link className={styles.leader} to={`/profile/${player.id}`} key={player.id}>
                 <span className={styles.leaderRank}>#{index + 1}</span>
                 <Avatar src={player.avatarURL} alt={getDisplayName(player)} size="sm" />
@@ -387,7 +381,7 @@ export default function Home() {
                 {getFlagUrl(player.country) && (
                   <img src={getFlagUrl(player.country)} alt={player.country} loading="lazy" />
                 )}
-                <span>{formatNumber(player.stats?.mainPoints || 0)} pts</span>
+                <span>{formatNumber(player.livePoints || 0)} pts</span>
               </Link>
             ))}
           </div>

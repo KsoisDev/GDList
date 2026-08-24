@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './contexts/AuthContext'
 import { SiteConfigProvider } from './contexts/SiteConfigContext'
@@ -15,10 +15,8 @@ import RequireRole from './components/guards/RequireRole'
 import RequireVerifiedEmail from './components/guards/RequireVerifiedEmail'
 
 const Home = lazy(() => import('./pages/Home'))
-const MainList = lazy(() => import('./pages/MainList'))
 const CommunityList = lazy(() => import('./pages/CommunityList'))
 const LevelDetail = lazy(() => import('./pages/LevelDetail'))
-const MainLeaderboard = lazy(() => import('./pages/MainLeaderboard'))
 const CommunityLeaderboard = lazy(() => import('./pages/CommunityLeaderboard'))
 const Profile = lazy(() => import('./pages/Profile'))
 const MyProfile = lazy(() => import('./pages/MyProfile'))
@@ -35,7 +33,6 @@ const ManageUsers = lazy(() => import('./pages/admin/ManageUsers'))
 const ManageReports = lazy(() => import('./pages/admin/ManageReports'))
 const ManageTags = lazy(() => import('./pages/admin/ManageTags'))
 const SiteSettings = lazy(() => import('./pages/admin/SiteSettings'))
-const MergeMainLevels = lazy(() => import('./pages/admin/MergeMainLevels'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 const queryClient = new QueryClient({
@@ -69,10 +66,10 @@ export default function App() {
               <Suspense fallback={<RouteLoader />}>
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route path="/list/main" element={<RequireMaintenanceAccess><MainList /></RequireMaintenanceAccess>} />
+                  <Route path="/list/main" element={<Navigate to="/list/community" replace />} />
                   <Route path="/list/community" element={<RequireMaintenanceAccess><CommunityList /></RequireMaintenanceAccess>} />
                   <Route path="/levels/:levelId" element={<RequireMaintenanceAccess><LevelDetail /></RequireMaintenanceAccess>} />
-                  <Route path="/leaderboard/main" element={<RequireMaintenanceAccess><MainLeaderboard /></RequireMaintenanceAccess>} />
+                  <Route path="/leaderboard/main" element={<Navigate to="/leaderboard/community" replace />} />
                   <Route path="/leaderboard/community" element={<RequireMaintenanceAccess><CommunityLeaderboard /></RequireMaintenanceAccess>} />
                   <Route path="/profile" element={<RequireAuth><MyProfile /></RequireAuth>} />
                   <Route path="/profile/:userId" element={<Profile />} />
@@ -89,7 +86,7 @@ export default function App() {
                   <Route path="/admin/reports" element={<AdminRoute minRole="owner"><ManageReports /></AdminRoute>} />
                   <Route path="/admin/tags" element={<AdminRoute><ManageTags /></AdminRoute>} />
                   <Route path="/admin/settings" element={<AdminRoute><SiteSettings /></AdminRoute>} />
-                  <Route path="/admin/merge" element={<AdminRoute><MergeMainLevels /></AdminRoute>} />
+                  <Route path="/admin/merge" element={<Navigate to="/admin" replace />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>

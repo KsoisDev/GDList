@@ -46,7 +46,7 @@ export default function CommunityLeaderboard() {
         setPlayers(sorted.map((player, index) => ({ ...player, _rank: index + 1 })))
       } catch (err) {
         console.error('Failed to load community leaderboard:', err)
-        setLoadError('The community leaderboard could not be loaded.')
+        setLoadError('The Basement leaderboard could not be loaded.')
       } finally {
         setLoading(false)
       }
@@ -71,7 +71,7 @@ export default function CommunityLeaderboard() {
   }
 
   return (
-    <PageShell title="Community Leaderboard" subtitle="Top players ranked by points from community demon completions">
+    <PageShell title="Basement Leaderboard" subtitle="Top players ranked by verified Basement List completions">
       <div className={styles.toolbar}>
         <span className={styles.count}>{filtered.length} players</span>
         <SearchBar
@@ -136,7 +136,7 @@ export default function CommunityLeaderboard() {
             <div className={styles.empty}>
               {search
                 ? <p>No players match "{search}".</p>
-                : <p>No community points yet. Submit your first completion!</p>}
+                : <p>No Basement List points yet. Submit your first completion!</p>}
             </div>
           )}
         </div>

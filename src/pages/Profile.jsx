@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
 import { Calendar, Trophy, Medal, List, Youtube, Flag, Crown, Shield, Trash2, AlertTriangle } from 'lucide-react'
@@ -77,7 +77,6 @@ export default function Profile() {
     if (userId) load(userId)
   }, [userId])
 
-  const mainComps = completions.filter(c => c.levelType === 'main')
   const communityComps = completions.filter(c => c.levelType === 'community')
 
   const handleDeleteCompletion = async () => {
@@ -112,10 +111,8 @@ export default function Profile() {
     )
   }
 
-  const stats = profile.stats || {}
-  const mainPoints = stats.mainPoints || 0
   const communityPointsLive = communityComps.reduce((sum, c) => sum + (c.points || 0), 0)
-  const totalPointsLive = parseFloat((mainPoints + communityPointsLive).toFixed(2))
+  const totalPointsLive = parseFloat(communityPointsLive.toFixed(2))
 
   return (
     <PageShell>
@@ -159,18 +156,13 @@ export default function Profile() {
             <span className={styles.statLabel}>Total Points</span>
           </Card>
           <Card className={styles.statCard}>
-            <Medal size={20} className={styles.statIcon} style={{ color: 'var(--accent-green)' }} />
-            <span className={styles.statValue}>{formatNumber(mainPoints)}</span>
-            <span className={styles.statLabel}>Main Points</span>
-          </Card>
-          <Card className={styles.statCard}>
             <Medal size={20} className={styles.statIcon} style={{ color: 'var(--accent-blue)' }} />
             <span className={styles.statValue}>{formatNumber(communityPointsLive)}</span>
-            <span className={styles.statLabel}>Community Points</span>
+            <span className={styles.statLabel}>Basement Points</span>
           </Card>
           <Card className={styles.statCard}>
             <List size={20} className={styles.statIcon} style={{ color: 'var(--accent-purple)' }} />
-            <span className={styles.statValue}>{mainComps.length + communityComps.length}</span>
+            <span className={styles.statValue}>{communityComps.length}</span>
             <span className={styles.statLabel}>Completions</span>
           </Card>
         </div>
@@ -221,7 +213,7 @@ export default function Profile() {
             {deleteTarget && (
               <p className={styles.deleteTarget}>
                 <strong>{deleteTarget.levelName || 'Unknown Level'}</strong>
-                {deleteTarget.levelType === 'community' ? ' (Community)' : ' (Main List)'}
+                {' (Basement List)'}
                 {' · +'} {deleteTarget.points} pts
               </p>
             )}
@@ -235,58 +227,9 @@ export default function Profile() {
           </div>
         </Modal>
 
-        {mainComps.length > 0 && (
-          <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Main List Completions ({mainComps.length})</h2>
-            <div className={styles.completions}>
-              {mainComps.map((comp, i) => (
-                <motion.div
-                  key={comp.id}
-                  className={styles.completion}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: Math.min(i, 12) * 0.03 }}
-                >
-                  <div className={styles.compInfo}>
-                    <span className={styles.compLevel}>
-                      <Link to={`/levels/${comp.levelId}`} className={styles.compLink}>{comp.levelName || 'Unknown Level'}</Link>
-                    </span>
-                    <span className={styles.compDate}>{formatDate(comp.completedAt)}</span>
-                  </div>
-                  <div className={styles.compRight}>
-                    <span className={styles.compPoints}>+{comp.points} pts</span>
-                    {comp.videoURL && (
-                      <a
-                        href={comp.videoURL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.compVideo}
-                        aria-label={`Watch ${comp.levelName || 'level'} completion video`}
-                      >
-                        <Youtube size={16} aria-hidden="true" />
-                      </a>
-                    )}
-                    {isAdmin && (
-                      <button
-                        type="button"
-                        className={styles.compDelete}
-                        onClick={() => setDeleteTarget(comp)}
-                        title="Delete this record"
-                        aria-label={`Delete ${comp.levelName || 'record'}`}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {communityComps.length > 0 && (
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Community Completions ({communityComps.length})</h2>
+            <h2 className={styles.sectionTitle}>Basement Completions ({communityComps.length})</h2>
             <div className={styles.completions}>
               {communityComps.map((comp, i) => (
                 <motion.div

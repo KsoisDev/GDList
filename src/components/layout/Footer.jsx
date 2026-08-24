@@ -16,14 +16,12 @@ export default function Footer() {
         </div>
         <div className={styles.links}>
           <div className={styles.column}>
-            <h4 className={styles.columnTitle}>Lists</h4>
-            <Link to="/list/main" className={styles.link}>Main List</Link>
-            <Link to="/list/community" className={styles.link}>Community List</Link>
+            <h4 className={styles.columnTitle}>List</h4>
+            <Link to="/list/community" className={styles.link}>Demon List</Link>
           </div>
           <div className={styles.column}>
-            <h4 className={styles.columnTitle}>Rankings</h4>
-            <Link to="/leaderboard/main" className={styles.link}>Main Rankings</Link>
-            <Link to="/leaderboard/community" className={styles.link}>Community Rankings</Link>
+            <h4 className={styles.columnTitle}>Players</h4>
+            <Link to="/leaderboard/community" className={styles.link}>Rankings</Link>
           </div>
           <div className={styles.column}>
             <h4 className={styles.columnTitle}>Community</h4>

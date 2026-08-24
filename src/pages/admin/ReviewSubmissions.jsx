@@ -22,8 +22,7 @@ import { hasAccess } from '../../utils/constants'
 import styles from './Admin.module.css'
 
 const TABS = [
-  { id: 'main', label: 'Main List' },
-  { id: 'community', label: 'Community List' },
+  { id: 'community', label: 'Basement Records' },
   { id: 'levels', label: 'Level Acceptance' },
 ]
 
@@ -100,7 +99,7 @@ async function finalizeSubmissionReview({
 export default function ReviewSubmissions() {
   const { user, userData, loading: authLoading } = useAuth()
   const navigate = useNavigate()
-  const [tab, setTab] = useState('main')
+  const [tab, setTab] = useState('community')
   const [submissions, setSubmissions] = useState([])
   const [loading, setLoading] = useState(true)
   const [note, setNote] = useState({})
@@ -119,7 +118,7 @@ export default function ReviewSubmissions() {
     try {
       const all = await getCollection('submissions')
       const data = all
-        .filter(s => s.status === 'pending')
+        .filter(s => s.status === 'pending' && (s.requestType === 'level' || s.levelType === 'community'))
         .sort((a, b) => {
           const ta = a.createdAt?.toMillis?.() || 0
           const tb = b.createdAt?.toMillis?.() || 0

@@ -208,12 +208,9 @@ export default function MyProfile() {
 
   if (!userData) return null
 
-  const stats = userData.stats || {}
-  const mainComps = completions.filter(c => c.levelType === 'main')
   const communityComps = completions.filter(c => c.levelType === 'community')
   const communityPointsLive = communityComps.reduce((sum, c) => sum + (c.points || 0), 0)
-  const mainPoints = stats.mainPoints || 0
-  const totalPointsLive = parseFloat((mainPoints + communityPointsLive).toFixed(2))
+  const totalPointsLive = parseFloat(communityPointsLive.toFixed(2))
   const passwordAccount = usesPasswordProvider(user)
 
   return (
@@ -313,15 +310,11 @@ export default function MyProfile() {
             <span className={styles.statLabel}>Total Points</span>
           </Card>
           <Card className={styles.statCard}>
-            <span className={styles.statValue}>{formatNumber(mainPoints)}</span>
-            <span className={styles.statLabel}>Main Points</span>
-          </Card>
-          <Card className={styles.statCard}>
             <span className={styles.statValue}>{formatNumber(communityPointsLive)}</span>
-            <span className={styles.statLabel}>Community Points</span>
+            <span className={styles.statLabel}>Basement Points</span>
           </Card>
           <Card className={styles.statCard}>
-            <span className={styles.statValue}>{mainComps.length + communityComps.length}</span>
+            <span className={styles.statValue}>{communityComps.length}</span>
             <span className={styles.statLabel}>Completions</span>
           </Card>
         </div>
@@ -452,7 +445,7 @@ export default function MyProfile() {
             {deleteTarget && (
               <p className={styles.deleteTarget}>
                 <strong>{deleteTarget.levelName || 'Unknown Level'}</strong>
-                {deleteTarget.levelType === 'community' ? ' (Community)' : ' (Main List)'}
+                {' (Basement List)'}
                 {' · +'} {deleteTarget.points} pts
               </p>
             )}
@@ -469,58 +462,9 @@ export default function MyProfile() {
         {(() => {
           return (
             <>
-              {mainComps.length > 0 && (
-                <div className={styles.section}>
-                  <h2 className={styles.sectionTitle}>Main List Completions ({mainComps.length})</h2>
-                  <div className={styles.completions}>
-                    {mainComps.map((comp, i) => (
-                      <motion.div
-                        key={comp.id}
-                        className={styles.completion}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: Math.min(i, 12) * 0.03 }}
-                      >
-                        <div className={styles.compInfo}>
-                          <span className={styles.compLevel}>
-                            <Link to={`/levels/${comp.levelId}`} className={styles.compLink}>{comp.levelName || 'Unknown Level'}</Link>
-                          </span>
-                          <span className={styles.compDate}>{formatDate(comp.completedAt)}</span>
-                        </div>
-                        <div className={styles.compRight}>
-                          <span className={styles.compPoints}>+{comp.points} pts</span>
-                          {comp.videoURL && (
-                            <a
-                              href={comp.videoURL}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={styles.compVideo}
-                              aria-label={`Watch ${comp.levelName || 'level'} completion video`}
-                            >
-                              <Youtube size={16} aria-hidden="true" />
-                            </a>
-                          )}
-                          {hasAccess(userData.role, 'admin') && (
-                            <button
-                              type="button"
-                              className={styles.compDelete}
-                              onClick={() => setDeleteTarget(comp)}
-                              title="Delete this record"
-                              aria-label={`Delete ${comp.levelName || 'record'}`}
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          )}
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {communityComps.length > 0 && (
                 <div className={styles.section}>
-                  <h2 className={styles.sectionTitle}>Community Completions ({communityComps.length})</h2>
+                  <h2 className={styles.sectionTitle}>Basement Completions ({communityComps.length})</h2>
                   <div className={styles.completions}>
                     {communityComps.map((comp, i) => (
                       <motion.div
@@ -567,7 +511,7 @@ export default function MyProfile() {
                 </div>
               )}
 
-              {completions.length === 0 && (
+              {communityComps.length === 0 && (
                 <div className={styles.section}>
                   <p className={styles.emptyText}>No completions yet. Submit your first record!</p>
                 </div>
