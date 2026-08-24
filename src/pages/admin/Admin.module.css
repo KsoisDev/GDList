@@ -636,6 +636,13 @@
   text-align: center;
 }
 
+.roleCell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .tabs {
   display: flex;
   gap: 4px;
