@@ -38,7 +38,10 @@ export default function Footer() {
           &copy; {new Date().getFullYear()} Basement List. Not affiliated with RobTop Games.
         </p>
         <p className={styles.credit}>
-          Web creada por <strong>Ksois</strong> con ayuda de IA
+          Created by{' '}
+          <a href="https://github.com/ntyu2" target="_blank" rel="noopener noreferrer">
+            ntyu2
+          </a>
         </p>
       </div>
     </footer>
