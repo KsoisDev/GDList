@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Trophy, Medal } from 'lucide-react'
+import { CheckCircle2, Crown, Trophy, Medal, Users } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
+import ThemedPageHero from '../components/layout/ThemedPageHero'
 import Avatar from '../components/ui/Avatar'
 import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
@@ -11,6 +12,7 @@ import { getCollection } from '../services/firestore'
 import { formatNumber, getDisplayName } from '../utils/format'
 import { getFlagUrl } from '../utils/countries'
 import styles from './Leaderboard.module.css'
+import theme from '../components/layout/ThemedPage.module.css'
 
 export default function MainLeaderboard() {
   const [players, setPlayers] = useState([])
@@ -24,10 +26,63 @@ export default function MainLeaderboard() {
       setLoading(true)
       setLoadError('')
       try {
-        const data = await getCollection('users')
-        const sorted = data
-          .filter(u => (u.stats?.mainPoints || 0) > 0)
-          .sort((a, b) => (b.stats?.mainPoints || 0) - (a.stats?.mainPoints || 0))
+        const [completions, levels] = await Promise.all([
+          getCollection('completions'),
+          getCollection('levels'),
+        ])
+        const communityLevelIds = new Set(
+          levels.filter(level => level.type === 'community').map(level => level.id),
+        )
+        const mainCompletions = completions.filter(completion =>
+          completion.status !== 'rejected'
+          && completion.userId
+          && completion.levelType !== 'community'
+          && !communityLevelIds.has(completion.levelId)
+        )
+        const publicProfiles = new Map()
+        levels.forEach(level => {
+          ;(level.victors || []).forEach(victor => {
+            if (!victor.userId) return
+            const previous = publicProfiles.get(victor.userId) || {}
+            publicProfiles.set(victor.userId, {
+              ...previous,
+              id: victor.userId,
+              username: victor.username || victor.displayName || previous.username || 'Basement player',
+              displayName: victor.displayName || victor.username || previous.displayName || 'Basement player',
+              avatarURL: victor.avatarURL || previous.avatarURL || '',
+              country: victor.country || previous.country || '',
+            })
+          })
+        })
+
+        const totals = {}
+        const counts = {}
+        mainCompletions.forEach(completion => {
+          const userId = completion.userId
+          totals[userId] = (totals[userId] || 0) + (Number(completion.points) || 0)
+          counts[userId] = (counts[userId] || 0) + 1
+          if (!publicProfiles.has(userId)) {
+            publicProfiles.set(userId, {
+              id: userId,
+              username: completion.username || completion.displayName || 'Basement player',
+              displayName: completion.displayName || completion.username || 'Basement player',
+              avatarURL: completion.avatarURL || '',
+              country: completion.country || '',
+            })
+          }
+        })
+
+        const sorted = Array.from(publicProfiles.values())
+          .map(player => ({
+            ...player,
+            stats: {
+              ...player.stats,
+              mainPoints: totals[player.id] || 0,
+              mainCompletions: counts[player.id] || 0,
+            },
+          }))
+          .filter(player => player.stats.mainPoints > 0)
+          .sort((a, b) => b.stats.mainPoints - a.stats.mainPoints)
           .slice(0, 100)
         setPlayers(sorted.map((player, index) => ({ ...player, _rank: index + 1 })))
       } catch (err) {
@@ -57,7 +112,33 @@ export default function MainLeaderboard() {
   }
 
   return (
-    <PageShell title="Main Leaderboard" subtitle="Top players ranked by points from official demon completions">
+    <PageShell className={theme.pageShell}>
+      <div className={theme.glow} aria-hidden="true" />
+      <ThemedPageHero
+        eyebrow="OFFICIAL DEMON STANDINGS"
+        title="Main"
+        accentTitle="Rankings"
+        description="The Basement's official demon standings, calculated from every verified main-list completion."
+        actions={[
+          { to: '/submit', label: 'Submit a record' },
+          { to: '/leaderboard/community', label: 'Community rankings' },
+        ]}
+        stats={[
+          { icon: Users, value: loading ? '—' : players.length, label: 'Ranked players' },
+          { icon: CheckCircle2, value: loading ? '—' : players.reduce((sum, player) => sum + (player.stats?.mainCompletions || 0), 0), label: 'Counted clears' },
+          { icon: Crown, value: loading ? 'Loading' : players[0] ? getDisplayName(players[0]) : 'Unranked', label: 'Current leader', featured: true },
+        ]}
+      />
+
+      <section className={theme.surface} aria-label="Main-list player standings">
+        <div className={theme.surfaceHeading}>
+          <div>
+            <span className={theme.sectionLabel}>LIVE LEADERBOARD</span>
+            <h2>Player standings</h2>
+          </div>
+          <span className={theme.count}>{filtered.length} {filtered.length === 1 ? 'player' : 'players'}</span>
+        </div>
+
       <div className={styles.toolbar}>
         <span className={styles.count}>{filtered.length} players</span>
         <SearchBar
@@ -127,6 +208,7 @@ export default function MainLeaderboard() {
           )}
         </div>
       )}
+      </section>
     </PageShell>
   )
 }
