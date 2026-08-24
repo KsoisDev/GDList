@@ -74,6 +74,17 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key !== 'Escape') return
+      setProfileOpen(false)
+      setNotifOpen(false)
+      setOpen(false)
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  useEffect(() => {
     setOpen(false)
     setProfileOpen(false)
     setNotifOpen(false)
@@ -268,7 +279,11 @@ export default function Navbar() {
                           <Flag size={16} /> Reports
                         </Link>
                       )}
-                      <button className={styles.dropdownItem} onClick={handleLogout} disabled={signingOut}>
+                      <button
+                        className={`${styles.dropdownItem} ${styles.signOutItem}`}
+                        onClick={handleLogout}
+                        disabled={signingOut}
+                      >
                         <LogOut size={16} /> {signingOut ? 'Signing Out…' : 'Sign Out'}
                       </button>
                     </motion.div>

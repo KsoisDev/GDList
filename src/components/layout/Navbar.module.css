@@ -119,14 +119,36 @@
 
 .dropdown {
   position: absolute;
+  z-index: 1000;
   top: calc(100% + 8px);
   right: 0;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-md);
-  min-width: 180px;
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
+  min-width: 220px;
+  padding: 7px;
+  overflow: visible;
+  border: 1px solid rgba(111, 163, 240, 0.28);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 100% 0, rgba(70, 139, 241, 0.17), transparent 42%),
+    rgba(8, 17, 31, 0.98);
+  box-shadow:
+    0 28px 72px rgba(0, 0, 0, 0.58),
+    0 0 0 1px rgba(255, 255, 255, 0.025) inset;
+  backdrop-filter: blur(24px);
+  isolation: isolate;
+}
+
+.dropdown::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: -6px;
+  right: 20px;
+  width: 10px;
+  height: 10px;
+  border-top: 1px solid rgba(111, 163, 240, 0.28);
+  border-left: 1px solid rgba(111, 163, 240, 0.28);
+  background: #0c192b;
+  transform: rotate(45deg);
 }
 
 .dropdownItem {
@@ -134,9 +156,12 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 10px 16px;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+  min-height: 42px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  font-size: 0.84rem;
+  font-weight: 650;
+  color: #aebbd0;
   background: none;
   border: none;
   text-align: left;
@@ -144,9 +169,44 @@
   transition: all var(--transition-fast);
 }
 
+.dropdownItem + .dropdownItem {
+  margin-top: 2px;
+}
+
+.dropdownItem svg {
+  flex-shrink: 0;
+  color: #6ba7ff;
+}
+
 .dropdownItem:hover {
-  background: var(--bg-card);
-  color: var(--text-primary);
+  background: rgba(79, 143, 239, 0.12);
+  color: #f4f7fc;
+}
+
+.dropdownItem:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: -2px;
+}
+
+.dropdownItem:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.signOutItem {
+  margin-top: 7px !important;
+  border-top: 1px solid rgba(126, 157, 203, 0.13);
+  border-radius: 0 0 9px 9px;
+  color: #d4a4aa;
+}
+
+.signOutItem svg {
+  color: #f17f8a;
+}
+
+.signOutItem:hover {
+  background: rgba(231, 86, 103, 0.1);
+  color: #ffb6bd;
 }
 
 .authButtons {
