@@ -41,7 +41,7 @@
 .logoAccent {
   font-size: 1.25rem;
   font-weight: 800;
-  color: var(--accent-green);
+  color: var(--accent-blue);
 }
 
 .description {
@@ -94,7 +94,7 @@
 }
 
 .link:hover {
-  color: var(--accent-green);
+  color: var(--accent-blue);
 }
 
 .bottom {
@@ -115,6 +115,12 @@
   opacity: 0.7;
 }
 
-.credit strong {
-  color: var(--accent-green);
+.credit a {
+  color: var(--accent-blue);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.credit a:hover {
+  color: var(--text-primary);
 }
