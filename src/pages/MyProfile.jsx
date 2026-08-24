@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Edit3, Save, X, Send, Shield, Youtube, Trash2, AlertTriangle, Crown, KeyRound, MailCheck } from 'lucide-react'
+import { Edit3, Save, X, Send, Shield, Youtube, Trash2, AlertTriangle, Crown, KeyRound, MailCheck, Share2 } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
+import ProfileProgress from '../components/profile/ProfileProgress'
 import Card from '../components/ui/Card'
 import Avatar from '../components/ui/Avatar'
 import Badge from '../components/ui/Badge'
@@ -30,9 +31,18 @@ import {
 import Modal from '../components/ui/Modal'
 import { hasAccess } from '../utils/constants'
 import styles from './Profile.module.css'
+import theme from '../components/layout/ThemedPage.module.css'
+import { useShareProfile } from '../hooks/useShareProfile'
 
 export default function MyProfile() {
-  const { user, userData, loading: authLoading, refreshUserData } = useAuth()
+  const {
+    user,
+    userData,
+    loading: authLoading,
+    refreshUserData,
+    profileError: accountLoadError,
+    retryProfile,
+  } = useAuth()
   const navigate = useNavigate()
   const [completions, setCompletions] = useState([])
   const [badges, setBadges] = useState({ firstVictor: false, verifier: false })
@@ -59,6 +69,10 @@ export default function MyProfile() {
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [completionDeleting, setCompletionDeleting] = useState(false)
   const [completionDeleteError, setCompletionDeleteError] = useState('')
+  const { shareProfile, shareStatus } = useShareProfile(
+    getDisplayName(userData),
+    user ? `/profile/${user.uid}` : '/profile',
+  )
 
   useEffect(() => {
     if (userData) {
@@ -200,28 +214,47 @@ export default function MyProfile() {
 
   if (authLoading) {
     return (
-      <PageShell>
+      <PageShell className={theme.pageShell}>
+        <div className={theme.glow} aria-hidden="true" />
         <div className={styles.loading}><Spinner size="lg" /></div>
       </PageShell>
     )
   }
 
-  if (!userData) return null
+  if (!userData) {
+    return (
+      <PageShell className={theme.pageShell}>
+        <div className={theme.glow} aria-hidden="true" />
+        <div className={styles.profileLoadError} role="alert">
+          <h1>Profile unavailable</h1>
+          <p>{accountLoadError?.message || 'Your profile could not be loaded. Please try again.'}</p>
+          <Button variant="primary" onClick={retryProfile}>Try Again</Button>
+        </div>
+      </PageShell>
+    )
+  }
 
   const stats = userData.stats || {}
   const mainComps = completions.filter(c => c.levelType === 'main')
   const communityComps = completions.filter(c => c.levelType === 'community')
   const communityPointsLive = communityComps.reduce((sum, c) => sum + (c.points || 0), 0)
-  const mainPoints = stats.mainPoints || 0
+  const mainPointsFromCompletions = mainComps.reduce((sum, completion) => sum + (completion.points || 0), 0)
+  const mainPoints = stats.mainPoints || mainPointsFromCompletions
   const totalPointsLive = parseFloat((mainPoints + communityPointsLive).toFixed(2))
   const passwordAccount = usesPasswordProvider(user)
 
   return (
-    <PageShell>
+    <PageShell className={theme.pageShell}>
+      <div className={theme.glow} aria-hidden="true" />
       <div className={styles.profile}>
         <Card padding="lg" className={styles.header}>
+          <span className={styles.profileEyebrow}>YOUR BASEMENT PROFILE</span>
           <div className={styles.headerContent}>
-            {!editing && <Avatar src={userData.avatarURL} alt={getDisplayName(userData)} size="xl" />}
+            {!editing && (
+              <div className={styles.avatarFrame}>
+                <Avatar src={userData.avatarURL} alt={getDisplayName(userData)} size="xl" />
+              </div>
+            )}
             <div className={styles.headerInfo}>
               {editing ? (
                 <div className={styles.editForm}>
@@ -237,6 +270,7 @@ export default function MyProfile() {
                     value={displayName}
                     onChange={e => setDisplayName(e.target.value)}
                     placeholder="Display name"
+                    maxLength={32}
                   />
                   <Select
                     label="Country"
@@ -254,7 +288,9 @@ export default function MyProfile() {
                       onChange={e => setBio(e.target.value)}
                       placeholder="Tell us about yourself..."
                       rows={3}
+                      maxLength={200}
                     />
+                    <span className={styles.fieldHint}>{bio.length}/200</span>
                   </div>
                   <div className={styles.editActions}>
                     <Button variant="primary" size="sm" onClick={handleSave} loading={saving} icon={Save}>
@@ -326,8 +362,15 @@ export default function MyProfile() {
           </Card>
         </div>
 
+        <ProfileProgress
+          totalPoints={totalPointsLive}
+          mainCount={mainComps.length}
+          communityCount={communityComps.length}
+        />
+
         <div className={styles.actions}>
           <Button to="/submit" variant="primary" icon={Send}>Submit Record</Button>
+          <Button variant="secondary" icon={Share2} onClick={shareProfile}>{shareStatus || 'Share Profile'}</Button>
           {hasAccess(userData.role, 'admin') && (
             <Button to="/admin" variant="secondary" icon={Shield}>Admin Panel</Button>
           )}

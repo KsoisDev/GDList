@@ -1,0 +1,95 @@
+.panel {
+  padding: 22px;
+  border: 1px solid rgba(111, 153, 215, 0.18);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 100% 0, rgba(70, 139, 241, 0.12), transparent 34%),
+    rgba(9, 18, 32, 0.86);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.heading,
+.milestoneRow,
+.splitHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.heading {
+  margin-bottom: 20px;
+}
+
+.heading > svg {
+  color: #65a3ff;
+}
+
+.heading span {
+  color: #5599ff;
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.17em;
+}
+
+.heading h2 {
+  margin-top: 4px;
+  color: #f4f7fb;
+  font-size: 1.15rem;
+}
+
+.milestoneRow strong {
+  color: #f4f7fb;
+  font-size: 1.2rem;
+}
+
+.milestoneRow span,
+.splitHeading {
+  color: #7e8da4;
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.progressTrack,
+.splitTrack {
+  display: flex;
+  overflow: hidden;
+  height: 8px;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: rgba(111, 148, 203, 0.1);
+}
+
+.progressTrack > span {
+  min-width: 2px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #347ff0, #73afff);
+  box-shadow: 0 0 18px rgba(76, 148, 255, 0.42);
+}
+
+.splitHeading {
+  margin-top: 22px;
+}
+
+.splitHeading span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mainSplit {
+  background: #5f9ffb;
+}
+
+.communitySplit {
+  background: #9b72e8;
+}
+
+@media (max-width: 520px) {
+  .milestoneRow,
+  .splitHeading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+}
