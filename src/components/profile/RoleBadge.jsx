@@ -1,12 +1,16 @@
 import { Ban, Code2, Crown, Shield, User as UserIcon } from 'lucide-react'
 import Badge from '../ui/Badge'
 
-export default function RoleBadge({ role = 'user', title = '', banned = false, size = 'sm' }) {
+const LIST_DEVELOPER_USERNAMES = new Set(['ntyu2', 'ksois'])
+
+export default function RoleBadge({ role = 'user', title = '', username = '', banned = false, size = 'sm' }) {
+  const isVerifiedListDeveloper = LIST_DEVELOPER_USERNAMES.has(username.trim().toLowerCase())
+
   if (banned) {
     return <Badge variant="red" size={size}><Ban size={12} aria-hidden="true" /> Banned</Badge>
   }
 
-  if (role === 'developer' || title === 'List Developer') {
+  if (role === 'developer' || title === 'List Developer' || isVerifiedListDeveloper) {
     return <Badge variant="blue" size={size}><Code2 size={12} aria-hidden="true" /> List Developer</Badge>
   }
 

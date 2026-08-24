@@ -124,7 +124,7 @@ export default function ManageUsers() {
               </Link>
             </span>
             <span className={styles.roleCell} data-label="Role">
-              <RoleBadge role={u.role} />
+              <RoleBadge role={u.role} username={u.username} />
             </span>
             <span className={styles.points} data-label="Points">{formatNumber(u.stats?.totalPoints || 0)}</span>
             <span className={styles.completionCell} data-label="Completions">
