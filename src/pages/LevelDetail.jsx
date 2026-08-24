@@ -186,7 +186,7 @@ export default function LevelDetail() {
               <div className={styles.headerRow}>
                 <h1 className={styles.levelName}>{level.name}</h1>
                 {isAdmin && !editing && (
-                  <button className={styles.editBtn} onClick={() => { setEditFields({ name: level.name, creator: level.creator, difficulty: level.difficulty, gameId: level.gameId || '', position: level.position, points: level.points, videoURL: level.videoURL || '', tags: level.tags || [] }); setEditing(true) }}>
+                  <button type="button" className={styles.editBtn} onClick={() => { setEditFields({ name: level.name, creator: level.creator, difficulty: level.difficulty, gameId: level.gameId || '', position: level.position, points: level.points, videoURL: level.videoURL || '', tags: level.tags || [] }); setEditing(true) }}>
                     <Edit3 size={16} /> Edit
                   </button>
                 )}
@@ -262,6 +262,7 @@ export default function LevelDetail() {
                               type="button"
                               className={`${styles.tagChip} ${active ? styles.tagChipActive : ''}`}
                               style={active ? { background: tag.color, borderColor: tag.color } : undefined}
+                              aria-pressed={active}
                               onClick={() => setEditFields(prev => ({
                                 ...prev,
                                 tags: active
@@ -321,7 +322,7 @@ export default function LevelDetail() {
                   className={styles.victorCard}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.03 }}
+                  transition={{ delay: Math.min(i, 12) * 0.03 }}
                 >
                   <Link to={`/profile/${victor.userId}`} className={styles.victorInfo}>
                     <Avatar src={victor.avatarURL} alt={victor.displayName || victor.username} size="sm" />
@@ -333,8 +334,14 @@ export default function LevelDetail() {
                   <div className={styles.victorMeta}>
                     <span className={styles.victorDate}>{formatDate(victor.completedAt)}</span>
                     {victor.videoURL && (
-                      <a href={victor.videoURL} target="_blank" rel="noopener noreferrer" className={styles.videoLink}>
-                        <Youtube size={16} />
+                      <a
+                        href={victor.videoURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.videoLink}
+                        aria-label={`Watch ${victor.displayName || victor.username || 'player'} completion video`}
+                      >
+                        <Youtube size={16} aria-hidden="true" />
                       </a>
                     )}
                   </div>
@@ -354,7 +361,7 @@ export default function LevelDetail() {
                   className={styles.changeRow}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.02 }}
+                  transition={{ delay: Math.min(i, 12) * 0.02 }}
                 >
                   <span className={styles.changeAction}>{changelogActionLabel(c.action)}</span>
                   <span className={styles.changeDetail}>

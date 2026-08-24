@@ -218,6 +218,7 @@ export default function ManageLevels() {
                     className={`${styles.formTagChip} ${active ? styles.formTagChipActive : ''}`}
                     style={active ? { background: tag.color, borderColor: tag.color } : undefined}
                     onClick={() => toggleTag(tag.id)}
+                    aria-pressed={active}
                   >
                     {tag.name}
                   </button>
@@ -255,7 +256,7 @@ export default function ManageLevels() {
         <div ref={listRef}>
         {levels.map((level, i) => (
           <motion.div key={level.id} className={styles.tableRow} data-id={level.id}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: Math.min(i, 12) * 0.02 }}
           >
             {(level.victoryCount || 0) > 0 ? (
               <span className={styles.dragHandle} data-drag-handle title="Drag to reorder">
@@ -282,10 +283,34 @@ export default function ManageLevels() {
             <span className={styles.gameId}>{level.gameId || '—'}</span>
             <span className={styles.points}>{level.points}</span>
             <span className={styles.actions}>
-              <Button variant="ghost" size="sm" onClick={() => handleMove(level.id, -1)} disabled={i === 0}>↑</Button>
-              <Button variant="ghost" size="sm" onClick={() => handleMove(level.id, 1)} disabled={i === levels.length - 1}>↓</Button>
-              <Button variant="ghost" size="sm" onClick={() => handleEdit(level)} icon={Edit3} />
-              <Button variant="ghost" size="sm" onClick={() => handleDelete(level.id)} icon={Trash2} />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleMove(level.id, -1)}
+                disabled={i === 0}
+                aria-label={`Move ${level.name} up`}
+              >↑</Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleMove(level.id, 1)}
+                disabled={i === levels.length - 1}
+                aria-label={`Move ${level.name} down`}
+              >↓</Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleEdit(level)}
+                icon={Edit3}
+                aria-label={`Edit ${level.name}`}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDelete(level.id)}
+                icon={Trash2}
+                aria-label={`Delete ${level.name}`}
+              />
             </span>
           </motion.div>
         ))}

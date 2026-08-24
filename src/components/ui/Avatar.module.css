@@ -11,6 +11,18 @@
   object-fit: cover;
 }
 
+.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--accent-blue-dim);
+  color: var(--accent-blue);
+  font-weight: 800;
+  line-height: 1;
+}
+
 .sm {
   width: 32px;
   height: 32px;

@@ -1,35 +1,57 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Trophy, Medal } from 'lucide-react'
+import { CheckCircle2, Crown, Trophy, Medal, Users } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
+import ThemedPageHero from '../components/layout/ThemedPageHero'
 import Avatar from '../components/ui/Avatar'
 import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
+import Button from '../components/ui/Button'
 import { getCollection, where } from '../services/firestore'
 import { computeUserCommunityPoints } from '../services/communityList'
 import { formatNumber, getDisplayName } from '../utils/format'
 import { getFlagUrl } from '../utils/countries'
 import styles from './Leaderboard.module.css'
+import theme from '../components/layout/ThemedPage.module.css'
 
 export default function CommunityLeaderboard() {
   const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const [retryKey, setRetryKey] = useState(0)
   const [search, setSearch] = useState('')
 
   useEffect(() => {
     async function load() {
+      setLoading(true)
+      setLoadError('')
       try {
-        const [users, comps, levels] = await Promise.all([
-          getCollection('users'),
+        const [comps, levels] = await Promise.all([
           getCollection('completions'),
           getCollection('levels', [where('type', '==', 'community')]),
         ])
         const pointsMap = {}
         levels.forEach(l => { pointsMap[l.id] = l.position })
         const { totals, counts } = computeUserCommunityPoints(comps, pointsMap)
+        const publicProfiles = new Map()
+        levels.forEach(level => {
+          const victors = level.victors || []
+          victors.forEach(victor => {
+            if (!victor.userId) return
+            const previous = publicProfiles.get(victor.userId) || {}
+            publicProfiles.set(victor.userId, {
+              ...previous,
+              id: victor.userId,
+              username: victor.username || victor.displayName || previous.username || 'Basement player',
+              displayName: victor.displayName || victor.username || previous.displayName || 'Basement player',
+              avatarURL: victor.avatarURL || previous.avatarURL || '',
+              country: victor.country || previous.country || '',
+            })
+          })
+        })
 
-        const sorted = users
+        const sorted = Array.from(publicProfiles.values())
           .map(u => ({
             ...u,
             liveCommunityPoints: totals[u.id] || 0,
@@ -38,15 +60,16 @@ export default function CommunityLeaderboard() {
           .filter(u => u.liveCommunityPoints > 0)
           .sort((a, b) => b.liveCommunityPoints - a.liveCommunityPoints)
           .slice(0, 100)
-        setPlayers(sorted)
+        setPlayers(sorted.map((player, index) => ({ ...player, _rank: index + 1 })))
       } catch (err) {
         console.error('Failed to load community leaderboard:', err)
+        setLoadError('The community leaderboard could not be loaded.')
       } finally {
         setLoading(false)
       }
     }
     load()
-  }, [])
+  }, [retryKey])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -58,14 +81,40 @@ export default function CommunityLeaderboard() {
   }, [players, search])
 
   const getRankIcon = (pos) => {
-    if (pos === 0) return <Trophy size={20} style={{ color: 'var(--accent-gold)' }} />
-    if (pos === 1) return <Medal size={20} style={{ color: '#c0c0c0' }} />
-    if (pos === 2) return <Medal size={20} style={{ color: '#cd7f32' }} />
+    if (pos === 0) return <Trophy size={20} style={{ color: 'var(--accent-gold)' }} aria-hidden="true" />
+    if (pos === 1) return <Medal size={20} style={{ color: '#c0c0c0' }} aria-hidden="true" />
+    if (pos === 2) return <Medal size={20} style={{ color: '#cd7f32' }} aria-hidden="true" />
     return null
   }
 
   return (
-    <PageShell title="Community Leaderboard" subtitle="Top players ranked by points from community demon completions">
+    <PageShell className={theme.pageShell}>
+      <div className={theme.glow} aria-hidden="true" />
+      <ThemedPageHero
+        eyebrow="COMMUNITY PLAYER STANDINGS"
+        title="Community"
+        accentTitle="Rankings"
+        description="Every verified community completion counts. See who is leading the Basement and which players are climbing fastest."
+        actions={[
+          { to: '/submit', label: 'Submit a record' },
+          { to: '/leaderboard/main', label: 'Main rankings' },
+        ]}
+        stats={[
+          { icon: Users, value: loading ? '—' : players.length, label: 'Ranked players' },
+          { icon: CheckCircle2, value: loading ? '—' : players.reduce((sum, player) => sum + player.liveCount, 0), label: 'Counted clears' },
+          { icon: Crown, value: loading ? 'Loading' : players[0] ? getDisplayName(players[0]) : 'Unranked', label: 'Current leader', featured: true },
+        ]}
+      />
+
+      <section className={theme.surface} aria-label="Community player standings">
+        <div className={theme.surfaceHeading}>
+          <div>
+            <span className={theme.sectionLabel}>LIVE LEADERBOARD</span>
+            <h2>Player standings</h2>
+          </div>
+          <span className={theme.count}>{filtered.length} {filtered.length === 1 ? 'player' : 'players'}</span>
+        </div>
+
       <div className={styles.toolbar}>
         <span className={styles.count}>{filtered.length} players</span>
         <SearchBar
@@ -79,6 +128,11 @@ export default function CommunityLeaderboard() {
       {loading ? (
         <div className={styles.loading}>
           <Spinner size="lg" />
+        </div>
+      ) : loadError ? (
+        <div className={styles.empty} role="alert">
+          <p>{loadError}</p>
+          <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>Try Again</Button>
         </div>
       ) : (
         <div className={styles.table}>
@@ -95,11 +149,12 @@ export default function CommunityLeaderboard() {
               className={styles.tableRow}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.02 }}
+              transition={{ delay: Math.min(i, 12) * 0.02 }}
             >
               <span className={styles.colRank}>
                 <span className={styles.rank}>
-                  {getRankIcon(i) || `#${i + 1}`}
+                  <span className={styles.rankA11y}>Rank {player._rank}</span>
+                  <span aria-hidden="true">{getRankIcon(player._rank - 1) || `#${player._rank}`}</span>
                 </span>
               </span>
               <span className={styles.colPlayer}>
@@ -129,6 +184,7 @@ export default function CommunityLeaderboard() {
           )}
         </div>
       )}
+      </section>
     </PageShell>
   )
 }

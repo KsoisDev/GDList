@@ -22,50 +22,11 @@
 }
 
 .backLink:hover {
-  color: var(--accent-green);
+  color: var(--accent-blue);
 }
 
 .header {
   margin-bottom: 0;
-}
-
-.heroThumb {
-  position: relative;
-  display: block;
-  width: 100%;
-  max-width: 420px;
-  margin-bottom: 24px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  aspect-ratio: 16 / 9;
-  background: var(--bg-glass);
-}
-
-.heroThumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform var(--transition-fast);
-}
-
-.heroThumb:hover img {
-  transform: scale(1.03);
-}
-
-.heroPlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.35);
-  transition: background var(--transition-fast);
-}
-
-.heroThumb:hover .heroPlay {
-  background: rgba(0, 0, 0, 0.5);
 }
 
 .headerContent {
@@ -84,7 +45,7 @@
 .heroThumb {
   position: relative;
   display: block;
-  width: 160px;
+  width: 240px;
   flex-shrink: 0;
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -92,9 +53,10 @@
   background: var(--bg-glass);
 }
 
-@media (min-width: 640px) {
+@media (max-width: 640px) {
   .heroThumb {
-    width: 240px;
+    width: 100%;
+    max-width: 420px;
   }
 }
 
@@ -151,12 +113,15 @@
 .levelName {
   font-size: 1.75rem;
   font-weight: 800;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .headerRow {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
   margin-bottom: 8px;
 }
 
@@ -176,13 +141,14 @@
 }
 
 .editBtn:hover {
-  color: var(--accent-green);
-  border-color: var(--accent-green);
+  color: var(--accent-blue);
+  border-color: var(--accent-blue);
 }
 
 .editActions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .editFields {
@@ -259,6 +225,9 @@
 .statValue {
   font-size: 1.25rem;
   font-weight: 800;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .statLabel {
@@ -309,17 +278,22 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
+  min-width: 0;
   text-decoration: none;
   color: inherit;
 }
 
 .victorInfo:hover .victorName {
-  color: var(--accent-green);
+  color: var(--accent-blue);
 }
 
 .victorName {
   font-size: 0.875rem;
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   transition: color var(--transition-fast);
 }
 
@@ -335,6 +309,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .victorDate {
@@ -437,4 +412,16 @@
 .tagChipActive {
   color: #fff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 520px) {
+  .changeRow {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .changeDate {
+    width: 100%;
+    margin-left: 0;
+  }
 }

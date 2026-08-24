@@ -4,6 +4,19 @@ import { communityPoints, roundPoints } from '../utils/communityPoints'
 import { logLevelChange } from './changelog'
 
 const isVerified = l => (l.victoryCount || 0) > 0
+const BATCH_SIZE = 450
+
+async function commitUpdates(updates) {
+  for (let start = 0; start < updates.length; start += BATCH_SIZE) {
+    const batch = writeBatch(db)
+    updates.slice(start, start + BATCH_SIZE).forEach(({ ref, data, type = 'update' }) => {
+      if (type === 'set') batch.set(ref, data)
+      else if (type === 'delete') batch.delete(ref)
+      else batch.update(ref, data)
+    })
+    await batch.commit()
+  }
+}
 
 export async function getCommunityLevels() {
   const data = await getCollection('levels', [where('type', '==', 'community')])
@@ -17,22 +30,114 @@ export async function getCommunityLevels() {
 
 export async function renumberCommunityLevels(levels = null, includeAll = false, log = false) {
   const all = levels || (await getCommunityLevels())
-  const batch = writeBatch(db)
   const ranked = includeAll ? all : all.filter(isVerified)
-  ranked.forEach((level, i) => {
+  const updates = ranked.map((level, i) => {
     const position = i + 1
-    batch.update(doc(db, 'levels', level.id), { position, points: communityPoints(position) })
+    return {
+      ref: doc(db, 'levels', level.id),
+      data: { position, points: communityPoints(position), updatedAt: new Date() },
+    }
   })
-  all.filter(l => !ranked.some(r => r.id === l.id)).forEach(l => {
-    batch.update(doc(db, 'levels', l.id), { position: 0 })
+  all.filter(l => !ranked.some(r => r.id === l.id)).forEach(level => {
+    updates.push({
+      ref: doc(db, 'levels', level.id),
+      data: { position: 0, points: 0, updatedAt: new Date() },
+    })
   })
-  await batch.commit()
+  await commitUpdates(updates)
+  await recalculateCommunityScores()
   if (log) {
     await Promise.all(ranked.map((level, i) =>
       logLevelChange({ levelId: level.id, action: 'renumbered', from: level.position || null, to: i + 1 })
     ))
   }
   return ranked
+}
+
+/**
+ * Keep ranked levels, completion snapshots, and user totals aligned after a
+ * community list move/removal. This is intentionally centralized because
+ * updating only a level document leaves every leaderboard total stale.
+ */
+export async function recalculateCommunityScores() {
+  const [levels, completions, users] = await Promise.all([
+    getCollection('levels', [where('type', '==', 'community')]),
+    getCollection('completions', [where('levelType', '==', 'community')]),
+    getCollection('users'),
+  ])
+
+  const ranked = levels
+    .filter(isVerified)
+    .sort((a, b) => (a.position || Number.MAX_SAFE_INTEGER) - (b.position || Number.MAX_SAFE_INTEGER))
+  const pointsByLevel = Object.fromEntries(
+    ranked.map((level, index) => [level.id, communityPoints(index + 1)]),
+  )
+  const totals = {}
+  const counts = {}
+  const updates = []
+  const updatedAt = new Date()
+
+  ranked.forEach((level, index) => {
+    const position = index + 1
+    const points = pointsByLevel[level.id]
+    if (level.position !== position || level.points !== points) {
+      updates.push({
+        ref: doc(db, 'levels', level.id),
+        data: { position, points, updatedAt },
+      })
+    }
+  })
+
+  levels.filter(level => !isVerified(level)).forEach(level => {
+    if ((level.position || 0) !== 0 || (level.points || 0) !== 0) {
+      updates.push({
+        ref: doc(db, 'levels', level.id),
+        data: { position: 0, points: 0, updatedAt },
+      })
+    }
+  })
+
+  completions.forEach(completion => {
+    const points = pointsByLevel[completion.levelId] || 0
+    if (points > 0) {
+      totals[completion.userId] = (totals[completion.userId] || 0) + points
+      counts[completion.userId] = (counts[completion.userId] || 0) + 1
+    }
+    if ((completion.points || 0) !== points) {
+      updates.push({
+        ref: doc(db, 'completions', completion.id),
+        data: { points, updatedAt },
+      })
+    }
+  })
+
+  users.forEach(user => {
+    const stats = user.stats || {}
+    const communityTotal = roundPoints(totals[user.id] || 0)
+    const completionCount = counts[user.id] || 0
+    const totalPoints = roundPoints((stats.mainPoints || 0) + communityTotal)
+    if (
+      (stats.communityPoints || 0) !== communityTotal
+      || (stats.communityCompletions || 0) !== completionCount
+      || (stats.totalPoints || 0) !== totalPoints
+    ) {
+      updates.push({
+        ref: doc(db, 'users', user.id),
+        data: {
+          stats: {
+            ...stats,
+            totalPoints,
+            communityPoints: communityTotal,
+            communityCompletions: completionCount,
+          },
+          updatedAt,
+        },
+      })
+    }
+  })
+
+  await commitUpdates(updates)
+  return { levels: ranked.length, completions: completions.length, users: users.length }
 }
 
 export async function insertCommunityLevel(id, data, targetPosition) {
@@ -64,6 +169,7 @@ export async function insertCommunityLevel(id, data, targetPosition) {
       batch.update(doc(db, 'levels', l.id), { position: p, points: communityPoints(p) })
     })
   await batch.commit()
+  await recalculateCommunityScores()
   await logLevelChange({ levelId: id, action: 'added', to: pos })
   return id
 }
@@ -109,6 +215,7 @@ export async function deleteCommunityLevel(id) {
   }
 
   await batch.commit()
+  await recalculateCommunityScores()
   if (level) {
     await logLevelChange({ levelId: id, action: 'removed', from: level.position || null })
   }

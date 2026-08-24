@@ -1,17 +1,20 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Edit3, Trash2, Youtube, X, Trophy } from 'lucide-react'
+import { Clock3, Edit3, ListChecks, Trash2, Youtube, X, Trophy } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
+import ThemedPageHero from '../components/layout/ThemedPageHero'
 import Card from '../components/ui/Card'
 import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
+import Button from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
 import { getCollection } from '../services/firestore'
 import { getCommunityLevels, deleteCommunityLevel } from '../services/communityList'
 import { hasAccess } from '../utils/constants'
 import { getVideoThumbnail } from '../utils/video'
 import styles from './List.module.css'
+import theme from '../components/layout/ThemedPage.module.css'
 
 const TABS = [
   { id: 'active', label: 'Active' },
@@ -26,6 +29,7 @@ export default function CommunityList() {
   const [selectedTags, setSelectedTags] = useState([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [tab, setTab] = useState('active')
 
   useEffect(() => {
@@ -36,11 +40,13 @@ export default function CommunityList() {
 
   const load = async () => {
     setLoading(true)
+    setLoadError('')
     try {
       const data = await getCommunityLevels()
       setLevels(data)
     } catch (err) {
       console.error('Failed to load community levels:', err)
+      setLoadError('The community list could not be loaded. Check your connection and try again.')
     } finally {
       setLoading(false)
     }
@@ -94,15 +100,41 @@ export default function CommunityList() {
   }
 
   return (
-    <PageShell title="Community Demon List" subtitle="Levels created and verified by our community members">
+    <PageShell className={theme.pageShell}>
+      <div className={theme.glow} aria-hidden="true" />
+      <ThemedPageHero
+        eyebrow="BUILT BY BASEMENT PLAYERS"
+        title="Community"
+        accentTitle="Demon List"
+        description="Discover original challenges created, submitted, and completed by members of the Basement community."
+        actions={[
+          { to: '/submit-level', label: 'Submit a level' },
+          { to: '/list/main', label: 'Main list' },
+        ]}
+        stats={[
+          { icon: ListChecks, value: loading ? '—' : active.length, label: 'Ranked levels' },
+          { icon: Trophy, value: loading ? '—' : active.reduce((sum, level) => sum + (level.victoryCount || 0), 0), label: 'Verified clears' },
+          { icon: Clock3, value: loading ? '—' : unverified.length, label: 'Awaiting verification', featured: true },
+        ]}
+      />
+
+      <section className={theme.surface} aria-label="Community list rankings">
+        <div className={theme.surfaceHeading}>
+          <div>
+            <span className={theme.sectionLabel}>COMMUNITY STANDINGS</span>
+            <h2>Original Basement levels</h2>
+          </div>
+          <span className={theme.count}>{visible.length} {visible.length === 1 ? 'level' : 'levels'}</span>
+        </div>
+
       <div className={styles.toolbar}>
         <div className={styles.toolbarLeft}>
           <span className={styles.count}>
             {visible.length} {visible.length === 1 ? 'level' : 'levels'}
           </span>
           {selectedTags.length > 0 && (
-            <button className={styles.clearFilter} onClick={() => setSelectedTags([])}>
-              <X size={14} /> Clear filters
+            <button type="button" className={styles.clearFilter} onClick={() => setSelectedTags([])}>
+              <X size={14} aria-hidden="true" /> Clear filters
             </button>
           )}
         </div>
@@ -122,9 +154,11 @@ export default function CommunityList() {
             return (
               <button
                 key={tag.id}
+                type="button"
                 className={`${styles.filterChip} ${active ? styles.filterChipActive : ''}`}
                 style={active ? { background: tag.color, borderColor: tag.color } : undefined}
                 onClick={() => toggleTag(tag.id)}
+                aria-pressed={active}
               >
                 {tag.name}
               </button>
@@ -137,8 +171,10 @@ export default function CommunityList() {
         {TABS.map(t => (
           <button
             key={t.id}
+            type="button"
             className={`${styles.tab} ${tab === t.id ? styles.tabActive : ''}`}
             onClick={() => setTab(t.id)}
+            aria-pressed={tab === t.id}
           >
             {t.label}
           </button>
@@ -149,6 +185,11 @@ export default function CommunityList() {
         <div className={styles.loading}>
           <Spinner size="lg" />
         </div>
+      ) : loadError ? (
+        <Card padding="lg" className={styles.empty}>
+          <p>{loadError}</p>
+          <Button variant="secondary" size="sm" onClick={load}>Try Again</Button>
+        </Card>
       ) : tab === 'active' && visible.length === 0 ? (
         <Card padding="lg" className={styles.empty}>
           {selectedTags.length > 0
@@ -162,7 +203,7 @@ export default function CommunityList() {
             : <p>No unverified levels. New level submissions will appear here once approved by an admin.</p>}
         </Card>
       ) : (
-        <div className={`${styles.table} ${isAdmin ? styles.withActions : ''}`}>
+        <div className={`${styles.table} ${isAdmin ? styles.withActions : ''} ${tab === 'unverified' ? styles.unverifiedTable : ''}`}>
           <div className={styles.tableHeader}>
             <span className={styles.colPos}>#</span>
             <span className={styles.colName}>Level</span>
@@ -186,7 +227,7 @@ export default function CommunityList() {
               className={`${styles.tableRow} ${completed ? styles.completed : ''}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.02 }}
+              transition={{ delay: Math.min(i, 12) * 0.02 }}
             >
               <span className={styles.colPos}>
                 <span className={styles.position}>
@@ -273,6 +314,7 @@ export default function CommunityList() {
                     <Edit3 size={16} />
                   </Link>
                   <button
+                    type="button"
                     className={styles.deleteBtn}
                     onClick={() => handleDelete(level)}
                     title="Delete level"
@@ -287,6 +329,7 @@ export default function CommunityList() {
           })}
         </div>
       )}
+      </section>
     </PageShell>
   )
 }

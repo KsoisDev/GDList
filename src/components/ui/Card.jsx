@@ -1,14 +1,15 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import styles from './Card.module.css'
 
 export default function Card({
   children,
   className = '',
   variant = 'default',
-  hover = true,
+  hover = false,
   onClick,
   padding = 'md',
 }) {
+  const reduceMotion = useReducedMotion()
   const cls = [
     styles.card,
     styles[variant],
@@ -21,10 +22,10 @@ export default function Card({
     <motion.div
       className={cls}
       onClick={onClick}
-      whileHover={hover && onClick ? { scale: 1.01 } : {}}
-      initial={{ opacity: 0, y: 10 }}
+      whileHover={!reduceMotion && hover && onClick ? { scale: 1.01 } : {}}
+      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: reduceMotion ? 0 : 0.3 }}
     >
       {children}
     </motion.div>

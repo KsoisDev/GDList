@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { doc, runTransaction, serverTimestamp } from 'firebase/firestore'
 import { Check, X, RefreshCw, ExternalLink } from 'lucide-react'
 import PageShell from '../../components/layout/PageShell'
 import Card from '../../components/ui/Card'
@@ -10,6 +11,7 @@ import Input from '../../components/ui/Input'
 import Select from '../../components/ui/Select'
 import Spinner from '../../components/ui/Spinner'
 import { useAuth } from '../../hooks/useAuth'
+import { db } from '../../services/firebase'
 import { getCollection, updateDocument, getDocument, createDocument } from '../../services/firestore'
 import { insertCommunityLevel, setCommunityPosition } from '../../services/communityList'
 import { findMainLevelByName } from '../../services/mainLevels'
@@ -26,6 +28,74 @@ const TABS = [
 ]
 
 const emptyConfig = { difficulty: 'extreme', points: 0, position: 0, externalUrl: '', creator: 'Unknown', gameId: '', sendTo: 'unverified' }
+
+async function claimSubmission(submissionId, reviewerId) {
+  const submissionRef = doc(db, 'submissions', submissionId)
+  await runTransaction(db, async transaction => {
+    const snapshot = await transaction.get(submissionRef)
+    if (!snapshot.exists()) throw new Error('This submission no longer exists.')
+    if (snapshot.data().status !== 'pending') {
+      throw new Error('This submission is already being reviewed or has been resolved.')
+    }
+    transaction.update(submissionRef, {
+      status: 'reviewing',
+      reviewClaimedBy: reviewerId,
+      reviewClaimedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    })
+  })
+}
+
+async function releaseSubmissionClaim(submissionId, reviewerId) {
+  const submissionRef = doc(db, 'submissions', submissionId)
+  await runTransaction(db, async transaction => {
+    const snapshot = await transaction.get(submissionRef)
+    if (!snapshot.exists()) return
+    const data = snapshot.data()
+    if (data.status !== 'reviewing' || data.reviewClaimedBy !== reviewerId) return
+    transaction.update(submissionRef, {
+      status: 'pending',
+      reviewClaimedBy: null,
+      reviewClaimedAt: null,
+      updatedAt: serverTimestamp(),
+    })
+  })
+}
+
+async function finalizeSubmissionReview({
+  submissionId,
+  reviewerId,
+  status,
+  reviewData,
+  notification,
+}) {
+  const submissionRef = doc(db, 'submissions', submissionId)
+  const notificationRef = doc(db, 'notifications', `review_${submissionId}`)
+
+  await runTransaction(db, async transaction => {
+    const snapshot = await transaction.get(submissionRef)
+    if (!snapshot.exists()) throw new Error('This submission no longer exists.')
+    const data = snapshot.data()
+    if (data.status !== 'reviewing' || data.reviewClaimedBy !== reviewerId) {
+      throw new Error('The review claim was lost. Reload the queue before trying again.')
+    }
+
+    transaction.update(submissionRef, {
+      ...reviewData,
+      status,
+      reviewClaimedBy: null,
+      reviewClaimedAt: null,
+      reviewedBy: reviewerId,
+      reviewedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    })
+    transaction.set(notificationRef, {
+      ...notification,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    })
+  })
+}
 
 export default function ReviewSubmissions() {
   const { user, userData, loading: authLoading } = useAuth()
@@ -90,7 +160,7 @@ export default function ReviewSubmissions() {
               position: sub.adminLevelConfig?.position || existingLevel?.position || suggestedPos,
               creator: sub.adminLevelConfig?.creator || existingLevel?.creator || sub.demonCreator || sub.creator || 'Unknown',
               externalUrl: sub.externalUrl || '',
-              gameId: sub.adminLevelConfig?.gameId || existingLevel?.gameId || sub.gameId || '',
+              gameId: sub.adminLevelConfig?.gameId || existingLevel?.gameId || sub.demonGameId || sub.gameId || '',
               sendTo: (existingLevel?.victoryCount || sub.isVerified) ? 'active' : 'unverified',
             },
           }
@@ -124,8 +194,10 @@ export default function ReviewSubmissions() {
     inFlightRef.current.add(subId)
     setError('')
     setProcessing(prev => ({ ...prev, [subId]: true }))
+    let claimed = false
     try {
       const sub = submissions.find(s => s.id === subId)
+      if (!sub) throw new Error('This submission is no longer in the review queue.')
       const cfg = config[subId]
         || (sub._existingLevel
           ? {
@@ -141,42 +213,30 @@ export default function ReviewSubmissions() {
 
       if (status === 'approved' && cfg.externalUrl && !isValidDemonlistUrl(cfg.externalUrl)) {
         setError('External URL must be from demonlist.org')
-        setProcessing(prev => ({ ...prev, [subId]: false }))
         return
       }
 
-      const updateData = {
-        status,
+      const reviewData = {
         reviewNote: note[subId] || '',
-        reviewedBy: user.uid,
-        reviewedAt: new Date(),
       }
 
       if (status === 'approved') {
-        updateData.adminLevelConfig = {
+        reviewData.adminLevelConfig = {
           difficulty: cfg.difficulty,
           points: parseDecimal(cfg.points) || 0,
           position: Number(cfg.position) || 0,
           creator: cfg.creator || 'Unknown',
-          gameId: cfg.gameId || '',
+          gameId: cfg.gameId || sub.demonGameId || '',
         }
-        if (cfg.externalUrl) updateData.externalUrl = cfg.externalUrl
+        if (cfg.externalUrl) reviewData.externalUrl = cfg.externalUrl
       }
 
-      await updateDocument('submissions', subId, updateData)
-
-      await createDocument('notifications', null, {
-        userId: sub.userId,
-        type: status,
-        levelName: sub.levelName,
-        reviewNote: note[subId] || '',
-        submissionId: subId,
-        read: false,
-      })
+      await claimSubmission(subId, user.uid)
+      claimed = true
 
       if (status === 'approved' && sub.requestType === 'level') {
         const sanitized = (sub.levelName || 'unknown').replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()
-        const levelId = `community_${sanitized}_${Date.now()}`
+        const levelId = sub.levelId || `community_${sanitized}_${subId}`
         const sendToActive = cfg.sendTo === 'active'
         const now = new Date()
 
@@ -186,7 +246,7 @@ export default function ReviewSubmissions() {
         const levelData = {
           type: 'community',
           name: sub.levelName || 'Unknown',
-          creator: sub.creator || 'Unknown',
+          creator: cfg.creator || sub.creator || 'Unknown',
           gameId: cfg.gameId || sub.gameId || '',
           thumbnail: '',
           videoURL: sub.videoURL || '',
@@ -225,7 +285,8 @@ export default function ReviewSubmissions() {
             ? Number(inserted.position)
             : (Number(cfg.position) || 999)
           const points = communityPoints(position)
-          const completionId = await createDocument('completions', null, {
+          const completionId = `completion_${subId}`
+          await createDocument('completions', completionId, {
             userId: sub.userId,
             levelId,
             levelType: 'community',
@@ -331,6 +392,7 @@ export default function ReviewSubmissions() {
           const pointsDiff = parseFloat((newLevelPoints - (existing.points || 0)).toFixed(2))
           const prevVictors = (existing.victors || []).filter(v => v.userId !== sub.userId)
           if (pointsDiff !== 0 && prevVictors.length > 0) {
+            const pointsField = isCommunity ? 'communityPoints' : 'mainPoints'
             const updates = prevVictors.map(victor =>
               getDocument('users', victor.userId).then(userDoc => {
                 if (!userDoc) return
@@ -339,8 +401,7 @@ export default function ReviewSubmissions() {
                   stats: {
                     ...s,
                     totalPoints: parseFloat(((s.totalPoints || 0) + pointsDiff).toFixed(2)),
-                    mainPoints: parseFloat(((s.mainPoints || 0) + pointsDiff).toFixed(2)),
-                    communityPoints: s.communityPoints || 0,
+                    [pointsField]: parseFloat(((s[pointsField] || 0) + pointsDiff).toFixed(2)),
                   },
                 })
               })
@@ -363,7 +424,7 @@ export default function ReviewSubmissions() {
             creator: cfg.creator || sub.demonCreator || 'Unknown',
             verifier: sub.demonVerifier || 'Unknown',
             difficulty: cfg.difficulty,
-            gameId: cfg.gameId || '',
+            gameId: cfg.gameId || sub.demonGameId || '',
             thumbnail: '',
             victoryCount: 1,
             victors: [victorEntry],
@@ -382,12 +443,14 @@ export default function ReviewSubmissions() {
           await updateDocument('submissions', subId, { levelId })
         }
 
-        if (cfg.gameId) {
-          await updateDocument('levels', levelId, { gameId: cfg.gameId })
+        const approvedGameId = cfg.gameId || sub.demonGameId || ''
+        if (approvedGameId) {
+          await updateDocument('levels', levelId, { gameId: approvedGameId })
         }
 
         if (!alreadyVictor) {
-          const completionId = await createDocument('completions', null, {
+          const completionId = `completion_${subId}`
+          await createDocument('completions', completionId, {
             userId: sub.userId,
             levelId,
             levelType: sub.levelType,
@@ -421,10 +484,33 @@ export default function ReviewSubmissions() {
         }
       }
 
+      await finalizeSubmissionReview({
+        submissionId: subId,
+        reviewerId: user.uid,
+        status,
+        reviewData,
+        notification: {
+          userId: sub.userId,
+          type: status,
+          levelName: sub.levelName,
+          reviewNote: note[subId] || '',
+          submissionId: subId,
+          read: false,
+        },
+      })
+      claimed = false
+
       await loadSubmissions()
       setNote(prev => ({ ...prev, [subId]: '' }))
       setConfig(prev => { const c = { ...prev }; delete c[subId]; return c })
     } catch (err) {
+      if (claimed) {
+        try {
+          await releaseSubmissionClaim(subId, user.uid)
+        } catch (releaseError) {
+          console.error('Failed to release submission review claim:', releaseError)
+        }
+      }
       setError(err.message)
       console.error(err)
     } finally {
@@ -487,8 +573,10 @@ export default function ReviewSubmissions() {
         {TABS.map(t => (
           <button
             key={t.id}
+            type="button"
             className={`${styles.tab} ${tab === t.id ? styles.tabActive : ''}`}
             onClick={() => setTab(t.id)}
+            aria-pressed={tab === t.id}
           >
             {t.label}
             <span className={styles.tabCount}>
@@ -512,7 +600,7 @@ export default function ReviewSubmissions() {
               key={sub.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
+              transition={{ delay: Math.min(i, 12) * 0.05 }}
             >
               <Card padding="md" className={styles.submissionCard}>
                 <div className={styles.subHeader}>
@@ -530,17 +618,27 @@ export default function ReviewSubmissions() {
                 </div>
 
                 <div className={styles.subVideo}>
-                  <a href={sub.videoURL} target="_blank" rel="noopener noreferrer">
-                    <Button variant="secondary" size="sm" icon={ExternalLink}>
-                      {sub.requestType === 'level' ? 'Watch Showcase' : 'Watch Video'}
-                    </Button>
-                  </a>
+                  <Button
+                    href={sub.videoURL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="secondary"
+                    size="sm"
+                    icon={ExternalLink}
+                  >
+                    {sub.requestType === 'level' ? 'Watch Showcase' : 'Watch Video'}
+                  </Button>
                   {sub.externalUrl && (
-                    <a href={sub.externalUrl} target="_blank" rel="noopener noreferrer">
-                      <Button variant="ghost" size="sm" icon={ExternalLink}>
-                        Level Link
-                      </Button>
-                    </a>
+                    <Button
+                      href={sub.externalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      variant="ghost"
+                      size="sm"
+                      icon={ExternalLink}
+                    >
+                      Level Link
+                    </Button>
                   )}
                 </div>
 
@@ -708,6 +806,7 @@ export default function ReviewSubmissions() {
                     placeholder="Optional review note..."
                     value={note[sub.id] || ''}
                     onChange={e => setNote({ ...note, [sub.id]: e.target.value })}
+                    aria-label={`Review note for ${sub.levelName}`}
                   />
                   <div className={styles.actionBtns}>
                     <Button

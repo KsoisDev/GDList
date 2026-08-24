@@ -8,16 +8,59 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
 }
 
 .header {
+  position: relative;
+  overflow: hidden;
   margin-bottom: 0;
+  border-color: rgba(111, 155, 220, 0.22) !important;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(76, 146, 250, 0.18), transparent 32%),
+    linear-gradient(135deg, rgba(18, 35, 59, 0.96), rgba(8, 17, 31, 0.95)) !important;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  top: -90px;
+  right: -70px;
+  width: 250px;
+  height: 250px;
+  border: 38px solid rgba(107, 164, 247, 0.055);
+  transform: rotate(18deg);
+  pointer-events: none;
+}
+
+.profileEyebrow {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  margin-bottom: 20px;
+  color: #6ba7ff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.19em;
 }
 
 .headerContent {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 24px;
+}
+
+.avatarFrame {
+  display: grid;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 3px solid rgba(112, 170, 255, 0.28);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.34), 0 0 28px rgba(74, 143, 246, 0.12);
 }
 
 .headerInfo {
@@ -25,8 +68,11 @@
 }
 
 .username {
-  font-size: 1.75rem;
-  font-weight: 800;
+  color: #f5f8fc;
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  line-height: 1;
   margin-bottom: 8px;
   display: flex;
   align-items: center;
@@ -45,6 +91,17 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.headerActions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(124, 159, 210, 0.12);
 }
 
 .joinDate {
@@ -74,6 +131,9 @@
   gap: 8px;
   padding: 24px;
   text-align: center;
+  border-color: rgba(111, 153, 215, 0.15) !important;
+  background: linear-gradient(145deg, rgba(15, 29, 49, 0.9), rgba(8, 17, 31, 0.88)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
 .statIcon {
@@ -81,6 +141,7 @@
 }
 
 .statValue {
+  color: #f4f7fb;
   font-size: 1.5rem;
   font-weight: 800;
 }
@@ -96,9 +157,15 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding: 22px;
+  border: 1px solid rgba(111, 153, 215, 0.16);
+  border-radius: 18px;
+  background: rgba(8, 17, 31, 0.82);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
 .sectionTitle {
+  color: #f2f6fb;
   font-size: 1.125rem;
   font-weight: 700;
 }
@@ -114,14 +181,15 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-glass);
+  background: linear-gradient(90deg, rgba(16, 30, 50, 0.82), rgba(10, 20, 35, 0.76));
+  border: 1px solid rgba(112, 151, 207, 0.12);
   border-radius: var(--radius-md);
   transition: background var(--transition-fast);
 }
 
 .completion:hover {
-  background: var(--bg-glass);
+  border-color: rgba(102, 161, 247, 0.28);
+  background: linear-gradient(90deg, rgba(28, 57, 96, 0.72), rgba(12, 24, 42, 0.86));
 }
 
 .compInfo {
@@ -143,7 +211,7 @@
 }
 
 .compLink:hover {
-  color: var(--accent-green);
+  color: var(--accent-blue);
 }
 
 .compDate {
@@ -184,11 +252,11 @@
 }
 
 .bio {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+  max-width: 680px;
+  font-size: 0.92rem;
+  color: #a8b5c8;
   line-height: 1.6;
   margin-top: 12px;
-  max-width: 500px;
 }
 
 .editForm {
@@ -243,6 +311,12 @@
   color: var(--text-secondary);
 }
 
+.fieldHint {
+  align-self: flex-end;
+  color: var(--text-tertiary);
+  font-size: 0.7rem;
+}
+
 .textarea {
   width: 100%;
   padding: 10px 14px;
@@ -258,7 +332,7 @@
 }
 
 .textarea:focus {
-  border-color: var(--accent-green);
+  border-color: var(--accent-blue);
 }
 
 .editActions {
@@ -275,6 +349,140 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.successMessage,
+.formError {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+}
+
+.successMessage {
+  color: #9fc3ff;
+  border: 1px solid rgba(68, 136, 255, 0.2);
+  background: var(--accent-blue-dim);
+}
+
+.formError {
+  color: #ff9caf;
+  border: 1px solid rgba(255, 68, 102, 0.2);
+  background: var(--accent-red-dim);
+}
+
+.accountSettings {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border-color: rgba(68, 136, 255, 0.18);
+  background: rgba(8, 17, 31, 0.84) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.profileLoadError {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 14px;
+  width: min(520px, 100%);
+  margin: 100px auto;
+  padding: 32px;
+  border: 1px solid rgba(111, 153, 215, 0.18);
+  border-radius: 18px;
+  background: rgba(8, 17, 31, 0.9);
+  text-align: center;
+}
+
+.profileLoadError p {
+  color: var(--text-secondary);
+}
+
+.accountHeading,
+.accountRow,
+.dangerZone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.accountHeading > svg {
+  color: var(--accent-blue);
+}
+
+.accountHeading h2 {
+  margin-top: 3px;
+  font-size: 1.1rem;
+}
+
+.accountEyebrow,
+.accountLabel {
+  display: block;
+  color: var(--text-tertiary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.accountRows {
+  overflow: hidden;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+}
+
+.accountRow {
+  min-height: 72px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.accountRow + .accountRow {
+  border-top: 1px solid var(--border-glass);
+}
+
+.accountRow strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.875rem;
+}
+
+.accountStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.verified {
+  color: var(--accent-green);
+  background: var(--accent-green-dim);
+}
+
+.unverified {
+  color: var(--accent-gold);
+  background: var(--accent-gold-dim);
+}
+
+.accountActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.securityForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.securityForm > p {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
 }
 
 .reportModal {
@@ -334,6 +542,16 @@
 
 .dangerZone {
   margin-top: 16px;
+  padding: 18px;
+  border: 1px solid rgba(255, 68, 102, 0.2);
+  border-radius: var(--radius-md);
+  background: rgba(255, 68, 102, 0.045);
+}
+
+.dangerZone p {
+  margin-top: 4px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
 }
 
 .deleteModalContent {
@@ -390,4 +608,56 @@
 
 .deleteActions > * {
   flex: 1;
+}
+
+@media (max-width: 560px) {
+  .headerContent {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .username {
+    font-size: 1.4rem;
+    overflow-wrap: anywhere;
+  }
+
+  .editBtn {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .headerActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .headerActions > * {
+    width: 100%;
+  }
+
+  .accountRow,
+  .dangerZone {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .accountActions {
+    justify-content: flex-start;
+  }
+
+  .completion {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .compInfo {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .compRight {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }

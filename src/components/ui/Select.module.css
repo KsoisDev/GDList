@@ -20,8 +20,8 @@
 }
 
 .selectContainer:focus-within {
-  border-color: var(--accent-green);
-  box-shadow: 0 0 0 3px var(--accent-green-dim);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-dim);
 }
 
 .hasError {

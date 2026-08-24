@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
-import { Calendar, Trophy, Medal, List, Youtube, Flag, Crown, Shield, Trash2, AlertTriangle } from 'lucide-react'
+import { Calendar, Trophy, Medal, List, Youtube, Flag, Crown, Shield, Trash2, AlertTriangle, Share2 } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
+import ProfileProgress from '../components/profile/ProfileProgress'
+import RoleBadge from '../components/profile/RoleBadge'
 import Avatar from '../components/ui/Avatar'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
@@ -19,6 +21,8 @@ import Modal from '../components/ui/Modal'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import styles from './Profile.module.css'
+import theme from '../components/layout/ThemedPage.module.css'
+import { useShareProfile } from '../hooks/useShareProfile'
 
 export default function Profile() {
   const { userId } = useParams()
@@ -30,48 +34,87 @@ export default function Profile() {
   const [reportModal, setReportModal] = useState(false)
   const [reportReason, setReportReason] = useState('')
   const [sendingReport, setSendingReport] = useState(false)
+  const [reportError, setReportError] = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
 
   const isAdmin = hasAccess(userData?.role || 'user', 'admin')
+  const { shareProfile, shareStatus } = useShareProfile(getDisplayName(profile), `/profile/${userId}`)
 
   const load = async (uid = userId) => {
     setLoading(true)
     try {
-      const uData = await getDocument('users', uid)
-      setProfile(uData)
-
-      if (uData) {
-        const comps = await getCollection('completions')
-        const userComps = comps
-          .filter(c => c.userId === uid)
-          .sort((a, b) => {
-            const ta = a.completedAt?.toMillis?.() || 0
-            const tb = b.completedAt?.toMillis?.() || 0
-            return tb - ta
-          })
-
-        const communityLevels = await getCollection('levels', [where('type', '==', 'community')])
-        const posMap = {}
-        communityLevels.forEach(l => { posMap[l.id] = l.position })
-
-        const withLivePoints = userComps.map(c => {
-          if (c.levelType === 'community') {
-            const pos = posMap[c.levelId]
-            if (pos) return { ...c, points: communityPoints(pos) }
-          }
-          return c
-          })
-
-          setCompletions(withLivePoints)
-          setBadges(computeBadges(communityLevels, uid))
+      const [profileResult, completionsResult, levelsResult, staffResult] = await Promise.allSettled([
+        getDocument('users', uid),
+        getCollection('completions', [where('userId', '==', uid)]),
+        getCollection('levels'),
+        getDocument('staff', uid),
+      ])
+      const allLevels = levelsResult.status === 'fulfilled' ? levelsResult.value : []
+      const communityLevels = allLevels.filter(level => level.type === 'community')
+      const comps = completionsResult.status === 'fulfilled' ? completionsResult.value : []
+      const userComps = [...comps].sort((a, b) => {
+        const ta = a.completedAt?.toMillis?.() || 0
+        const tb = b.completedAt?.toMillis?.() || 0
+        return tb - ta
+      })
+      const posMap = {}
+      communityLevels.forEach(level => { posMap[level.id] = level.position })
+      const withLivePoints = userComps.map(completion => {
+        if (completion.levelType === 'community') {
+          const position = posMap[completion.levelId]
+          if (position) return { ...completion, points: communityPoints(position) }
         }
-      } catch (err) {
-        console.error('Failed to load profile:', err)
-      } finally {
-        setLoading(false)
+        return completion
+      })
+
+      let snapshotProfile = null
+      for (const level of allLevels) {
+        const victor = (level.victors || []).find(entry => entry.userId === uid)
+        if (victor) {
+          snapshotProfile = {
+            id: uid,
+            username: victor.username || victor.displayName || 'Basement player',
+            displayName: victor.displayName || victor.username || 'Basement player',
+            avatarURL: victor.avatarURL || '',
+            country: victor.country || '',
+            role: 'user',
+            createdAt: withLivePoints.at(-1)?.completedAt || null,
+          }
+          break
+        }
       }
+
+      const privateProfile = profileResult.status === 'fulfilled' ? profileResult.value : null
+      const staffProfile = staffResult.status === 'fulfilled' ? staffResult.value : null
+      const fallbackProfile = snapshotProfile || (withLivePoints.length > 0 ? {
+        id: uid,
+        username: 'Basement player',
+        displayName: 'Basement player',
+        role: 'user',
+        createdAt: withLivePoints.at(-1)?.completedAt || null,
+      } : staffProfile ? {
+        id: uid,
+        username: staffProfile.displayName || 'Basement developer',
+        displayName: staffProfile.displayName || 'Basement developer',
+        role: 'developer',
+      } : null)
+      const resolvedProfile = privateProfile || fallbackProfile
+      setProfile(resolvedProfile ? {
+        ...resolvedProfile,
+        teamTitle: staffProfile?.title || '',
+      } : null)
+      setCompletions(withLivePoints)
+      setBadges(computeBadges(communityLevels, uid))
+    } catch (err) {
+      console.error('Failed to load profile:', err)
+      setProfile(null)
+      setCompletions([])
+      setBadges({ firstVictor: false, verifier: false })
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -99,7 +142,8 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <PageShell>
+      <PageShell className={theme.pageShell}>
+        <div className={theme.glow} aria-hidden="true" />
         <div className={styles.loading}><Spinner size="lg" /></div>
       </PageShell>
     )
@@ -107,23 +151,29 @@ export default function Profile() {
 
   if (!profile) {
     return (
-      <PageShell title="User Not Found">
+      <PageShell title="User Not Found" className={theme.pageShell}>
+        <div className={theme.glow} aria-hidden="true" />
         <p>This user does not exist.</p>
       </PageShell>
     )
   }
 
   const stats = profile.stats || {}
-  const mainPoints = stats.mainPoints || 0
+  const mainPointsFromCompletions = mainComps.reduce((sum, completion) => sum + (completion.points || 0), 0)
+  const mainPoints = stats.mainPoints || mainPointsFromCompletions
   const communityPointsLive = communityComps.reduce((sum, c) => sum + (c.points || 0), 0)
   const totalPointsLive = parseFloat((mainPoints + communityPointsLive).toFixed(2))
 
   return (
-    <PageShell>
+    <PageShell className={theme.pageShell}>
+      <div className={theme.glow} aria-hidden="true" />
       <div className={styles.profile}>
         <Card padding="lg" className={styles.header}>
+          <span className={styles.profileEyebrow}>BASEMENT PLAYER PROFILE</span>
           <div className={styles.headerContent}>
-            <Avatar src={profile.avatarURL} alt={getDisplayName(profile)} size="xl" />
+            <div className={styles.avatarFrame}>
+              <Avatar src={profile.avatarURL} alt={getDisplayName(profile)} size="xl" />
+            </div>
             <div className={styles.headerInfo}>
               <h1 className={styles.username}>
                 {getDisplayName(profile)}
@@ -132,9 +182,7 @@ export default function Profile() {
                 )}
               </h1>
               <div className={styles.meta}>
-                <Badge variant={profile.role === 'owner' ? 'gold' : profile.role === 'admin' ? 'purple' : 'default'} size="sm">
-                  {profile.banned ? 'Banned' : profile.role === 'owner' ? <><Crown size={12} /> Owner</> : profile.role === 'admin' ? <><Shield size={12} /> Admin</> : 'Player'}
-                </Badge>
+                <RoleBadge role={profile.role} title={profile.teamTitle} username={profile.username} banned={profile.banned} />
                 {badges.firstVictor && (
                   <Badge variant="gold" size="sm" title="First victor of a community level">
                     <Crown size={12} /> First Victor
@@ -149,7 +197,18 @@ export default function Profile() {
                   <Calendar size={14} /> Joined {formatDate(profile.createdAt)}
                 </span>
               </div>
+              {profile.bio && <p className={styles.bio}>{profile.bio}</p>}
             </div>
+          </div>
+          <div className={styles.headerActions}>
+            <Button variant="secondary" size="sm" icon={Share2} onClick={shareProfile}>
+              {shareStatus || 'Share Profile'}
+            </Button>
+            {user && user.uid !== userId && (
+              <Button variant="ghost" size="sm" icon={Flag} onClick={() => { setReportError(''); setReportModal(true) }}>
+                Report User
+              </Button>
+            )}
           </div>
         </Card>
 
@@ -176,23 +235,23 @@ export default function Profile() {
           </Card>
         </div>
 
-        {user && user.uid !== userId && hasAccess(userData?.role || 'user', 'admin') && (
-          <div className={styles.actions}>
-            <Button variant="ghost" size="sm" icon={Flag} onClick={() => setReportModal(true)}>
-              Report User
-            </Button>
-          </div>
-        )}
+        <ProfileProgress
+          totalPoints={totalPointsLive}
+          mainCount={mainComps.length}
+          communityCount={communityComps.length}
+        />
 
-        <Modal isOpen={reportModal} onClose={() => setReportModal(false)} title="Report User">
+        <Modal isOpen={reportModal} onClose={() => !sendingReport && setReportModal(false)} title="Report User">
           <div className={styles.reportModal}>
             <p className={styles.reportDesc}>Report this user to the owner.</p>
-            <Input placeholder="Reason..." value={reportReason} onChange={e => setReportReason(e.target.value)} />
+            <Input label="Report reason" placeholder="Reason..." value={reportReason} onChange={e => setReportReason(e.target.value)} />
+            {reportError && <p className={styles.formError} role="alert">{reportError}</p>}
             <div className={styles.reportActions}>
               <Button variant="ghost" onClick={() => setReportModal(false)} disabled={sendingReport}>Cancel</Button>
               <Button variant="danger" onClick={async () => {
                 if (!reportReason.trim()) return
                 setSendingReport(true)
+                setReportError('')
                 try {
                   await createDocument('reports', null, {
                     reporterId: user.uid,
@@ -204,7 +263,10 @@ export default function Profile() {
                   })
                   setReportModal(false)
                   setReportReason('')
-                } catch (e) { console.error(e) } finally { setSendingReport(false) }
+                } catch (error) {
+                  console.error(error)
+                  setReportError(error?.message || 'The report could not be sent. Please try again.')
+                } finally { setSendingReport(false) }
               }} loading={sendingReport} disabled={!reportReason.trim()}>
                 Send Report
               </Button>
@@ -246,7 +308,7 @@ export default function Profile() {
                   className={styles.completion}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.03 }}
+                  transition={{ delay: Math.min(i, 12) * 0.03 }}
                 >
                   <div className={styles.compInfo}>
                     <span className={styles.compLevel}>
@@ -257,15 +319,23 @@ export default function Profile() {
                   <div className={styles.compRight}>
                     <span className={styles.compPoints}>+{comp.points} pts</span>
                     {comp.videoURL && (
-                      <a href={comp.videoURL} target="_blank" rel="noopener noreferrer" className={styles.compVideo}>
-                        <Youtube size={16} />
+                      <a
+                        href={comp.videoURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.compVideo}
+                        aria-label={`Watch ${comp.levelName || 'level'} completion video`}
+                      >
+                        <Youtube size={16} aria-hidden="true" />
                       </a>
                     )}
                     {isAdmin && (
                       <button
+                        type="button"
                         className={styles.compDelete}
                         onClick={() => setDeleteTarget(comp)}
                         title="Delete this record"
+                        aria-label={`Delete ${comp.levelName || 'record'}`}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -287,24 +357,34 @@ export default function Profile() {
                   className={styles.completion}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.03 }}
+                  transition={{ delay: Math.min(i, 12) * 0.03 }}
                 >
                   <div className={styles.compInfo}>
-                    <span className={styles.compLevel}>{comp.levelName || 'Unknown Level'}</span>
+                    <span className={styles.compLevel}>
+                      <Link to={`/levels/${comp.levelId}`} className={styles.compLink}>{comp.levelName || 'Unknown Level'}</Link>
+                    </span>
                     <span className={styles.compDate}>{formatDate(comp.completedAt)}</span>
                   </div>
                   <div className={styles.compRight}>
                     <span className={styles.compPoints}>+{comp.points} pts</span>
                     {comp.videoURL && (
-                      <a href={comp.videoURL} target="_blank" rel="noopener noreferrer" className={styles.compVideo}>
-                        <Youtube size={16} />
+                      <a
+                        href={comp.videoURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.compVideo}
+                        aria-label={`Watch ${comp.levelName || 'level'} completion video`}
+                      >
+                        <Youtube size={16} aria-hidden="true" />
                       </a>
                     )}
                     {isAdmin && (
                       <button
+                        type="button"
                         className={styles.compDelete}
                         onClick={() => setDeleteTarget(comp)}
                         title="Delete this record"
+                        aria-label={`Delete ${comp.levelName || 'record'}`}
                       >
                         <Trash2 size={16} />
                       </button>

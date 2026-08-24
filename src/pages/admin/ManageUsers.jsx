@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Shield, User as UserIcon, Ban, Flag, Crown } from 'lucide-react'
+import { Ban, Code2, Flag } from 'lucide-react'
 import PageShell from '../../components/layout/PageShell'
-import Card from '../../components/ui/Card'
+import RoleBadge from '../../components/profile/RoleBadge'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Spinner from '../../components/ui/Spinner'
@@ -11,7 +11,7 @@ import Avatar from '../../components/ui/Avatar'
 import Modal from '../../components/ui/Modal'
 import Input from '../../components/ui/Input'
 import { useAuth } from '../../hooks/useAuth'
-import { getCollection, updateDocument, createDocument } from '../../services/firestore'
+import { getCollection, updateDocument, updateUserRole, createDocument } from '../../services/firestore'
 import { formatNumber, getDisplayName } from '../../utils/format'
 import { getFlagUrl } from '../../utils/countries'
 import { hasAccess } from '../../utils/constants'
@@ -25,9 +25,10 @@ export default function ManageUsers() {
   const [reportModal, setReportModal] = useState(null)
   const [reportReason, setReportReason] = useState('')
   const [sending, setSending] = useState(false)
+  const [actionError, setActionError] = useState('')
 
   const role = userData?.role || 'user'
-  const isOwner = role === 'owner'
+  const isOwner = hasAccess(role, 'owner')
   const isAdmin = hasAccess(role, 'admin')
 
   useEffect(() => {
@@ -48,14 +49,15 @@ export default function ManageUsers() {
     if (isAdmin) load()
   }, [userData, isAdmin])
 
-  const toggleRole = async (uid, currentRole) => {
+  const setRole = async (target, nextRole) => {
     if (!isOwner) return
-    const newRole = currentRole === 'admin' ? 'user' : 'admin'
+    setActionError('')
     try {
-      await updateDocument('users', uid, { role: newRole })
-      setUsers(prev => prev.map(u => u.id === uid ? { ...u, role: newRole } : u))
+      await updateUserRole(target.id, nextRole, getDisplayName(target))
+      setUsers(prev => prev.map(u => u.id === target.id ? { ...u, role: nextRole } : u))
     } catch (err) {
       console.error(err)
+      setActionError(err?.message || 'The role could not be updated.')
     }
   }
 
@@ -66,6 +68,7 @@ export default function ManageUsers() {
       setUsers(prev => prev.map(u => u.id === uid ? { ...u, banned: !currentBanned } : u))
     } catch (err) {
       console.error(err)
+      setActionError(err?.message || 'The account status could not be updated.')
     }
   }
 
@@ -96,8 +99,9 @@ export default function ManageUsers() {
 
   return (
     <PageShell title="Manage Users" subtitle={`${users.length} registered users`}>
-      <div className={styles.table}>
-        <div className={styles.tableHeader}>
+      {actionError && <p className={styles.error} role="alert">{actionError}</p>}
+      <div className={`${styles.table} ${styles.usersTable}`}>
+        <div className={`${styles.tableHeader} ${styles.usersHeader}`}>
           <span>User</span>
           <span>Role</span>
           <span>Points</span>
@@ -105,8 +109,8 @@ export default function ManageUsers() {
           <span>Actions</span>
         </div>
         {users.map((u, i) => (
-          <motion.div key={u.id} className={styles.tableRow}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.01 }}
+          <motion.div key={u.id} className={`${styles.tableRow} ${styles.usersRow}`}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: Math.min(i, 12) * 0.01 }}
             style={u.banned ? { opacity: 0.5 } : {}}
           >
             <span className={styles.userCell}>
@@ -116,26 +120,35 @@ export default function ManageUsers() {
                 {getFlagUrl(u.country) && (
                   <img src={getFlagUrl(u.country)} alt={u.country} className={styles.flagImg} loading="lazy" />
                 )}
-                {u.banned && <Badge variant="danger" size="sm">Banned</Badge>}
+                {u.banned && <Badge variant="red" size="sm">Banned</Badge>}
               </Link>
             </span>
-            <span>
-              <Badge variant={u.role === 'owner' ? 'gold' : u.role === 'admin' ? 'purple' : 'default'} size="sm">
-                {u.role === 'owner' ? <Crown size={12} /> : u.role === 'admin' ? <Shield size={12} /> : <UserIcon size={12} />}
-                {u.role}
-              </Badge>
+            <span className={styles.roleCell} data-label="Role">
+              <RoleBadge role={u.role} username={u.username} />
             </span>
-            <span className={styles.points}>{formatNumber(u.stats?.totalPoints || 0)}</span>
-            <span>{(u.stats?.mainCompletions || 0) + (u.stats?.communityCompletions || 0)}</span>
+            <span className={styles.points} data-label="Points">{formatNumber(u.stats?.totalPoints || 0)}</span>
+            <span className={styles.completionCell} data-label="Completions">
+              {(u.stats?.mainCompletions || 0) + (u.stats?.communityCompletions || 0)}
+            </span>
             <span className={styles.actionButtons}>
+              {isOwner && (u.role !== 'owner' || u.id === user.uid) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={Code2}
+                  onClick={() => setRole(u, u.role === 'developer' ? (u.id === user.uid ? 'owner' : 'admin') : 'developer')}
+                >
+                  {u.role === 'developer' ? 'Remove developer' : 'Make developer'}
+                </Button>
+              )}
               {u.id !== user.uid && (
                 <>
-                  {isOwner && u.role !== 'owner' && (
+                  {isOwner && !['owner', 'developer'].includes(u.role) && (
                     <>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => toggleRole(u.id, u.role)}
+                        onClick={() => setRole(u, u.role === 'admin' ? 'user' : 'admin')}
                       >
                         {u.role === 'admin' ? 'Demote' : 'Promote'}
                       </Button>
@@ -171,6 +184,7 @@ export default function ManageUsers() {
             Report this user to the owner. Provide a reason for the report.
           </p>
           <Input
+            label="Report reason"
             placeholder="Reason for report..."
             value={reportReason}
             onChange={e => setReportReason(e.target.value)}

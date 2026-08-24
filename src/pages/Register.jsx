@@ -1,49 +1,70 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Mail, Lock, User, UserPlus } from 'lucide-react'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Lock, Mail, User, UserPlus } from 'lucide-react'
+import AuthShell from '../components/auth/AuthShell'
 import GoogleLogo from '../components/ui/GoogleLogo'
-import { registerWithEmail, loginWithGoogle } from '../services/auth'
-import { useAuth } from '../hooks/useAuth'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
-import Card from '../components/ui/Card'
+import Spinner from '../components/ui/Spinner'
+import { useAuth } from '../hooks/useAuth'
+import { getAuthErrorMessage, loginWithGoogle, registerWithEmail } from '../services/auth'
 import { isValidUsername } from '../utils/validators'
 import styles from './Auth.module.css'
 
+function returnLocation(state) {
+  const from = state?.from
+  if (!from?.pathname || !from.pathname.startsWith('/') || from.pathname.startsWith('//')) {
+    return { pathname: '/profile', search: '', hash: '' }
+  }
+  return from
+}
+
+function locationPath(location) {
+  return `${location.pathname}${location.search || ''}${location.hash || ''}`
+}
+
 export default function Register() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const location = useLocation()
+  const { user, loading: authLoading } = useAuth()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [remember, setRemember] = useState(true)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const destination = returnLocation(location.state)
 
-  if (user) {
-    navigate('/profile')
-    return null
+  if (authLoading) {
+    return <AuthShell compact><div className={styles.centerStatus}><Spinner size="lg" /><p>Restoring your session…</p></div></AuthShell>
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  if (user) return <Navigate to={locationPath(destination)} replace />
+
+  const validate = () => {
+    if (!isValidUsername(username.trim())) return 'Username must be 3–20 characters using letters, numbers, hyphens, or underscores.'
+    if (password.length < 8) return 'Use a password with at least 8 characters.'
+    if (password !== confirmPassword) return 'The passwords do not match.'
+    return ''
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    const validationError = validate()
+    if (validationError) {
+      setError(validationError)
+      return
+    }
+
     setError('')
-
-    if (!isValidUsername(username)) {
-      setError('Username must be 3-20 characters (letters, numbers, -, _)')
-      return
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
-      return
-    }
-
     setLoading(true)
     try {
-      await registerWithEmail(email, password, username)
-      navigate('/profile')
+      await registerWithEmail(email, password, username, remember)
+      navigate('/verify-email', { replace: true, state: { from: destination } })
     } catch (err) {
-      setError(err.message.replace('Firebase: ', '').split('(')[0])
+      setError(getAuthErrorMessage(err))
     } finally {
       setLoading(false)
     }
@@ -53,76 +74,50 @@ export default function Register() {
     setError('')
     setLoading(true)
     try {
-      await loginWithGoogle()
-      navigate('/profile')
+      await loginWithGoogle(remember)
+      navigate(locationPath(destination), { replace: true })
     } catch (err) {
-      setError(err.message.replace('Firebase: ', '').split('(')[0])
+      if (err?.code !== 'auth/cancelled-popup-request') setError(getAuthErrorMessage(err))
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className={styles.page}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className={styles.container}
-      >
-        <Card padding="lg" className={styles.card}>
-          <div className={styles.header}>
-            <h1 className={styles.title}>Create account</h1>
-            <p className={styles.subtitle}>Join the community</p>
+    <AuthShell>
+      <div className={styles.authContent}>
+        <div className={styles.header}>
+          <span className={styles.kicker}>Join the ranking</span>
+          <h2 className={styles.title}>Create your player account</h2>
+          <p className={styles.subtitle}>Save completions, submit proof, and build your profile.</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className={styles.form} noValidate>
+          <Input label="Username" autoComplete="username" placeholder="PlayerName" value={username} onChange={event => setUsername(event.target.value)} icon={User} required />
+          <Input label="Email" type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={event => setEmail(event.target.value)} icon={Mail} required />
+          <div className={styles.passwordGrid}>
+            <Input label="Password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="8+ characters" value={password} onChange={event => setPassword(event.target.value)} icon={Lock} required />
+            <Input label="Confirm password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="Repeat password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} icon={Lock} required />
           </div>
-
-          <form onSubmit={handleSubmit} className={styles.form}>
-            <Input
-              label="Username"
-              type="text"
-              placeholder="YourUsername"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              icon={User}
-              required
-            />
-            <Input
-              label="Email"
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              icon={Mail}
-              required
-            />
-            <Input
-              label="Password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              icon={Lock}
-              required
-            />
-            {error && <p className={styles.error}>{error}</p>}
-            <Button type="submit" variant="primary" fullWidth loading={loading} icon={UserPlus}>
-              Create Account
-            </Button>
-          </form>
-
-          <div className={styles.divider}>
-            <span>or</span>
+          <p className={styles.passwordHint}>Use at least 8 characters. A mix of words, numbers, and symbols is strongest.</p>
+          <div className={styles.formOptions}>
+            <label className={styles.checkRow}>
+              <input type="checkbox" checked={remember} onChange={event => setRemember(event.target.checked)} />
+              <span>Keep me signed in</span>
+            </label>
+            <label className={styles.checkRow}>
+              <input type="checkbox" checked={showPassword} onChange={event => setShowPassword(event.target.checked)} />
+              <span>Show passwords</span>
+            </label>
           </div>
+          {error && <p className={styles.error} role="alert">{error}</p>}
+          <Button type="submit" variant="primary" fullWidth loading={loading} icon={UserPlus}>Create Account</Button>
+        </form>
 
-          <Button variant="secondary" fullWidth onClick={handleGoogle} loading={loading} icon={GoogleLogo}>
-            Continue with Google
-          </Button>
-
-          <p className={styles.footer}>
-            Already have an account?{' '}
-            <Link to="/login">Sign in</Link>
-          </p>
-        </Card>
-      </motion.div>
-    </div>
+        <div className={styles.divider}><span>or continue with</span></div>
+        <Button variant="secondary" fullWidth onClick={handleGoogle} loading={loading} icon={GoogleLogo}>Google</Button>
+        <p className={styles.footer}>Already registered? <Link to="/login" state={location.state}>Sign in</Link></p>
+      </div>
+    </AuthShell>
   )
 }

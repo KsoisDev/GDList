@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Youtube, Send, ExternalLink } from 'lucide-react'
+import { Youtube, Send, ExternalLink, FileCheck2, ShieldCheck, Video } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
+import ThemedPageHero from '../components/layout/ThemedPageHero'
 import Card from '../components/ui/Card'
 import Input from '../components/ui/Input'
 import SearchSelect from '../components/ui/SearchSelect'
@@ -14,6 +15,7 @@ import { fetchAredlLevels } from '../services/aredl'
 import { findMainLevelByName } from '../services/mainLevels'
 import { isValidVideoUrl } from '../utils/validators'
 import styles from './SubmitRecord.module.css'
+import theme from '../components/layout/ThemedPage.module.css'
 
 export default function SubmitRecord() {
   const { user, loading: authLoading } = useAuth()
@@ -83,7 +85,8 @@ export default function SubmitRecord() {
 
   if (authLoading) {
     return (
-      <PageShell title="Submit Record">
+      <PageShell className={theme.pageShell}>
+        <div className={theme.glow} aria-hidden="true" />
         <div className={styles.loadingCenter}><Spinner size="lg" /></div>
       </PageShell>
     )
@@ -243,8 +246,9 @@ export default function SubmitRecord() {
 
   if (success) {
     return (
-      <PageShell>
-        <Card padding="lg" className={styles.successCard}>
+      <PageShell className={theme.pageShell}>
+        <div className={theme.glow} aria-hidden="true" />
+        <Card padding="lg" className={`${styles.successCard} ${theme.successSurface}`}>
           <h2 className={styles.successTitle}>Submission Sent!</h2>
           <p className={styles.successText}>
             Your record has been submitted and is pending review by an admin.
@@ -263,31 +267,58 @@ export default function SubmitRecord() {
   }
 
   const levelOptions = getLevelOptions()
+  const selectionError = error === 'Please select a level' ? error : ''
+  const levelNameError = error === 'Please enter the level name' ? error : ''
+  const videoError = error.startsWith('Please provide a valid video URL') ? error : ''
+  const externalLinkError = error === 'Link must be from demonlist.org' ? error : ''
+  const hasFieldError = !!(selectionError || levelNameError || videoError || externalLinkError)
 
   return (
-    <PageShell title="Submit Record" subtitle="Submit a demon completion for verification">
-      <div className={styles.container}>
-        <Card padding="lg">
+    <PageShell className={theme.pageShell}>
+      <div className={theme.glow} aria-hidden="true" />
+      <ThemedPageHero
+        eyebrow="PROVE YOUR COMPLETION"
+        title="Submit a"
+        accentTitle="Record"
+        description="Send your completion proof to the Basement review team and add an approved clear to your profile and rankings."
+        stats={[
+          { icon: Video, value: 'Video proof', label: 'YouTube, Medal, TikTok or Drive' },
+          { icon: ShieldCheck, value: 'Admin review', label: 'Every record is checked' },
+          { icon: FileCheck2, value: 'Ranked result', label: 'Approved clears earn points', featured: true },
+        ]}
+      />
+
+      <section className={`${theme.surface} ${theme.formSurface}`} aria-label="Record submission form">
+        <div className={theme.surfaceHeading}>
+          <div>
+            <span className={theme.sectionLabel}>NEW COMPLETION</span>
+            <h2>Record details</h2>
+          </div>
+        </div>
+        <div className={`${styles.container} ${theme.formContainer}`}>
+        <Card padding="lg" className={theme.innerCard}>
           <form onSubmit={handleSubmit} className={styles.form}>
-            <div className={styles.typeToggle}>
+            <div className={styles.typeToggle} role="group" aria-label="Choose list type">
               <button
                 type="button"
                 className={`${styles.typeBtn} ${levelType === 'main' ? styles.active : ''}`}
-                onClick={() => setLevelType('main')}
+                onClick={() => { setLevelType('main'); setError('') }}
+                aria-pressed={levelType === 'main'}
               >
                 Main List
               </button>
               <button
                 type="button"
                 className={`${styles.typeBtn} ${levelType === 'community' ? styles.active : ''}`}
-                onClick={() => setLevelType('community')}
+                onClick={() => { setLevelType('community'); setError('') }}
+                aria-pressed={levelType === 'community'}
               >
                 Community List
               </button>
             </div>
 
             {loadError && (
-              <p className={styles.error}>{loadError}</p>
+              <p className={styles.error} role="alert">{loadError}</p>
             )}
 
             {!manualMode ? (
@@ -298,6 +329,7 @@ export default function SubmitRecord() {
                   options={levelOptions}
                   value={levelType === 'main' ? (selectedDemon ? String(selectedDemon.id) : '') : (selectedDemon || '')}
                   onChange={e => {
+                    setError('')
                     if (levelType === 'main') {
                       const demon = demons.find(d => String(d.id) === e.target.value)
                       setSelectedDemon(demon || null)
@@ -305,7 +337,7 @@ export default function SubmitRecord() {
                       setSelectedDemon(e.target.value || null)
                     }
                   }}
-                  error={error && !selectedDemon ? error : ''}
+                  error={!selectedDemon ? selectionError : ''}
                   loading={loading}
                 />
                 {levelType === 'main' && sourceInfo && !loading && (
@@ -327,7 +359,7 @@ export default function SubmitRecord() {
                   <button
                     type="button"
                     className={styles.manualToggle}
-                    onClick={() => setManualMode(true)}
+                    onClick={() => { setManualMode(true); setError('') }}
                   >
                     <ExternalLink size={18} />
                     <span>
@@ -344,7 +376,7 @@ export default function SubmitRecord() {
                   <button
                     type="button"
                     className={styles.backBtn}
-                    onClick={() => setManualMode(false)}
+                    onClick={() => { setManualMode(false); setError('') }}
                   >
                     Back to search
                   </button>
@@ -354,7 +386,7 @@ export default function SubmitRecord() {
                   placeholder="e.g. Bloodbath"
                   value={manualLevelName}
                   onChange={e => setManualLevelName(e.target.value)}
-                  error={error && !manualLevelName.trim() ? error : ''}
+                  error={!manualLevelName.trim() ? levelNameError : ''}
                 />
                 <Input
                   label="Link (optional) — demonlist.org"
@@ -385,11 +417,11 @@ export default function SubmitRecord() {
               value={videoUrl}
               onChange={e => setVideoUrl(e.target.value)}
               icon={Youtube}
-              error={error && !isValidVideoUrl(videoUrl) ? error : ''}
+              error={!isValidVideoUrl(videoUrl) ? videoError : ''}
             />
 
-            {error && (
-              <p className={styles.error}>{error}</p>
+            {error && !hasFieldError && (
+              <p className={styles.error} role="alert">{error}</p>
             )}
 
             <Button type="submit" variant="primary" fullWidth loading={submitting} icon={Send}>
@@ -397,7 +429,8 @@ export default function SubmitRecord() {
             </Button>
           </form>
         </Card>
-      </div>
+        </div>
+      </section>
     </PageShell>
   )
 }

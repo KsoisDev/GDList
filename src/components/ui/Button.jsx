@@ -1,5 +1,8 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import styles from './Button.module.css'
+
+const MotionLink = motion.create(Link)
 
 export default function Button({
   children,
@@ -11,9 +14,12 @@ export default function Button({
   disabled = false,
   loading = false,
   href,
+  to,
   fullWidth = false,
   className = '',
+  ...rest
 }) {
+  const reduceMotion = useReducedMotion()
   const cls = [
     styles.button,
     styles[variant],
@@ -38,11 +44,26 @@ export default function Button({
       <motion.a
         href={href}
         className={cls}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        {...rest}
+        whileHover={reduceMotion ? {} : { scale: 1.02 }}
+        whileTap={reduceMotion ? {} : { scale: 0.98 }}
       >
         {content}
       </motion.a>
+    )
+  }
+
+  if (to) {
+    return (
+      <MotionLink
+        to={to}
+        className={cls}
+        {...rest}
+        whileHover={reduceMotion ? {} : { scale: 1.02 }}
+        whileTap={reduceMotion ? {} : { scale: 0.98 }}
+      >
+        {content}
+      </MotionLink>
     )
   }
 
@@ -52,8 +73,10 @@ export default function Button({
       onClick={onClick}
       type={type}
       disabled={disabled || loading}
-      whileHover={!disabled ? { scale: 1.02 } : {}}
-      whileTap={!disabled ? { scale: 0.98 } : {}}
+      aria-busy={loading || undefined}
+      {...rest}
+      whileHover={!reduceMotion && !disabled ? { scale: 1.02 } : {}}
+      whileTap={!reduceMotion && !disabled ? { scale: 0.98 } : {}}
     >
       {content}
     </motion.button>

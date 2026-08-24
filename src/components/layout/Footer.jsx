@@ -35,10 +35,17 @@ export default function Footer() {
       </div>
       <div className={styles.bottom}>
         <p className={styles.copyright}>
-          &copy; {new Date().getFullYear()} Basement List. Not affiliated with RobTop Games.
+          &copy; {new Date().getFullYear()} ntyu2 and Ksois. All rights reserved. Basement List is not affiliated with RobTop Games.
         </p>
         <p className={styles.credit}>
-          Web creada por <strong>Ksois</strong> con ayuda de IA
+          Created by{' '}
+          <a href="https://github.com/ntyu2" target="_blank" rel="noopener noreferrer">
+            ntyu2
+          </a>
+          {' and '}
+          <a href="https://github.com/KsoisDev" target="_blank" rel="noopener noreferrer">
+            Ksois
+          </a>
         </p>
       </div>
     </footer>

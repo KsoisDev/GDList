@@ -83,7 +83,6 @@
     gap: 10px;
   }
 
-  .tableHeader > :nth-child(2),
   .tableHeader > :nth-child(4) {
     display: none;
   }
@@ -101,12 +100,29 @@
   gap: 4px;
 }
 
+.rankA11y {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .playerInfo {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
   text-decoration: none;
   color: inherit;
+}
+
+.colPlayer {
+  min-width: 0;
 }
 
 .flagImg {
@@ -118,12 +134,15 @@
 }
 
 .playerInfo:hover .username {
-  color: var(--accent-green);
+  color: var(--accent-blue);
 }
 
 .username {
+  overflow: hidden;
   font-weight: 600;
   font-size: 0.9375rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   transition: color var(--transition-fast);
 }
 
@@ -139,6 +158,10 @@
 }
 
 .empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
   padding: 48px 20px;
   text-align: center;
   color: var(--text-secondary);

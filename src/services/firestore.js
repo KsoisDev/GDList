@@ -16,8 +16,22 @@ import {
 } from 'firebase/firestore'
 import { db } from './firebase'
 
+const READ_TIMEOUT_MS = 10000
+const ASSIGNABLE_ROLES = new Set(['user', 'admin', 'owner', 'developer'])
+
+function withReadTimeout(promise, label) {
+  let timer
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} took too long. Check your connection and try again.`)), READ_TIMEOUT_MS)
+  })
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer))
+}
+
 export async function getDocument(collectionName, id) {
-  const snap = await getDoc(doc(db, collectionName, id))
+  const snap = await withReadTimeout(
+    getDoc(doc(db, collectionName, id)),
+    `Loading ${collectionName}`,
+  )
   return snap.exists() ? { id: snap.id, ...snap.data() } : null
 }
 
@@ -25,7 +39,7 @@ export async function getCollection(collectionName, constraints = []) {
   const q = constraints.length > 0
     ? query(collection(db, collectionName), ...constraints)
     : collection(db, collectionName)
-  const snap = await getDocs(q)
+  const snap = await withReadTimeout(getDocs(q), `Loading ${collectionName}`)
   return snap.docs.map(d => ({ id: d.id, ...d.data() }))
 }
 
@@ -43,6 +57,31 @@ export async function updateDocument(collectionName, id, data) {
   const ref = doc(db, collectionName, id)
   await updateDoc(ref, { ...data, updatedAt: serverTimestamp() })
   return id
+}
+
+export async function updateUserRole(userId, nextRole, displayName = '') {
+  if (!ASSIGNABLE_ROLES.has(nextRole)) {
+    throw new Error('That account role is not supported.')
+  }
+
+  const batch = writeBatch(db)
+  const now = serverTimestamp()
+  batch.update(doc(db, 'users', userId), { role: nextRole, updatedAt: now })
+
+  const staffRef = doc(db, 'staff', userId)
+  if (nextRole === 'developer') {
+    batch.set(staffRef, {
+      userId,
+      title: 'List Developer',
+      displayName,
+      updatedAt: now,
+    }, { merge: true })
+  } else {
+    batch.delete(staffRef)
+  }
+
+  await batch.commit()
+  return userId
 }
 
 export async function deleteDocument(collectionName, id) {

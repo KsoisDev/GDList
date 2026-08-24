@@ -1,11 +1,20 @@
 import { deleteUser } from 'firebase/auth'
 import { where, doc, updateDoc, deleteDoc } from 'firebase/firestore'
 import { auth, db } from './firebase'
-import { getCollection } from './firestore'
+import { getCollection, getDocument } from './firestore'
+import { recalculateCommunityScores } from './communityList'
 
 export async function deleteAccount(userId) {
-  const results = { submissions: 0, completions: 0, notifications: 0, levels: 0 }
+  const results = { submissions: 0, completions: 0, notifications: 0, levels: 0, usernames: 0, staff: 0 }
   const errors = []
+
+  try {
+    const profile = await getDocument('users', userId)
+    if (profile?.usernameLower) {
+      await deleteDoc(doc(db, 'usernames', profile.usernameLower))
+      results.usernames++
+    }
+  } catch (e) { errors.push(`username: ${e.message}`) }
 
   try {
     const userSubs = await getCollection('submissions', [where('userId', '==', userId)])
@@ -41,7 +50,18 @@ export async function deleteAccount(userId) {
       })
       results.levels++
     }
+    if (affectedLevels.some(level => level.type === 'community')) {
+      await recalculateCommunityScores()
+    }
   } catch (e) { errors.push(`levels: ${e.message}`) }
+
+  try {
+    const staff = await getDocument('staff', userId)
+    if (staff) {
+      await deleteDoc(doc(db, 'staff', userId))
+      results.staff++
+    }
+  } catch (e) { errors.push(`staff: ${e.message}`) }
 
   try {
     await deleteDoc(doc(db, 'users', userId))

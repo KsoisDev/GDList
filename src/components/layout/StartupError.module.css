@@ -1,0 +1,61 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(67, 139, 255, 0.16), transparent 38%),
+    var(--bg-primary, #070b14);
+  color: var(--text-primary, #f5f7fb);
+}
+
+.card {
+  width: min(100%, 620px);
+  padding: clamp(28px, 5vw, 48px);
+  border: 1px solid rgba(109, 164, 255, 0.24);
+  border-radius: 18px;
+  background: rgba(12, 18, 31, 0.94);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.38);
+}
+
+.kicker {
+  display: block;
+  margin-bottom: 12px;
+  color: #6ca8ff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.card h1 {
+  margin: 0 0 14px;
+  font-size: clamp(1.7rem, 5vw, 2.5rem);
+  line-height: 1.1;
+}
+
+.card p {
+  margin: 0;
+  color: #aab3c5;
+  line-height: 1.7;
+}
+
+.card details {
+  margin-top: 24px;
+  color: #c8d0df;
+}
+
+.card summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.card details code {
+  display: block;
+  margin-top: 12px;
+  padding: 14px;
+  overflow-wrap: anywhere;
+  border-radius: 10px;
+  background: #070b14;
+  color: #8dbbff;
+}
