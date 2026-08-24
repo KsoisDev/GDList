@@ -22,17 +22,17 @@ export async function syncMainLevelsFromAredl() {
   const unmatched = []
 
   for (const level of levels) {
-    let match = byName.get(normalizeName(level.name))
-    if (!match && level.gameId) match = byGameId.get(String(level.gameId))
+    let match = level.gameId ? byGameId.get(String(level.gameId)) : null
+    if (!match) match = byName.get(normalizeName(level.name))
     if (!match) {
-      unmatched.push(level.id)
+      unmatched.push({ id: level.id, name: level.name })
       continue
     }
     updated.push({
       id: level.id,
       name: level.name,
       position: match.position,
-      points: match.points != null ? match.points : Math.max(1, 1001 - (match.position || 0)),
+      points: match.points != null ? match.points : (level.points || 0),
     })
   }
 
@@ -87,6 +87,24 @@ export async function mergeMainLevelDuplicates() {
   const duplicates = await getMainLevelDuplicates()
   const results = []
 
+  let aredlByName = null
+  const lookupAredlPoints = async name => {
+    if (!aredlByName) {
+      try {
+        const aredl = await fetchAredlLevels()
+        aredlByName = new Map()
+        aredl.forEach(l => {
+          const key = normalizeName(l.name)
+          if (key && !aredlByName.has(key)) aredlByName.set(key, l)
+        })
+      } catch {
+        aredlByName = new Map()
+      }
+    }
+    const hit = aredlByName.get(normalizeName(name))
+    return hit?.points != null ? roundPoints(hit.points) : 0
+  }
+
   for (const group of duplicates) {
     const sorted = [...group].sort((a, b) => canonicalScore(b) - canonicalScore(a))
     const canonical = sorted[0]
@@ -99,9 +117,8 @@ export async function mergeMainLevelDuplicates() {
     const mergedVictors = [...victorMap.values()]
 
     const finalPosition = canonical.position || 0
-    const finalPoints = finalPosition > 0
-      ? roundPoints(500 / (1 + Math.pow((finalPosition - 1) / 35, 0.85)))
-      : (canonical.points || 0)
+    let finalPoints = roundPoints(canonical.points || 0)
+    if (!(finalPoints > 0)) finalPoints = await lookupAredlPoints(canonical.name)
 
     const dates = group.map(l => l.firstCompletedAt?.toMillis?.() || 0).filter(Boolean)
     const firstCompletedAt = dates.length

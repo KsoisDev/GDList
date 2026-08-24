@@ -147,7 +147,7 @@ export default function ReviewSubmissions() {
           const suggestedPoints = isCommunitySub
             ? ''
             : (sub.adminLevelConfig?.points
-                || (aredlLevel?.points != null ? aredlLevel.points : (sub.demonPosition ? Math.max(1, 1001 - Number(sub.demonPosition)) : '')))
+                || (aredlLevel?.points != null ? aredlLevel.points : ''))
 
           return {
             ...sub,
@@ -381,6 +381,7 @@ export default function ReviewSubmissions() {
                 username: submitterName,
                 displayName: submitterName,
                 country: submitter?.country || '',
+                avatarURL: submitter?.avatarURL || '',
                 completionId: '',
                 completedAt: now,
                 videoURL: sub.videoURL || '',
@@ -414,6 +415,7 @@ export default function ReviewSubmissions() {
             username: submitterName,
             displayName: submitterName,
             country: submitter?.country || '',
+            avatarURL: submitter?.avatarURL || '',
             completionId: '',
             completedAt: now,
             videoURL: sub.videoURL || '',
@@ -533,7 +535,7 @@ export default function ReviewSubmissions() {
       const creator = level.creators?.[0] || config[subId]?.creator || 'Unknown'
       const verifier = level.verifier || sub.demonVerifier || ''
       const position = Number(level.position) || 0
-      const aredlPoints = level.points != null ? level.points : (position ? Math.max(1, 1001 - position) : 0)
+      const aredlPoints = level.points != null ? level.points : 0
       const prev = config[subId] || sub._initialConfig || emptyConfig
 
       setConfig(prevCfg => ({

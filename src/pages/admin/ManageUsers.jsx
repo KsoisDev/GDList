@@ -11,7 +11,7 @@ import Avatar from '../../components/ui/Avatar'
 import Modal from '../../components/ui/Modal'
 import Input from '../../components/ui/Input'
 import { useAuth } from '../../hooks/useAuth'
-import { getCollection, updateDocument, updateUserRole, createDocument } from '../../services/firestore'
+import { getCollection, updateDocument, updateUserRole, updateUserDeveloperFlag, createDocument } from '../../services/firestore'
 import { formatNumber, getDisplayName } from '../../utils/format'
 import { getFlagUrl } from '../../utils/countries'
 import { hasAccess } from '../../utils/constants'
@@ -53,11 +53,24 @@ export default function ManageUsers() {
     if (!isOwner) return
     setActionError('')
     try {
-      await updateUserRole(target.id, nextRole, getDisplayName(target))
+      await updateUserRole(target.id, nextRole)
       setUsers(prev => prev.map(u => u.id === target.id ? { ...u, role: nextRole } : u))
     } catch (err) {
       console.error(err)
       setActionError(err?.message || 'The role could not be updated.')
+    }
+  }
+
+  const toggleDeveloper = async target => {
+    if (!isOwner) return
+    setActionError('')
+    try {
+      const next = !target.isDeveloper
+      await updateUserDeveloperFlag(target.id, next, getDisplayName(target))
+      setUsers(prev => prev.map(u => u.id === target.id ? { ...u, isDeveloper: next } : u))
+    } catch (err) {
+      console.error(err)
+      setActionError(err?.message || 'The developer badge could not be updated.')
     }
   }
 
@@ -124,26 +137,27 @@ export default function ManageUsers() {
               </Link>
             </span>
             <span className={styles.roleCell} data-label="Role">
-              <RoleBadge role={u.role} username={u.username} />
+              <RoleBadge role={u.role} username={u.username} isDeveloper={u.isDeveloper} />
             </span>
             <span className={styles.points} data-label="Points">{formatNumber(u.stats?.totalPoints || 0)}</span>
             <span className={styles.completionCell} data-label="Completions">
               {(u.stats?.mainCompletions || 0) + (u.stats?.communityCompletions || 0)}
             </span>
             <span className={styles.actionButtons}>
-              {isOwner && (u.role !== 'owner' || u.id === user.uid) && (
+              {isOwner && (
                 <Button
                   variant="ghost"
                   size="sm"
                   icon={Code2}
-                  onClick={() => setRole(u, u.role === 'developer' ? (u.id === user.uid ? 'owner' : 'admin') : 'developer')}
+                  onClick={() => toggleDeveloper(u)}
+                  style={u.isDeveloper ? { color: 'var(--accent-blue)' } : undefined}
                 >
-                  {u.role === 'developer' ? 'Remove developer' : 'Make developer'}
+                  {u.isDeveloper ? 'Remove Dev Badge' : 'Add Dev Badge'}
                 </Button>
               )}
               {u.id !== user.uid && (
                 <>
-                  {isOwner && !['owner', 'developer'].includes(u.role) && (
+                  {isOwner && u.role !== 'owner' && (
                     <>
                       <Button
                         variant="ghost"

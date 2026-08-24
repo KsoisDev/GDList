@@ -70,7 +70,7 @@ export function mapAredlLevel(level) {
     id: level.slug,
     name: level.name,
     position: level.position,
-    points: level.points != null ? level.points : Math.max(1, 1001 - (level.position || 0)),
+    points: level.points != null ? level.points : 0,
     gameId: level.levelId != null ? String(level.levelId) : '',
     levelId: level.levelId,
     twoPlayer: Boolean(level.twoPlayer),

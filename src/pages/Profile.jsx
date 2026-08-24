@@ -182,7 +182,7 @@ export default function Profile() {
                 )}
               </h1>
               <div className={styles.meta}>
-                <RoleBadge role={profile.role} title={profile.teamTitle} username={profile.username} banned={profile.banned} />
+                <RoleBadge role={profile.role} title={profile.teamTitle} username={profile.username} banned={profile.banned} isDeveloper={profile.isDeveloper} />
                 {badges.firstVictor && (
                   <Badge variant="gold" size="sm" title="First victor of a community level">
                     <Crown size={12} /> First Victor

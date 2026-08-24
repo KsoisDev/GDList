@@ -1,26 +1,34 @@
+import { Fragment } from 'react'
 import { Ban, Code2, Crown, Shield, User as UserIcon } from 'lucide-react'
 import Badge from '../ui/Badge'
 
 const LIST_DEVELOPER_USERNAMES = new Set(['ntyu2', 'ksois'])
 
-export default function RoleBadge({ role = 'user', title = '', username = '', banned = false, size = 'sm' }) {
-  const isVerifiedListDeveloper = LIST_DEVELOPER_USERNAMES.has(username.trim().toLowerCase())
-
+export default function RoleBadge({ role = 'user', title = '', username = '', banned = false, isDeveloper = false, size = 'sm' }) {
   if (banned) {
     return <Badge variant="red" size={size}><Ban size={12} aria-hidden="true" /> Banned</Badge>
   }
 
-  if (role === 'developer' || title === 'List Developer' || isVerifiedListDeveloper) {
-    return <Badge variant="blue" size={size}><Code2 size={12} aria-hidden="true" /> List Developer</Badge>
-  }
+  const hasDevBadge = Boolean(isDeveloper)
+    || title === 'List Developer'
+    || LIST_DEVELOPER_USERNAMES.has(username.trim().toLowerCase())
 
-  if (role === 'owner') {
-    return <Badge variant="gold" size={size}><Crown size={12} aria-hidden="true" /> Owner</Badge>
-  }
+  const effectiveRole = role === 'developer' ? 'owner' : role
 
-  if (role === 'admin') {
-    return <Badge variant="purple" size={size}><Shield size={12} aria-hidden="true" /> Admin</Badge>
-  }
-
-  return <Badge variant="default" size={size}><UserIcon size={12} aria-hidden="true" /> Player</Badge>
+  return (
+    <Fragment>
+      {effectiveRole === 'owner' && (
+        <Badge variant="gold" size={size}><Crown size={12} aria-hidden="true" /> Owner</Badge>
+      )}
+      {effectiveRole === 'admin' && (
+        <Badge variant="purple" size={size}><Shield size={12} aria-hidden="true" /> Admin</Badge>
+      )}
+      {effectiveRole !== 'owner' && effectiveRole !== 'admin' && (
+        <Badge variant="default" size={size}><UserIcon size={12} aria-hidden="true" /> Player</Badge>
+      )}
+      {(hasDevBadge || effectiveRole === 'developer') && (
+        <Badge variant="blue" size={size}><Code2 size={12} aria-hidden="true" /> List Developer</Badge>
+      )}
+    </Fragment>
+  )
 }
