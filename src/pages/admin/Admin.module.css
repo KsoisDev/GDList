@@ -345,6 +345,67 @@
 .tableRow:hover { background: var(--bg-card); }
 .tableRow:active { cursor: grabbing; }
 
+.usersHeader,
+.usersRow {
+  grid-template-columns: minmax(220px, 1.8fr) minmax(100px, 0.75fr) minmax(90px, 0.55fr) minmax(100px, 0.65fr) minmax(220px, 1.5fr);
+  gap: 16px;
+}
+
+@media (max-width: 767px) {
+  .usersTable {
+    display: grid;
+    gap: 12px;
+    overflow: visible;
+    border: none;
+    border-radius: 0;
+  }
+
+  .usersHeader {
+    display: none;
+  }
+
+  .usersRow {
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+    padding: 14px;
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+  }
+
+  .usersRow .userCell,
+  .usersRow .actionButtons {
+    grid-column: 1 / -1;
+  }
+
+  .usersRow .roleCell,
+  .usersRow .points,
+  .usersRow .completionCell {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .usersRow .roleCell::before,
+  .usersRow .points::before,
+  .usersRow .completionCell::before {
+    content: attr(data-label);
+    color: var(--text-tertiary);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .usersRow .actionButtons {
+    padding-top: 4px;
+    border-top: 1px solid var(--border-glass);
+  }
+}
+
 .dragHandle {
   display: inline-flex;
   align-items: center;

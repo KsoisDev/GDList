@@ -96,8 +96,8 @@ export default function ManageUsers() {
 
   return (
     <PageShell title="Manage Users" subtitle={`${users.length} registered users`}>
-      <div className={styles.table}>
-        <div className={styles.tableHeader}>
+      <div className={`${styles.table} ${styles.usersTable}`}>
+        <div className={`${styles.tableHeader} ${styles.usersHeader}`}>
           <span>User</span>
           <span>Role</span>
           <span>Points</span>
@@ -105,7 +105,7 @@ export default function ManageUsers() {
           <span>Actions</span>
         </div>
         {users.map((u, i) => (
-          <motion.div key={u.id} className={styles.tableRow}
+          <motion.div key={u.id} className={`${styles.tableRow} ${styles.usersRow}`}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: Math.min(i, 12) * 0.01 }}
             style={u.banned ? { opacity: 0.5 } : {}}
           >
@@ -119,14 +119,16 @@ export default function ManageUsers() {
                 {u.banned && <Badge variant="danger" size="sm">Banned</Badge>}
               </Link>
             </span>
-            <span>
+            <span className={styles.roleCell} data-label="Role">
               <Badge variant={u.role === 'owner' ? 'gold' : u.role === 'admin' ? 'purple' : 'default'} size="sm">
                 {u.role === 'owner' ? <Crown size={12} /> : u.role === 'admin' ? <Shield size={12} /> : <UserIcon size={12} />}
                 {u.role}
               </Badge>
             </span>
-            <span className={styles.points}>{formatNumber(u.stats?.totalPoints || 0)}</span>
-            <span>{(u.stats?.mainCompletions || 0) + (u.stats?.communityCompletions || 0)}</span>
+            <span className={styles.points} data-label="Points">{formatNumber(u.stats?.totalPoints || 0)}</span>
+            <span className={styles.completionCell} data-label="Completions">
+              {(u.stats?.mainCompletions || 0) + (u.stats?.communityCompletions || 0)}
+            </span>
             <span className={styles.actionButtons}>
               {u.id !== user.uid && (
                 <>

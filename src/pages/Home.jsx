@@ -81,16 +81,50 @@ export default function Home() {
           completion.status !== 'rejected'
           && (completion.levelType === 'community' || communityLevelIds.has(completion.levelId))
         )
-        const namesById = Object.fromEntries(users.map(user => [user.id, getDisplayName(user)]))
+        const publicProfiles = {}
+        levels.forEach(level => {
+          ;(level.victors || []).forEach(victor => {
+            if (!victor.userId) return
+            publicProfiles[victor.userId] = {
+              id: victor.userId,
+              username: victor.username || victor.displayName || 'Basement player',
+              displayName: victor.displayName || victor.username || 'Basement player',
+              avatarURL: victor.avatarURL || '',
+              country: victor.country || '',
+            }
+          })
+        })
+        const profilesById = Object.fromEntries([
+          ...Object.values(publicProfiles).map(profile => [profile.id, profile]),
+          ...users.map(profile => [profile.id, profile]),
+        ])
+        const namesById = Object.fromEntries(
+          Object.values(profilesById).map(profile => [profile.id, getDisplayName(profile)]),
+        )
         const pointsMap = Object.fromEntries(
           communityLevels.filter(level => (level.position || 0) > 0).map(level => [level.id, level.position]),
         )
         const { totals } = computeUserCommunityPoints(communityCompletions, pointsMap)
-        const topMain = users
+        const mainTotals = completions.reduce((totalsByUser, completion) => {
+          if (completion.status === 'rejected' || completion.levelType === 'community' || !completion.userId) {
+            return totalsByUser
+          }
+          totalsByUser[completion.userId] = (totalsByUser[completion.userId] || 0) + (Number(completion.points) || 0)
+          return totalsByUser
+        }, {})
+        const leaderboardProfiles = Object.values(profilesById)
+        const topMain = leaderboardProfiles
+          .map(profile => ({
+            ...profile,
+            stats: {
+              ...profile.stats,
+              mainPoints: profile.stats?.mainPoints || mainTotals[profile.id] || 0,
+            },
+          }))
           .filter(user => (user.stats?.mainPoints || 0) > 0)
           .sort((a, b) => (b.stats?.mainPoints || 0) - (a.stats?.mainPoints || 0))
           .slice(0, 3)
-        const topCommunity = users
+        const topCommunity = leaderboardProfiles
           .map(user => ({ ...user, livePoints: totals[user.id] || 0 }))
           .filter(user => user.livePoints > 0)
           .sort((a, b) => b.livePoints - a.livePoints)
@@ -128,7 +162,7 @@ export default function Home() {
             newLevels,
             communityLevels: rankedLevels,
             stats: {
-              users: users.length,
+              users: Math.max(users.length, Object.keys(publicProfiles).length),
               records: communityCompletions.length,
               levels: communityLevels.length,
             },
