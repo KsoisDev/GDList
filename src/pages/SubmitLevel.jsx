@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Send, Youtube, User, FileText } from 'lucide-react'
+import { BadgeCheck, Send, Tags, Youtube, User, FileText, Video } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
+import ThemedPageHero from '../components/layout/ThemedPageHero'
 import Card from '../components/ui/Card'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
@@ -10,6 +11,7 @@ import { useAuth } from '../hooks/useAuth'
 import { getCollection, where, createDocument } from '../services/firestore'
 import { isValidVideoUrl } from '../utils/validators'
 import styles from './SubmitLevel.module.css'
+import theme from '../components/layout/ThemedPage.module.css'
 
 export default function SubmitLevel() {
   const { user, loading: authLoading } = useAuth()
@@ -40,7 +42,8 @@ export default function SubmitLevel() {
 
   if (authLoading) {
     return (
-      <PageShell title="Submit Level">
+      <PageShell className={theme.pageShell}>
+        <div className={theme.glow} aria-hidden="true" />
         <div className={styles.loadingCenter}><Spinner size="lg" /></div>
       </PageShell>
     )
@@ -111,8 +114,9 @@ export default function SubmitLevel() {
 
   if (success) {
     return (
-      <PageShell>
-        <Card padding="lg" className={styles.successCard}>
+      <PageShell className={theme.pageShell}>
+        <div className={theme.glow} aria-hidden="true" />
+        <Card padding="lg" className={`${styles.successCard} ${theme.successSurface}`}>
           <h2 className={styles.successTitle}>Level Submitted!</h2>
           <p className={styles.successText}>
             Your level has been submitted and is pending review by an admin.
@@ -131,9 +135,29 @@ export default function SubmitLevel() {
   }
 
   return (
-    <PageShell title="Submit Level" subtitle="Submit a new level for the community demon list">
-      <div className={styles.container}>
-        <Card padding="lg">
+    <PageShell className={theme.pageShell}>
+      <div className={theme.glow} aria-hidden="true" />
+      <ThemedPageHero
+        eyebrow="ADD TO THE COMMUNITY LIST"
+        title="Submit a"
+        accentTitle="Level"
+        description="Share a new Geometry Dash challenge with the Basement community and send it to the review team for placement."
+        stats={[
+          { icon: Video, value: 'Showcase proof', label: 'Attach a supported video' },
+          { icon: Tags, value: 'Level details', label: 'Creator, ID and tags stay intact' },
+          { icon: BadgeCheck, value: 'Review queue', label: 'Admins verify every submission', featured: true },
+        ]}
+      />
+
+      <section className={`${theme.surface} ${theme.formSurface}`} aria-label="Level submission form">
+        <div className={theme.surfaceHeading}>
+          <div>
+            <span className={theme.sectionLabel}>NEW COMMUNITY LEVEL</span>
+            <h2>Level details</h2>
+          </div>
+        </div>
+        <div className={`${styles.container} ${theme.formContainer}`}>
+        <Card padding="lg" className={theme.innerCard}>
           <form onSubmit={handleSubmit} className={styles.form}>
             <Input
               label="Level Name"
@@ -221,7 +245,8 @@ export default function SubmitLevel() {
             </Button>
           </form>
         </Card>
-      </div>
+        </div>
+      </section>
     </PageShell>
   )
 }

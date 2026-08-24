@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Edit3, Trash2, Youtube, X, Trophy } from 'lucide-react'
+import { Clock3, Edit3, ListChecks, Trash2, Youtube, X, Trophy } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
+import ThemedPageHero from '../components/layout/ThemedPageHero'
 import Card from '../components/ui/Card'
 import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
@@ -13,6 +14,7 @@ import { getCommunityLevels, deleteCommunityLevel } from '../services/communityL
 import { hasAccess } from '../utils/constants'
 import { getVideoThumbnail } from '../utils/video'
 import styles from './List.module.css'
+import theme from '../components/layout/ThemedPage.module.css'
 
 const TABS = [
   { id: 'active', label: 'Active' },
@@ -98,7 +100,33 @@ export default function CommunityList() {
   }
 
   return (
-    <PageShell title="Community Demon List" subtitle="Levels created and verified by our community members">
+    <PageShell className={theme.pageShell}>
+      <div className={theme.glow} aria-hidden="true" />
+      <ThemedPageHero
+        eyebrow="BUILT BY BASEMENT PLAYERS"
+        title="Community"
+        accentTitle="Demon List"
+        description="Discover original challenges created, submitted, and completed by members of the Basement community."
+        actions={[
+          { to: '/submit-level', label: 'Submit a level' },
+          { to: '/list/main', label: 'Main list' },
+        ]}
+        stats={[
+          { icon: ListChecks, value: loading ? '—' : active.length, label: 'Ranked levels' },
+          { icon: Trophy, value: loading ? '—' : active.reduce((sum, level) => sum + (level.victoryCount || 0), 0), label: 'Verified clears' },
+          { icon: Clock3, value: loading ? '—' : unverified.length, label: 'Awaiting verification', featured: true },
+        ]}
+      />
+
+      <section className={theme.surface} aria-label="Community list rankings">
+        <div className={theme.surfaceHeading}>
+          <div>
+            <span className={theme.sectionLabel}>COMMUNITY STANDINGS</span>
+            <h2>Original Basement levels</h2>
+          </div>
+          <span className={theme.count}>{visible.length} {visible.length === 1 ? 'level' : 'levels'}</span>
+        </div>
+
       <div className={styles.toolbar}>
         <div className={styles.toolbarLeft}>
           <span className={styles.count}>
@@ -301,6 +329,7 @@ export default function CommunityList() {
           })}
         </div>
       )}
+      </section>
     </PageShell>
   )
 }

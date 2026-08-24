@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Youtube, Send, ExternalLink } from 'lucide-react'
+import { Youtube, Send, ExternalLink, FileCheck2, ShieldCheck, Video } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
+import ThemedPageHero from '../components/layout/ThemedPageHero'
 import Card from '../components/ui/Card'
 import Input from '../components/ui/Input'
 import SearchSelect from '../components/ui/SearchSelect'
@@ -14,6 +15,7 @@ import { fetchAredlLevels } from '../services/aredl'
 import { findMainLevelByName } from '../services/mainLevels'
 import { isValidVideoUrl } from '../utils/validators'
 import styles from './SubmitRecord.module.css'
+import theme from '../components/layout/ThemedPage.module.css'
 
 export default function SubmitRecord() {
   const { user, loading: authLoading } = useAuth()
@@ -83,7 +85,8 @@ export default function SubmitRecord() {
 
   if (authLoading) {
     return (
-      <PageShell title="Submit Record">
+      <PageShell className={theme.pageShell}>
+        <div className={theme.glow} aria-hidden="true" />
         <div className={styles.loadingCenter}><Spinner size="lg" /></div>
       </PageShell>
     )
@@ -243,8 +246,9 @@ export default function SubmitRecord() {
 
   if (success) {
     return (
-      <PageShell>
-        <Card padding="lg" className={styles.successCard}>
+      <PageShell className={theme.pageShell}>
+        <div className={theme.glow} aria-hidden="true" />
+        <Card padding="lg" className={`${styles.successCard} ${theme.successSurface}`}>
           <h2 className={styles.successTitle}>Submission Sent!</h2>
           <p className={styles.successText}>
             Your record has been submitted and is pending review by an admin.
@@ -270,9 +274,29 @@ export default function SubmitRecord() {
   const hasFieldError = !!(selectionError || levelNameError || videoError || externalLinkError)
 
   return (
-    <PageShell title="Submit Record" subtitle="Submit a demon completion for verification">
-      <div className={styles.container}>
-        <Card padding="lg">
+    <PageShell className={theme.pageShell}>
+      <div className={theme.glow} aria-hidden="true" />
+      <ThemedPageHero
+        eyebrow="PROVE YOUR COMPLETION"
+        title="Submit a"
+        accentTitle="Record"
+        description="Send your completion proof to the Basement review team and add an approved clear to your profile and rankings."
+        stats={[
+          { icon: Video, value: 'Video proof', label: 'YouTube, Medal, TikTok or Drive' },
+          { icon: ShieldCheck, value: 'Admin review', label: 'Every record is checked' },
+          { icon: FileCheck2, value: 'Ranked result', label: 'Approved clears earn points', featured: true },
+        ]}
+      />
+
+      <section className={`${theme.surface} ${theme.formSurface}`} aria-label="Record submission form">
+        <div className={theme.surfaceHeading}>
+          <div>
+            <span className={theme.sectionLabel}>NEW COMPLETION</span>
+            <h2>Record details</h2>
+          </div>
+        </div>
+        <div className={`${styles.container} ${theme.formContainer}`}>
+        <Card padding="lg" className={theme.innerCard}>
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.typeToggle} role="group" aria-label="Choose list type">
               <button
@@ -405,7 +429,8 @@ export default function SubmitRecord() {
             </Button>
           </form>
         </Card>
-      </div>
+        </div>
+      </section>
     </PageShell>
   )
 }
