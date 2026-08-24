@@ -67,12 +67,11 @@ export default function Home() {
     setLoadError('')
 
     Promise.allSettled([
-      getCollection('users'),
       getCollection('completions'),
       getCollection('levels'),
     ])
-      .then(([usersResult, completionsResult, levelsResult]) => {
-        const users = usersResult.status === 'fulfilled' ? usersResult.value : []
+      .then(([completionsResult, levelsResult]) => {
+        const users = []
         const completions = completionsResult.status === 'fulfilled' ? completionsResult.value : []
         const levels = levelsResult.status === 'fulfilled' ? levelsResult.value : []
         const communityLevels = levels.filter(level => level.type === 'community')
@@ -167,7 +166,7 @@ export default function Home() {
               levels: communityLevels.length,
             },
           })
-          const partialFailure = [usersResult, completionsResult, levelsResult]
+          const partialFailure = [completionsResult, levelsResult]
             .some(result => result.status === 'rejected')
           setLoadError(partialFailure ? 'Some live community data could not be loaded.' : '')
         }
@@ -181,7 +180,7 @@ export default function Home() {
       })
 
     return () => { mounted = false }
-  }, [retryKey, user?.uid])
+  }, [retryKey])
 
   const activity = useMemo(() => {
     const records = highlights.recent.map(record => ({
