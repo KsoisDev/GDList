@@ -28,8 +28,8 @@
 }
 
 .typeBtn.active {
-  background: var(--accent-green);
-  color: var(--bg-primary);
+  background: var(--accent-blue);
+  color: #fff;
 }
 
 .typeBtn:not(.active):hover {
@@ -131,7 +131,7 @@
 .manualLabel {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--accent-green);
+  color: var(--accent-blue);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }

@@ -6,8 +6,9 @@ import PageShell from '../components/layout/PageShell'
 import Badge from '../components/ui/Badge'
 import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
+import Button from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
-import { getCollection } from '../services/firestore'
+import { getCollection, where } from '../services/firestore'
 import { formatNumber } from '../utils/format'
 import { DIFFICULTY_COLORS } from '../utils/constants'
 import styles from './List.module.css'
@@ -16,25 +17,29 @@ export default function MainList() {
   const { user } = useAuth()
   const [levels, setLevels] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const [retryKey, setRetryKey] = useState(0)
   const [search, setSearch] = useState('')
 
   useEffect(() => {
     async function load() {
       setLoading(true)
+      setLoadError('')
       try {
-        const data = await getCollection('levels')
+        const data = await getCollection('levels', [where('type', '==', 'main')])
         const withWins = data
-          .filter(l => l.type === 'main' && (l.victoryCount || 0) > 0)
+          .filter(l => (l.victoryCount || 0) > 0)
           .sort((a, b) => a.position - b.position)
-        setLevels(withWins)
+        setLevels(withWins.map((level, index) => ({ ...level, _webRank: index + 1 })))
       } catch (err) {
         console.error('Failed to load levels:', err)
+        setLoadError('The main list could not be loaded. Check your connection and try again.')
       } finally {
         setLoading(false)
       }
     }
     load()
-  }, [])
+  }, [retryKey])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -61,6 +66,11 @@ export default function MainList() {
 
       {loading ? (
         <div className={styles.loading}><Spinner size="lg" /></div>
+      ) : loadError ? (
+        <div className={styles.empty} role="alert">
+          <p>{loadError}</p>
+          <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>Try Again</Button>
+        </div>
       ) : filtered.length === 0 ? (
         <div className={styles.empty}>
           {search
@@ -86,11 +96,11 @@ export default function MainList() {
               key={level.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.02 }}
+              transition={{ delay: Math.min(i, 12) * 0.02 }}
             >
               <Link to={`/levels/${level.id}`} className={`${styles.rowMain} ${completed ? styles.completed : ''}`}>
                 <span className={styles.colWeb}>
-                  <span className={styles.webPos}>#{i + 1}</span>
+                  <span className={styles.webPos}>#{level._webRank}</span>
                 </span>
                 <span className={styles.colOff}>
                   <span className={styles.position}>#{level.position}</span>

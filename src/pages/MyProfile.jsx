@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Edit3, Save, X, Send, Shield, Youtube, Trash2, AlertTriangle, Crown } from 'lucide-react'
+import { Edit3, Save, X, Send, Shield, Youtube, Trash2, AlertTriangle, Crown, KeyRound, MailCheck } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import Card from '../components/ui/Card'
 import Avatar from '../components/ui/Avatar'
@@ -19,7 +19,14 @@ import { COUNTRIES, getFlagUrl } from '../utils/countries'
 import { deleteAccount } from '../services/deleteAccount'
 import { deleteCompletionRecord } from '../services/deleteCompletion'
 import { syncVictorsSnapshot } from '../services/syncUsernames'
-import { logout } from '../services/auth'
+import {
+  changePassword,
+  getAuthErrorMessage,
+  logout,
+  reauthenticateCurrentUser,
+  updateCurrentUserProfile,
+  usesPasswordProvider,
+} from '../services/auth'
 import Modal from '../components/ui/Modal'
 import { hasAccess } from '../utils/constants'
 import styles from './Profile.module.css'
@@ -35,19 +42,23 @@ export default function MyProfile() {
   const [bio, setBio] = useState('')
   const [country, setCountry] = useState('')
   const [saving, setSaving] = useState(false)
+  const [profileMessage, setProfileMessage] = useState('')
+  const [profileError, setProfileError] = useState('')
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [changingPassword, setChangingPassword] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordMessage, setPasswordMessage] = useState('')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [deletePassword, setDeletePassword] = useState('')
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [completionDeleting, setCompletionDeleting] = useState(false)
   const [completionDeleteError, setCompletionDeleteError] = useState('')
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/login')
-    }
-  }, [user, authLoading, navigate])
 
   useEffect(() => {
     if (userData) {
@@ -62,13 +73,12 @@ export default function MyProfile() {
     if (!user) return
     try {
       const [comps, communityLevels] = await Promise.all([
-        getCollection('completions'),
+        getCollection('completions', [where('userId', '==', user.uid)]),
         getCollection('levels', [where('type', '==', 'community')]),
       ])
       const posMap = {}
       communityLevels.forEach(l => { posMap[l.id] = l.position })
       const userComps = comps
-        .filter(c => c.userId === user.uid)
         .map(c => {
           if (c.levelType === 'community') {
             const pos = posMap[c.levelId]
@@ -95,7 +105,10 @@ export default function MyProfile() {
   const handleSave = async () => {
     if (!user || !displayName.trim()) return
     setSaving(true)
+    setProfileError('')
+    setProfileMessage('')
     try {
+      await updateCurrentUserProfile(displayName, avatarURL)
       await updateDocument('users', user.uid, {
         displayName: displayName.trim(),
         avatarURL: avatarURL.trim() || '',
@@ -109,8 +122,10 @@ export default function MyProfile() {
       }
       await refreshUserData()
       setEditing(false)
+      setProfileMessage('Profile updated successfully.')
     } catch (err) {
       console.error('Failed to update profile:', err)
+      setProfileError(getAuthErrorMessage(err))
     } finally {
       setSaving(false)
     }
@@ -128,13 +143,42 @@ export default function MyProfile() {
     setDeleting(true)
     setDeleteError('')
     try {
+      await reauthenticateCurrentUser(deletePassword)
       await deleteAccount(user.uid)
       await logout()
       navigate('/')
     } catch (err) {
-      setDeleteError(err.message)
+      setDeleteError(getAuthErrorMessage(err))
     } finally {
       setDeleting(false)
+    }
+  }
+
+  const handleChangePassword = async (event) => {
+    event.preventDefault()
+    setPasswordError('')
+    setPasswordMessage('')
+    if (newPassword.length < 8) {
+      setPasswordError('Use a new password with at least 8 characters.')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('The new passwords do not match.')
+      return
+    }
+
+    setChangingPassword(true)
+    try {
+      await changePassword(currentPassword, newPassword)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      setPasswordMessage('Password changed successfully.')
+      setShowPasswordModal(false)
+    } catch (err) {
+      setPasswordError(getAuthErrorMessage(err))
+    } finally {
+      setChangingPassword(false)
     }
   }
 
@@ -170,6 +214,7 @@ export default function MyProfile() {
   const communityPointsLive = communityComps.reduce((sum, c) => sum + (c.points || 0), 0)
   const mainPoints = stats.mainPoints || 0
   const totalPointsLive = parseFloat((mainPoints + communityPointsLive).toFixed(2))
+  const passwordAccount = usesPasswordProvider(user)
 
   return (
     <PageShell>
@@ -201,8 +246,9 @@ export default function MyProfile() {
                     options={COUNTRIES.map(c => ({ value: c.code, label: c.name }))}
                   />
                   <div className={styles.fieldGroup}>
-                    <label className={styles.fieldLabel}>Bio</label>
+                    <label className={styles.fieldLabel} htmlFor="profile-bio">Bio</label>
                     <textarea
+                      id="profile-bio"
                       className={styles.textarea}
                       value={bio}
                       onChange={e => setBio(e.target.value)}
@@ -258,6 +304,9 @@ export default function MyProfile() {
           </div>
         </Card>
 
+        {profileMessage && <p className={styles.successMessage} role="status">{profileMessage}</p>}
+        {profileError && <p className={styles.formError} role="alert">{profileError}</p>}
+
         <div className={styles.statsGrid}>
           <Card className={styles.statCard}>
             <span className={styles.statValue}>{formatNumber(totalPointsLive)}</span>
@@ -278,21 +327,73 @@ export default function MyProfile() {
         </div>
 
         <div className={styles.actions}>
-          <Link to="/submit">
-            <Button variant="primary" icon={Send}>Submit Record</Button>
-          </Link>
+          <Button to="/submit" variant="primary" icon={Send}>Submit Record</Button>
           {hasAccess(userData.role, 'admin') && (
-            <Link to="/admin">
-              <Button variant="secondary" icon={Shield}>Admin Panel</Button>
-            </Link>
+            <Button to="/admin" variant="secondary" icon={Shield}>Admin Panel</Button>
           )}
         </div>
 
+        <Card padding="lg" className={styles.accountSettings}>
+          <div className={styles.accountHeading}>
+            <div>
+              <span className={styles.accountEyebrow}>Account security</span>
+              <h2>Sign-in settings</h2>
+            </div>
+            <Shield size={20} aria-hidden="true" />
+          </div>
+          <div className={styles.accountRows}>
+            <div className={styles.accountRow}>
+              <div>
+                <span className={styles.accountLabel}>Email</span>
+                <strong>{user.email || 'No email available'}</strong>
+              </div>
+              <span className={`${styles.accountStatus} ${user.emailVerified ? styles.verified : styles.unverified}`}>
+                <MailCheck size={14} /> {user.emailVerified ? 'Verified' : 'Not verified'}
+              </span>
+            </div>
+            <div className={styles.accountRow}>
+              <div>
+                <span className={styles.accountLabel}>Sign-in method</span>
+                <strong>{passwordAccount ? 'Email and password' : 'Google'}</strong>
+              </div>
+              <div className={styles.accountActions}>
+                {!user.emailVerified && passwordAccount && (
+                  <Button to="/verify-email" variant="secondary" size="sm">Verify Email</Button>
+                )}
+                {passwordAccount && (
+                  <Button variant="secondary" size="sm" icon={KeyRound} onClick={() => { setPasswordError(''); setShowPasswordModal(true) }}>
+                    Change Password
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+          {passwordMessage && <p className={styles.successMessage} role="status">{passwordMessage}</p>}
+        </Card>
+
         <div className={styles.dangerZone}>
-          <Button variant="danger" icon={Trash2} onClick={() => setShowDeleteModal(true)} fullWidth>
+          <div>
+            <span className={styles.accountEyebrow}>Danger zone</span>
+            <p>Permanently remove your profile, records, and sign-in account.</p>
+          </div>
+          <Button variant="danger" icon={Trash2} onClick={() => setShowDeleteModal(true)}>
             Delete Account
           </Button>
         </div>
+
+        <Modal isOpen={showPasswordModal} onClose={() => !changingPassword && setShowPasswordModal(false)} title="Change Password">
+          <form className={styles.securityForm} onSubmit={handleChangePassword}>
+            <p>Confirm your current password, then choose a new password with at least 8 characters.</p>
+            <Input label="Current password" type="password" autoComplete="current-password" value={currentPassword} onChange={event => setCurrentPassword(event.target.value)} required />
+            <Input label="New password" type="password" autoComplete="new-password" value={newPassword} onChange={event => setNewPassword(event.target.value)} required />
+            <Input label="Confirm new password" type="password" autoComplete="new-password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} required />
+            {passwordError && <p className={styles.formError} role="alert">{passwordError}</p>}
+            <div className={styles.deleteActions}>
+              <Button variant="ghost" onClick={() => setShowPasswordModal(false)} disabled={changingPassword}>Cancel</Button>
+              <Button type="submit" variant="primary" loading={changingPassword}>Update Password</Button>
+            </div>
+          </form>
+        </Modal>
 
         <Modal isOpen={showDeleteModal} onClose={() => !deleting && setShowDeleteModal(false)} title="Delete Account">
           <div className={styles.deleteModalContent}>
@@ -307,18 +408,34 @@ export default function MyProfile() {
               <li>Your Firebase Auth account</li>
             </ul>
             <p className={styles.deleteNote}>This action cannot be undone.</p>
-            {deleteError && <p className={styles.deleteError}>{deleteError}</p>}
+            {deleteError && <p className={styles.deleteError} role="alert">{deleteError}</p>}
             <p className={styles.deletePrompt}>Type <strong>deleteaccount</strong> to confirm:</p>
             <Input
+              label="Confirmation text"
               placeholder="deleteaccount"
               value={deleteConfirmText}
               onChange={e => setDeleteConfirmText(e.target.value)}
             />
+            {passwordAccount && (
+              <Input
+                label="Current password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="Required to confirm your identity"
+                value={deletePassword}
+                onChange={event => setDeletePassword(event.target.value)}
+              />
+            )}
             <div className={styles.deleteActions}>
               <Button variant="ghost" onClick={() => setShowDeleteModal(false)} disabled={deleting}>
                 Cancel
               </Button>
-              <Button variant="danger" onClick={handleDeleteAccount} loading={deleting} disabled={deleteConfirmText.trim().toLowerCase() !== 'deleteaccount'}>
+              <Button
+                variant="danger"
+                onClick={handleDeleteAccount}
+                loading={deleting}
+                disabled={deleteConfirmText.trim().toLowerCase() !== 'deleteaccount' || (passwordAccount && !deletePassword)}
+              >
                 Delete My Account
               </Button>
             </div>
@@ -339,7 +456,7 @@ export default function MyProfile() {
                 {' · +'} {deleteTarget.points} pts
               </p>
             )}
-            {completionDeleteError && <p className={styles.deleteError}>{completionDeleteError}</p>}
+            {completionDeleteError && <p className={styles.deleteError} role="alert">{completionDeleteError}</p>}
             <div className={styles.reportActions}>
               <Button variant="ghost" onClick={() => setDeleteTarget(null)} disabled={completionDeleting}>Cancel</Button>
               <Button variant="danger" onClick={handleDeleteCompletion} loading={completionDeleting} icon={Trash2}>
@@ -362,7 +479,7 @@ export default function MyProfile() {
                         className={styles.completion}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.03 }}
+                        transition={{ delay: Math.min(i, 12) * 0.03 }}
                       >
                         <div className={styles.compInfo}>
                           <span className={styles.compLevel}>
@@ -373,15 +490,23 @@ export default function MyProfile() {
                         <div className={styles.compRight}>
                           <span className={styles.compPoints}>+{comp.points} pts</span>
                           {comp.videoURL && (
-                            <a href={comp.videoURL} target="_blank" rel="noopener noreferrer" className={styles.compVideo}>
-                              <Youtube size={16} />
+                            <a
+                              href={comp.videoURL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={styles.compVideo}
+                              aria-label={`Watch ${comp.levelName || 'level'} completion video`}
+                            >
+                              <Youtube size={16} aria-hidden="true" />
                             </a>
                           )}
                           {hasAccess(userData.role, 'admin') && (
                             <button
+                              type="button"
                               className={styles.compDelete}
                               onClick={() => setDeleteTarget(comp)}
                               title="Delete this record"
+                              aria-label={`Delete ${comp.levelName || 'record'}`}
                             >
                               <Trash2 size={16} />
                             </button>
@@ -403,24 +528,34 @@ export default function MyProfile() {
                         className={styles.completion}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.03 }}
+                        transition={{ delay: Math.min(i, 12) * 0.03 }}
                       >
                         <div className={styles.compInfo}>
-                          <span className={styles.compLevel}>{comp.levelName || 'Unknown Level'}</span>
+                          <span className={styles.compLevel}>
+                            <Link to={`/levels/${comp.levelId}`} className={styles.compLink}>{comp.levelName || 'Unknown Level'}</Link>
+                          </span>
                           <span className={styles.compDate}>{formatDate(comp.completedAt)}</span>
                         </div>
                         <div className={styles.compRight}>
                           <span className={styles.compPoints}>+{comp.points} pts</span>
                           {comp.videoURL && (
-                            <a href={comp.videoURL} target="_blank" rel="noopener noreferrer" className={styles.compVideo}>
-                              <Youtube size={16} />
+                            <a
+                              href={comp.videoURL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={styles.compVideo}
+                              aria-label={`Watch ${comp.levelName || 'level'} completion video`}
+                            >
+                              <Youtube size={16} aria-hidden="true" />
                             </a>
                           )}
                           {hasAccess(userData.role, 'admin') && (
                             <button
+                              type="button"
                               className={styles.compDelete}
                               onClick={() => setDeleteTarget(comp)}
                               title="Delete this record"
+                              aria-label={`Delete ${comp.levelName || 'record'}`}
                             >
                               <Trash2 size={16} />
                             </button>

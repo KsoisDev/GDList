@@ -43,9 +43,8 @@ export default function Profile() {
       setProfile(uData)
 
       if (uData) {
-        const comps = await getCollection('completions')
+        const comps = await getCollection('completions', [where('userId', '==', uid)])
         const userComps = comps
-          .filter(c => c.userId === uid)
           .sort((a, b) => {
             const ta = a.completedAt?.toMillis?.() || 0
             const tb = b.completedAt?.toMillis?.() || 0
@@ -187,7 +186,7 @@ export default function Profile() {
         <Modal isOpen={reportModal} onClose={() => setReportModal(false)} title="Report User">
           <div className={styles.reportModal}>
             <p className={styles.reportDesc}>Report this user to the owner.</p>
-            <Input placeholder="Reason..." value={reportReason} onChange={e => setReportReason(e.target.value)} />
+            <Input label="Report reason" placeholder="Reason..." value={reportReason} onChange={e => setReportReason(e.target.value)} />
             <div className={styles.reportActions}>
               <Button variant="ghost" onClick={() => setReportModal(false)} disabled={sendingReport}>Cancel</Button>
               <Button variant="danger" onClick={async () => {
@@ -246,7 +245,7 @@ export default function Profile() {
                   className={styles.completion}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.03 }}
+                  transition={{ delay: Math.min(i, 12) * 0.03 }}
                 >
                   <div className={styles.compInfo}>
                     <span className={styles.compLevel}>
@@ -257,15 +256,23 @@ export default function Profile() {
                   <div className={styles.compRight}>
                     <span className={styles.compPoints}>+{comp.points} pts</span>
                     {comp.videoURL && (
-                      <a href={comp.videoURL} target="_blank" rel="noopener noreferrer" className={styles.compVideo}>
-                        <Youtube size={16} />
+                      <a
+                        href={comp.videoURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.compVideo}
+                        aria-label={`Watch ${comp.levelName || 'level'} completion video`}
+                      >
+                        <Youtube size={16} aria-hidden="true" />
                       </a>
                     )}
                     {isAdmin && (
                       <button
+                        type="button"
                         className={styles.compDelete}
                         onClick={() => setDeleteTarget(comp)}
                         title="Delete this record"
+                        aria-label={`Delete ${comp.levelName || 'record'}`}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -287,7 +294,7 @@ export default function Profile() {
                   className={styles.completion}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.03 }}
+                  transition={{ delay: Math.min(i, 12) * 0.03 }}
                 >
                   <div className={styles.compInfo}>
                     <span className={styles.compLevel}>{comp.levelName || 'Unknown Level'}</span>
@@ -296,15 +303,23 @@ export default function Profile() {
                   <div className={styles.compRight}>
                     <span className={styles.compPoints}>+{comp.points} pts</span>
                     {comp.videoURL && (
-                      <a href={comp.videoURL} target="_blank" rel="noopener noreferrer" className={styles.compVideo}>
-                        <Youtube size={16} />
+                      <a
+                        href={comp.videoURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.compVideo}
+                        aria-label={`Watch ${comp.levelName || 'level'} completion video`}
+                      >
+                        <Youtube size={16} aria-hidden="true" />
                       </a>
                     )}
                     {isAdmin && (
                       <button
+                        type="button"
                         className={styles.compDelete}
                         onClick={() => setDeleteTarget(comp)}
                         title="Delete this record"
+                        aria-label={`Delete ${comp.levelName || 'record'}`}
                       >
                         <Trash2 size={16} />
                       </button>

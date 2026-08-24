@@ -4,6 +4,64 @@
   padding: 80px 0;
 }
 
+.statePage {
+  width: min(100% - 32px, 560px);
+  min-height: calc(100vh - var(--navbar-height) - 160px);
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 48px 0;
+}
+
+.stateCard {
+  width: 100%;
+  padding: 32px;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.stateTitle {
+  margin-bottom: 10px;
+  color: var(--text-primary);
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
+}
+
+.stateMessage {
+  margin: 0 auto 22px;
+  max-width: 46ch;
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+}
+
+.stateButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 20px;
+  border: 1px solid rgba(68, 136, 255, 0.45);
+  border-radius: var(--radius-sm);
+  background: var(--accent-blue-dim);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.stateButton:hover {
+  border-color: var(--accent-blue);
+  background: rgba(68, 136, 255, 0.25);
+  color: var(--text-primary);
+}
+
+.stateButton:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 3px;
+}
+
 .banner {
   display: flex;
   align-items: center;

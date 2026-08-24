@@ -113,8 +113,8 @@
 
 .quickLink:hover {
   background: var(--bg-glass);
-  border-color: var(--accent-green);
-  color: var(--accent-green);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
 }
 
 .formCard {
@@ -413,7 +413,7 @@
 }
 
 .userLink:hover {
-  color: var(--accent-green);
+  color: var(--accent-blue);
 }
 
 .submissionsList {
@@ -486,7 +486,7 @@
 }
 
 .noteInput:focus {
-  border-color: var(--accent-green);
+  border-color: var(--accent-blue);
 }
 
 .actionBtns {
@@ -608,13 +608,13 @@
 }
 
 .tabActive {
-  background: var(--accent-green);
-  color: var(--bg-primary);
+  background: var(--accent-blue);
+  color: #fff;
 }
 
 .tabActive:hover {
-  background: var(--accent-green);
-  color: var(--bg-primary);
+  background: var(--accent-blue);
+  color: #fff;
 }
 
 .tabCount {
@@ -627,7 +627,7 @@
 
 .tabActive .tabCount {
   background: rgba(0,0,0,0.2);
-  color: var(--bg-primary);
+  color: #fff;
 }
 
 .subNote {

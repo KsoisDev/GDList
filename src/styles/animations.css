@@ -69,8 +69,8 @@
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.1); }
-  50% { box-shadow: 0 0 40px rgba(0, 255, 136, 0.2); }
+  0%, 100% { box-shadow: 0 0 20px rgba(68, 136, 255, 0.1); }
+  50% { box-shadow: 0 0 40px rgba(68, 136, 255, 0.2); }
 }
 
 @keyframes float {

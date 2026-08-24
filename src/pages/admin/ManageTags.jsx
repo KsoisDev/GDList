@@ -99,6 +99,7 @@ export default function ManageTags() {
                 className={styles.tagColorInput}
                 value={form.color}
                 onChange={e => setForm({ ...form, color: e.target.value })}
+                aria-label="Custom tag color"
               />
               {COLOR_PRESETS.map(c => (
                 <button
@@ -135,15 +136,27 @@ export default function ManageTags() {
         <div className={styles.tagsTable}>
           {tags.map((tag, i) => (
             <motion.div key={tag.id} className={styles.tagsRow}
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: Math.min(i, 12) * 0.02 }}
             >
               <span className={styles.tagPreview} style={{ background: tag.color || '#888' }}>
                 {tag.name}
               </span>
               <span className={styles.tagId}>{tag.id}</span>
               <span className={styles.tagsActions}>
-                <Button variant="ghost" size="sm" onClick={() => handleEdit(tag)} icon={Edit3} />
-                <Button variant="ghost" size="sm" onClick={() => handleDelete(tag.id)} icon={Trash2} />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEdit(tag)}
+                  icon={Edit3}
+                  aria-label={`Edit ${tag.name}`}
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDelete(tag.id)}
+                  icon={Trash2}
+                  aria-label={`Delete ${tag.name}`}
+                />
               </span>
             </motion.div>
           ))}

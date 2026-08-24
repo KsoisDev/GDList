@@ -67,7 +67,7 @@ export default function ManageReports() {
               key={r.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.03 }}
+              transition={{ delay: Math.min(i, 12) * 0.03 }}
             >
               <Card padding="md" className={styles.submissionCard}>
                 <div className={styles.subHeader}>
@@ -79,7 +79,7 @@ export default function ManageReports() {
                   </div>
                 </div>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  <strong>Target:</strong> <Link to={`/profile/${r.targetId}`} style={{ color: 'var(--accent-green)' }}>{r.targetId}</Link>
+                  <strong>Target:</strong> <Link to={`/profile/${r.targetId}`} style={{ color: 'var(--accent-blue)' }}>{r.targetId}</Link>
                 </p>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
                   <strong>Reason:</strong> {r.reason}

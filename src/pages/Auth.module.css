@@ -1,59 +1,124 @@
-.page {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 100px 24px 48px;
-  min-height: 100vh;
-}
-
-.container {
-  width: 100%;
-  max-width: 420px;
-}
-
-.card {
+.authContent {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 22px;
 }
 
 .header {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.kicker {
+  color: #72a9ff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
 }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: 800;
-  margin-bottom: 8px;
+  color: #f6f8fc;
+  font-size: clamp(1.65rem, 3vw, 2.1rem);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
 }
 
 .subtitle {
-  font-size: 0.9375rem;
-  color: var(--text-secondary);
+  color: #9cacbf;
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+
+.subtitle strong {
+  color: #dbe7f7;
 }
 
 .form {
   display: flex;
   flex-direction: column;
+  gap: 15px;
+}
+
+.passwordGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.passwordHint {
+  margin-top: -6px;
+  color: #7d8fa8;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.formOptions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 16px;
+  flex-wrap: wrap;
+}
+
+.checkRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #a8b6c9;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+
+.checkRow input {
+  width: 15px;
+  height: 15px;
+  accent-color: #4488ff;
+}
+
+.forgotRow {
+  margin-top: -7px;
+  text-align: right;
+  font-size: 0.78rem;
+}
+
+.forgotRow a,
+.footer a,
+.backLink,
+.laterLink {
+  color: #72a9ff;
+  font-weight: 700;
+}
+
+.error,
+.notice {
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
 .error {
-  font-size: 0.8125rem;
-  color: var(--accent-red);
-  text-align: center;
-  padding: 8px 12px;
-  background: var(--accent-red-dim);
-  border-radius: var(--radius-sm);
+  color: #ff9caf;
+  border: 1px solid rgba(255, 68, 102, 0.23);
+  background: rgba(255, 68, 102, 0.09);
+}
+
+.notice {
+  color: #a9caff;
+  border: 1px solid rgba(68, 136, 255, 0.24);
+  background: rgba(68, 136, 255, 0.09);
 }
 
 .divider {
   display: flex;
   align-items: center;
-  gap: 16px;
-  color: var(--text-tertiary);
-  font-size: 0.8125rem;
+  gap: 14px;
+  color: #71839c;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .divider::before,
@@ -61,15 +126,99 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--border-glass);
+  background: rgba(127, 153, 190, 0.15);
 }
 
 .footer {
+  color: #8495ad;
+  font-size: 0.8rem;
   text-align: center;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
 }
 
-.footer a {
-  font-weight: 600;
+.backLink {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+}
+
+.successPanel {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 13px;
+  color: #b8cff3;
+  text-align: center;
+  border: 1px solid rgba(68, 136, 255, 0.22);
+  border-radius: 12px;
+  background: rgba(68, 136, 255, 0.08);
+}
+
+.successPanel > svg {
+  color: #72a9ff;
+}
+
+.successPanel h3 {
+  color: #f4f7fb;
+  font-size: 1.05rem;
+}
+
+.successPanel p {
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.successPanel a {
+  width: 100%;
+}
+
+.iconBadge {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  color: #77adff;
+  border: 1px solid rgba(119, 173, 255, 0.24);
+  border-radius: 13px;
+  background: rgba(68, 136, 255, 0.1);
+}
+
+.stackActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.laterLink {
+  padding: 5px;
+  font-size: 0.76rem;
+  text-align: center;
+}
+
+.centerStatus {
+  min-height: 220px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  color: #9cacbf;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 480px) {
+  .authContent {
+    gap: 19px;
+  }
+
+  .passwordGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formOptions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 9px;
+  }
 }

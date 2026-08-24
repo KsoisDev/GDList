@@ -143,7 +143,7 @@
 }
 
 .compLink:hover {
-  color: var(--accent-green);
+  color: var(--accent-blue);
 }
 
 .compDate {
@@ -258,7 +258,7 @@
 }
 
 .textarea:focus {
-  border-color: var(--accent-green);
+  border-color: var(--accent-blue);
 }
 
 .editActions {
@@ -275,6 +275,120 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.successMessage,
+.formError {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+}
+
+.successMessage {
+  color: #9fc3ff;
+  border: 1px solid rgba(68, 136, 255, 0.2);
+  background: var(--accent-blue-dim);
+}
+
+.formError {
+  color: #ff9caf;
+  border: 1px solid rgba(255, 68, 102, 0.2);
+  background: var(--accent-red-dim);
+}
+
+.accountSettings {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border-color: rgba(68, 136, 255, 0.18);
+}
+
+.accountHeading,
+.accountRow,
+.dangerZone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.accountHeading > svg {
+  color: var(--accent-blue);
+}
+
+.accountHeading h2 {
+  margin-top: 3px;
+  font-size: 1.1rem;
+}
+
+.accountEyebrow,
+.accountLabel {
+  display: block;
+  color: var(--text-tertiary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.accountRows {
+  overflow: hidden;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+}
+
+.accountRow {
+  min-height: 72px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.accountRow + .accountRow {
+  border-top: 1px solid var(--border-glass);
+}
+
+.accountRow strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.875rem;
+}
+
+.accountStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.verified {
+  color: var(--accent-green);
+  background: var(--accent-green-dim);
+}
+
+.unverified {
+  color: var(--accent-gold);
+  background: var(--accent-gold-dim);
+}
+
+.accountActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.securityForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.securityForm > p {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
 }
 
 .reportModal {
@@ -334,6 +448,16 @@
 
 .dangerZone {
   margin-top: 16px;
+  padding: 18px;
+  border: 1px solid rgba(255, 68, 102, 0.2);
+  border-radius: var(--radius-md);
+  background: rgba(255, 68, 102, 0.045);
+}
+
+.dangerZone p {
+  margin-top: 4px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
 }
 
 .deleteModalContent {
@@ -390,4 +514,47 @@
 
 .deleteActions > * {
   flex: 1;
+}
+
+@media (max-width: 560px) {
+  .headerContent {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .username {
+    font-size: 1.4rem;
+    overflow-wrap: anywhere;
+  }
+
+  .editBtn {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .accountRow,
+  .dangerZone {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .accountActions {
+    justify-content: flex-start;
+  }
+
+  .completion {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .compInfo {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .compRight {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }

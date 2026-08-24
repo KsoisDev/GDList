@@ -1,4 +1,4 @@
-const AREDL_DATA_URL = import.meta.env.VITE_AREDL_DATA_URL || '/aredl-levels.json'
+const AREDL_DATA_URL = import.meta.env.VITE_AREDL_DATA_URL || `${import.meta.env.BASE_URL}aredl-levels.json`
 const AREDL_LIVE_URL = import.meta.env.VITE_AREDL_LIVE_URL || 'https://api.aredl.net/v2/api/aredl/levels?exclude_legacy=true'
 const LIVE_MERGE_MS = 10000
 

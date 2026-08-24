@@ -106,7 +106,7 @@ export default function ManageUsers() {
         </div>
         {users.map((u, i) => (
           <motion.div key={u.id} className={styles.tableRow}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.01 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: Math.min(i, 12) * 0.01 }}
             style={u.banned ? { opacity: 0.5 } : {}}
           >
             <span className={styles.userCell}>
@@ -171,6 +171,7 @@ export default function ManageUsers() {
             Report this user to the owner. Provide a reason for the report.
           </p>
           <Input
+            label="Report reason"
             placeholder="Reason for report..."
             value={reportReason}
             onChange={e => setReportReason(e.target.value)}

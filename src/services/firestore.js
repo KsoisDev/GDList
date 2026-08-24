@@ -16,8 +16,21 @@ import {
 } from 'firebase/firestore'
 import { db } from './firebase'
 
+const READ_TIMEOUT_MS = 10000
+
+function withReadTimeout(promise, label) {
+  let timer
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} took too long. Check your connection and try again.`)), READ_TIMEOUT_MS)
+  })
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer))
+}
+
 export async function getDocument(collectionName, id) {
-  const snap = await getDoc(doc(db, collectionName, id))
+  const snap = await withReadTimeout(
+    getDoc(doc(db, collectionName, id)),
+    `Loading ${collectionName}`,
+  )
   return snap.exists() ? { id: snap.id, ...snap.data() } : null
 }
 
@@ -25,7 +38,7 @@ export async function getCollection(collectionName, constraints = []) {
   const q = constraints.length > 0
     ? query(collection(db, collectionName), ...constraints)
     : collection(db, collectionName)
-  const snap = await getDocs(q)
+  const snap = await withReadTimeout(getDocs(q), `Loading ${collectionName}`)
   return snap.docs.map(d => ({ id: d.id, ...d.data() }))
 }
 

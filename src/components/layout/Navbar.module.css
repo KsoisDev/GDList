@@ -45,7 +45,7 @@
   gap: 4px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1080px) {
   .desktopNav {
     display: flex;
   }
@@ -82,7 +82,7 @@
   display: none;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1080px) {
   .profileWrapper {
     display: block;
   }
@@ -153,7 +153,7 @@
   display: none;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1080px) {
   .authButtons {
     display: flex;
   }
@@ -169,7 +169,7 @@
   padding: 8px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1080px) {
   .menuBtn {
     display: none;
   }
@@ -359,11 +359,17 @@
 
 .notifItem {
   display: flex;
+  width: 100%;
   gap: 12px;
   padding: 12px 16px;
   cursor: pointer;
   transition: background var(--transition-fast);
   border-bottom: 1px solid var(--border-glass);
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  color: inherit;
+  text-align: left;
 }
 
 .notifItem:last-child {

@@ -16,7 +16,9 @@ export const ROLES = {
 export const HIERARCHY = { user: 0, admin: 1, owner: 2 }
 
 export function hasAccess(role, minRole) {
-  return (HIERARCHY[role] || 0) >= (HIERARCHY[minRole] || 0)
+  const roleLevel = HIERARCHY[role]
+  const requiredLevel = HIERARCHY[minRole]
+  return Number.isInteger(roleLevel) && Number.isInteger(requiredLevel) && roleLevel >= requiredLevel
 }
 
 export const SUBMISSION_STATUS = {

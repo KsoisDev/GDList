@@ -12,7 +12,7 @@
 .code {
   font-size: 6rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+  background: linear-gradient(135deg, #80b2ff, var(--accent-blue));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

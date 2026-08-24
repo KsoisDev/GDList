@@ -20,6 +20,7 @@ import {
   Youtube,
 } from 'lucide-react'
 import Avatar from '../components/ui/Avatar'
+import { useAuth } from '../hooks/useAuth'
 import { getCollection } from '../services/firestore'
 import { formatDateRelative, formatNumber, getDisplayName } from '../utils/format'
 import { getFlagUrl } from '../utils/countries'
@@ -53,12 +54,17 @@ const emptyHighlights = {
 }
 
 export default function Home() {
+  const { user } = useAuth()
   const [highlights, setHighlights] = useState(emptyHighlights)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const [retryKey, setRetryKey] = useState(0)
   const [listMode, setListMode] = useState('main')
 
   useEffect(() => {
     let mounted = true
+    setLoading(true)
+    setLoadError('')
 
     Promise.all([
       getCollection('users'),
@@ -113,13 +119,16 @@ export default function Home() {
           })
         }
       })
-      .catch(error => console.error('Failed to load home data:', error))
+      .catch(error => {
+        console.error('Failed to load home data:', error)
+        if (mounted) setLoadError('Live community data could not be loaded.')
+      })
       .finally(() => {
         if (mounted) setLoading(false)
       })
 
     return () => { mounted = false }
-  }, [])
+  }, [retryKey])
 
   const activity = useMemo(() => {
     const records = highlights.recent.map(record => ({
@@ -151,7 +160,7 @@ export default function Home() {
   const activeListHref = listMode === 'main' ? '/list/main' : '/list/community'
 
   return (
-    <main className={styles.page}>
+    <main id="main-content" className={styles.page} tabIndex={-1}>
       <div className={styles.ambientGlow} aria-hidden="true" />
       <div className={styles.sceneLines} aria-hidden="true" />
       <div className={styles.depthMarker} aria-hidden="true">
@@ -215,6 +224,12 @@ export default function Home() {
               <Youtube size={14} /> YouTube
             </a>
           </div>
+          {loadError && (
+            <div className={styles.dataNotice} role="alert">
+              <span>{loadError}</span>
+              <button type="button" onClick={() => setRetryKey(key => key + 1)}>Try again</button>
+            </div>
+          )}
         </motion.div>
 
         <motion.aside
@@ -227,7 +242,7 @@ export default function Home() {
           <div className={styles.spotlightTopline}>
             <div>
               <span className={styles.liveDot} />
-              <span>LIVE RANKING</span>
+              <span>CURRENT RANKING</span>
             </div>
             <Link to={activeListHref}>Open full list <ArrowRight size={14} /></Link>
           </div>
@@ -385,8 +400,12 @@ export default function Home() {
           <h2>Make your run part of the list.</h2>
         </div>
         <div>
-          <Link className={styles.primaryAction} to="/submit">Submit a record <ArrowRight size={17} /></Link>
-          <Link className={styles.textAction} to="/register">Create an account</Link>
+          <Link className={styles.primaryAction} to={user ? '/submit' : '/register'}>
+            {user ? 'Submit a record' : 'Create an account'} <ArrowRight size={17} />
+          </Link>
+          <Link className={styles.textAction} to={user ? '/profile' : '/login'}>
+            {user ? 'My profile' : 'Sign in'}
+          </Link>
         </div>
       </section>
     </main>

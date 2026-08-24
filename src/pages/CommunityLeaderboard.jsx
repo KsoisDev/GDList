@@ -6,6 +6,7 @@ import PageShell from '../components/layout/PageShell'
 import Avatar from '../components/ui/Avatar'
 import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
+import Button from '../components/ui/Button'
 import { getCollection, where } from '../services/firestore'
 import { computeUserCommunityPoints } from '../services/communityList'
 import { formatNumber, getDisplayName } from '../utils/format'
@@ -15,10 +16,14 @@ import styles from './Leaderboard.module.css'
 export default function CommunityLeaderboard() {
   const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const [retryKey, setRetryKey] = useState(0)
   const [search, setSearch] = useState('')
 
   useEffect(() => {
     async function load() {
+      setLoading(true)
+      setLoadError('')
       try {
         const [users, comps, levels] = await Promise.all([
           getCollection('users'),
@@ -38,15 +43,16 @@ export default function CommunityLeaderboard() {
           .filter(u => u.liveCommunityPoints > 0)
           .sort((a, b) => b.liveCommunityPoints - a.liveCommunityPoints)
           .slice(0, 100)
-        setPlayers(sorted)
+        setPlayers(sorted.map((player, index) => ({ ...player, _rank: index + 1 })))
       } catch (err) {
         console.error('Failed to load community leaderboard:', err)
+        setLoadError('The community leaderboard could not be loaded.')
       } finally {
         setLoading(false)
       }
     }
     load()
-  }, [])
+  }, [retryKey])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -58,9 +64,9 @@ export default function CommunityLeaderboard() {
   }, [players, search])
 
   const getRankIcon = (pos) => {
-    if (pos === 0) return <Trophy size={20} style={{ color: 'var(--accent-gold)' }} />
-    if (pos === 1) return <Medal size={20} style={{ color: '#c0c0c0' }} />
-    if (pos === 2) return <Medal size={20} style={{ color: '#cd7f32' }} />
+    if (pos === 0) return <Trophy size={20} style={{ color: 'var(--accent-gold)' }} aria-hidden="true" />
+    if (pos === 1) return <Medal size={20} style={{ color: '#c0c0c0' }} aria-hidden="true" />
+    if (pos === 2) return <Medal size={20} style={{ color: '#cd7f32' }} aria-hidden="true" />
     return null
   }
 
@@ -80,6 +86,11 @@ export default function CommunityLeaderboard() {
         <div className={styles.loading}>
           <Spinner size="lg" />
         </div>
+      ) : loadError ? (
+        <div className={styles.empty} role="alert">
+          <p>{loadError}</p>
+          <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>Try Again</Button>
+        </div>
       ) : (
         <div className={styles.table}>
           <div className={styles.tableHeader}>
@@ -95,11 +106,12 @@ export default function CommunityLeaderboard() {
               className={styles.tableRow}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.02 }}
+              transition={{ delay: Math.min(i, 12) * 0.02 }}
             >
               <span className={styles.colRank}>
                 <span className={styles.rank}>
-                  {getRankIcon(i) || `#${i + 1}`}
+                  <span className={styles.rankA11y}>Rank {player._rank}</span>
+                  <span aria-hidden="true">{getRankIcon(player._rank - 1) || `#${player._rank}`}</span>
                 </span>
               </span>
               <span className={styles.colPlayer}>

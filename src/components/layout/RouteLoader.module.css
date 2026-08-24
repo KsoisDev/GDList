@@ -1,0 +1,10 @@
+.loader {
+  min-height: calc(100vh - var(--navbar-height));
+  padding-top: var(--navbar-height);
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}

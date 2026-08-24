@@ -334,6 +334,29 @@
   border-color: rgba(111, 165, 255, 0.4);
 }
 
+.dataNotice {
+  width: fit-content;
+  margin-top: 14px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #a9bad2;
+  border: 1px solid rgba(255, 184, 76, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 184, 76, 0.06);
+  font-size: 0.72rem;
+}
+
+.dataNotice button {
+  padding: 2px 0;
+  color: #ffc66d;
+  border: 0;
+  background: transparent;
+  font-size: inherit;
+  font-weight: 800;
+}
+
 .listSpotlight {
   position: relative;
   overflow: hidden;

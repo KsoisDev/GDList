@@ -2,6 +2,7 @@ import { doc, writeBatch } from 'firebase/firestore'
 import { db } from './firebase'
 import { getDocument } from './firestore'
 import { communityPoints, roundPoints } from '../utils/communityPoints'
+import { recalculateCommunityScores } from './communityList'
 
 export async function deleteCompletionRecord(completionId) {
   const completion = await getDocument('completions', completionId)
@@ -49,5 +50,8 @@ export async function deleteCompletionRecord(completionId) {
   }
 
   await batch.commit()
+  if (completion.levelType === 'community' && level) {
+    await recalculateCommunityScores()
+  }
   return { removedPoints }
 }

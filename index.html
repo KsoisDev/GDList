@@ -6,6 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0a0a1a" />
     <meta name="description" content="Basement List - Geometry Dash Community Demon List & Leaderboards for tnaillzxgd Discord" />
+    <script>
+      (() => {
+        try {
+          const redirect = sessionStorage.getItem('gdlist.redirect') || sessionStorage.getItem('redirect')
+          sessionStorage.removeItem('gdlist.redirect')
+          sessionStorage.removeItem('redirect')
+          if (!redirect) return
+
+          const base = '%BASE_URL%'
+          if (base === '/') return
+
+          const target = new URL(redirect)
+          const basePath = base.endsWith('/') ? base.slice(0, -1) : base
+          const isAppPath = target.pathname === basePath || target.pathname.startsWith(`${basePath}/`)
+          if (target.origin === location.origin && isAppPath) {
+            history.replaceState(null, '', `${target.pathname}${target.search}${target.hash}`)
+          }
+        } catch {
+          // Continue at the app root if storage or URL parsing is unavailable.
+        }
+      })()
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />

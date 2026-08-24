@@ -263,31 +263,38 @@ export default function SubmitRecord() {
   }
 
   const levelOptions = getLevelOptions()
+  const selectionError = error === 'Please select a level' ? error : ''
+  const levelNameError = error === 'Please enter the level name' ? error : ''
+  const videoError = error.startsWith('Please provide a valid video URL') ? error : ''
+  const externalLinkError = error === 'Link must be from demonlist.org' ? error : ''
+  const hasFieldError = !!(selectionError || levelNameError || videoError || externalLinkError)
 
   return (
     <PageShell title="Submit Record" subtitle="Submit a demon completion for verification">
       <div className={styles.container}>
         <Card padding="lg">
           <form onSubmit={handleSubmit} className={styles.form}>
-            <div className={styles.typeToggle}>
+            <div className={styles.typeToggle} role="group" aria-label="Choose list type">
               <button
                 type="button"
                 className={`${styles.typeBtn} ${levelType === 'main' ? styles.active : ''}`}
-                onClick={() => setLevelType('main')}
+                onClick={() => { setLevelType('main'); setError('') }}
+                aria-pressed={levelType === 'main'}
               >
                 Main List
               </button>
               <button
                 type="button"
                 className={`${styles.typeBtn} ${levelType === 'community' ? styles.active : ''}`}
-                onClick={() => setLevelType('community')}
+                onClick={() => { setLevelType('community'); setError('') }}
+                aria-pressed={levelType === 'community'}
               >
                 Community List
               </button>
             </div>
 
             {loadError && (
-              <p className={styles.error}>{loadError}</p>
+              <p className={styles.error} role="alert">{loadError}</p>
             )}
 
             {!manualMode ? (
@@ -298,6 +305,7 @@ export default function SubmitRecord() {
                   options={levelOptions}
                   value={levelType === 'main' ? (selectedDemon ? String(selectedDemon.id) : '') : (selectedDemon || '')}
                   onChange={e => {
+                    setError('')
                     if (levelType === 'main') {
                       const demon = demons.find(d => String(d.id) === e.target.value)
                       setSelectedDemon(demon || null)
@@ -305,7 +313,7 @@ export default function SubmitRecord() {
                       setSelectedDemon(e.target.value || null)
                     }
                   }}
-                  error={error && !selectedDemon ? error : ''}
+                  error={!selectedDemon ? selectionError : ''}
                   loading={loading}
                 />
                 {levelType === 'main' && sourceInfo && !loading && (
@@ -327,7 +335,7 @@ export default function SubmitRecord() {
                   <button
                     type="button"
                     className={styles.manualToggle}
-                    onClick={() => setManualMode(true)}
+                    onClick={() => { setManualMode(true); setError('') }}
                   >
                     <ExternalLink size={18} />
                     <span>
@@ -344,7 +352,7 @@ export default function SubmitRecord() {
                   <button
                     type="button"
                     className={styles.backBtn}
-                    onClick={() => setManualMode(false)}
+                    onClick={() => { setManualMode(false); setError('') }}
                   >
                     Back to search
                   </button>
@@ -354,7 +362,7 @@ export default function SubmitRecord() {
                   placeholder="e.g. Bloodbath"
                   value={manualLevelName}
                   onChange={e => setManualLevelName(e.target.value)}
-                  error={error && !manualLevelName.trim() ? error : ''}
+                  error={!manualLevelName.trim() ? levelNameError : ''}
                 />
                 <Input
                   label="Link (optional) — demonlist.org"
@@ -385,11 +393,11 @@ export default function SubmitRecord() {
               value={videoUrl}
               onChange={e => setVideoUrl(e.target.value)}
               icon={Youtube}
-              error={error && !isValidVideoUrl(videoUrl) ? error : ''}
+              error={!isValidVideoUrl(videoUrl) ? videoError : ''}
             />
 
-            {error && (
-              <p className={styles.error}>{error}</p>
+            {error && !hasFieldError && (
+              <p className={styles.error} role="alert">{error}</p>
             )}
 
             <Button type="submit" variant="primary" fullWidth loading={submitting} icon={Send}>

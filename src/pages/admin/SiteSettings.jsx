@@ -111,8 +111,9 @@ export default function SiteSettings() {
           </div>
 
           <div className={siteStyles.field}>
-            <label className={siteStyles.label}>Message shown to users</label>
+            <label className={siteStyles.label} htmlFor="maintenance-message">Message shown to users</label>
             <textarea
+              id="maintenance-message"
               className={siteStyles.textarea}
               value={message}
               onChange={e => setMessage(e.target.value)}
@@ -121,8 +122,8 @@ export default function SiteSettings() {
             />
           </div>
 
-          {error && <p className={styles.error}>{error}</p>}
-          {saved && <p className={siteStyles.saved}>Settings saved.</p>}
+          {error && <p className={styles.error} role="alert">{error}</p>}
+          {saved && <p className={siteStyles.saved} role="status">Settings saved.</p>}
 
           <div className={siteStyles.actions}>
             <Button variant="primary" onClick={handleSave} loading={saving} icon={Save}>

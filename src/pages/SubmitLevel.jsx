@@ -192,7 +192,7 @@ export default function SubmitLevel() {
             {tags.length > 0 && (
               <div className={styles.tagsField}>
                 <span className={styles.tagsLabel}>Tags</span>
-                <div className={styles.tagsRow}>
+                <div className={styles.tagsRow} role="group" aria-label="Choose level tags">
                   {tags.map(tag => {
                     const active = selectedTags.includes(tag.id)
                     return (
@@ -204,6 +204,7 @@ export default function SubmitLevel() {
                         onClick={() => setSelectedTags(prev =>
                           active ? prev.filter(id => id !== tag.id) : [...prev, tag.id]
                         )}
+                        aria-pressed={active}
                       >
                         {tag.name}
                       </button>
@@ -213,7 +214,7 @@ export default function SubmitLevel() {
               </div>
             )}
 
-            {error && <p className={styles.error}>{error}</p>}
+            {error && <p className={styles.error} role="alert">{error}</p>}
 
             <Button type="submit" variant="primary" fullWidth loading={submitting} icon={Send}>
               Submit Level

@@ -17,13 +17,13 @@
 }
 
 .primary {
-  background: var(--accent-green);
-  color: var(--bg-primary);
+  background: var(--accent-blue);
+  color: #ffffff;
 }
 
 .primary:hover:not(:disabled) {
-  background: #00cc6a;
-  box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+  background: #5b98ff;
+  box-shadow: 0 0 20px rgba(68, 136, 255, 0.3);
 }
 
 .secondary {
