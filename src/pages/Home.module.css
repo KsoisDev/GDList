@@ -581,6 +581,7 @@
 }
 
 .dashboard,
+.leaderboards,
 .leaders,
 .finalCta {
   position: relative;
@@ -588,6 +589,12 @@
   width: min(1000px, 100%);
   margin-right: auto;
   margin-left: auto;
+}
+
+.leaderboards {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
 }
 
 .dashboard {
@@ -778,11 +785,19 @@
 }
 
 .leaders {
-  margin-top: 18px;
+  margin-top: 0;
   padding: 20px 22px;
   border: 1px solid var(--home-line);
   border-radius: 15px;
   background: rgba(8, 16, 29, 0.9);
+}
+
+.leaderEmpty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 18px;
+  color: #69778d;
+  text-align: center;
 }
 
 .leadersHeading {

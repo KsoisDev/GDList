@@ -46,7 +46,8 @@ const communityBenefits = [
 ]
 
 const emptyHighlights = {
-  topPlayers: [],
+  topMain: [],
+  topCommunity: [],
   recent: [],
   newLevels: [],
   communityLevels: [],
@@ -85,7 +86,11 @@ export default function Home() {
           communityLevels.filter(level => (level.position || 0) > 0).map(level => [level.id, level.position]),
         )
         const { totals } = computeUserCommunityPoints(communityCompletions, pointsMap)
-        const topPlayers = users
+        const topMain = users
+          .filter(user => (user.stats?.mainPoints || 0) > 0)
+          .sort((a, b) => (b.stats?.mainPoints || 0) - (a.stats?.mainPoints || 0))
+          .slice(0, 3)
+        const topCommunity = users
           .map(user => ({ ...user, livePoints: totals[user.id] || 0 }))
           .filter(user => user.livePoints > 0)
           .sort((a, b) => b.livePoints - a.livePoints)
@@ -117,7 +122,8 @@ export default function Home() {
 
         if (mounted) {
           setHighlights({
-            topPlayers,
+            topMain,
+            topCommunity,
             recent,
             newLevels,
             communityLevels: rankedLevels,
@@ -363,28 +369,59 @@ export default function Home() {
         </motion.aside>
       </section>
 
-      {highlights.topPlayers.length > 0 && (
-        <section className={styles.leaders}>
-          <div className={styles.leadersHeading}>
-            <div>
-              <Crown size={18} />
-              <span>Players leading the Basement</span>
+      {(highlights.topMain.length > 0 || highlights.topCommunity.length > 0) && (
+        <section className={styles.leaderboards} aria-label="Top player rankings">
+          <article className={styles.leaders}>
+            <div className={styles.leadersHeading}>
+              <div>
+                <Crown size={18} />
+                <span>Main List leaders</span>
+              </div>
+              <Link to="/leaderboard/main">Full leaderboard <ArrowRight size={14} /></Link>
             </div>
-            <Link to="/leaderboard/community">Full leaderboard <ArrowRight size={14} /></Link>
-          </div>
-          <div className={styles.leaderList}>
-            {highlights.topPlayers.map((player, index) => (
-              <Link className={styles.leader} to={`/profile/${player.id}`} key={player.id}>
-                <span className={styles.leaderRank}>#{index + 1}</span>
-                <Avatar src={player.avatarURL} alt={getDisplayName(player)} size="sm" />
-                <strong>{getDisplayName(player)}</strong>
-                {getFlagUrl(player.country) && (
-                  <img src={getFlagUrl(player.country)} alt={player.country} loading="lazy" />
-                )}
-                <span>{formatNumber(player.livePoints || 0)} pts</span>
-              </Link>
-            ))}
-          </div>
+            <div className={styles.leaderList}>
+              {highlights.topMain.map((player, index) => (
+                <Link className={styles.leader} to={`/profile/${player.id}`} key={player.id}>
+                  <span className={styles.leaderRank}>#{index + 1}</span>
+                  <Avatar src={player.avatarURL} alt={getDisplayName(player)} size="sm" />
+                  <strong>{getDisplayName(player)}</strong>
+                  {getFlagUrl(player.country) && (
+                    <img src={getFlagUrl(player.country)} alt={player.country} loading="lazy" />
+                  )}
+                  <span>{formatNumber(player.stats?.mainPoints || 0)} pts</span>
+                </Link>
+              ))}
+              {highlights.topMain.length === 0 && (
+                <p className={styles.leaderEmpty}>No Main List points yet.</p>
+              )}
+            </div>
+          </article>
+
+          <article className={styles.leaders}>
+            <div className={styles.leadersHeading}>
+              <div>
+                <Crown size={18} />
+                <span>Community List leaders</span>
+              </div>
+              <Link to="/leaderboard/community">Full leaderboard <ArrowRight size={14} /></Link>
+            </div>
+            <div className={styles.leaderList}>
+              {highlights.topCommunity.map((player, index) => (
+                <Link className={styles.leader} to={`/profile/${player.id}`} key={player.id}>
+                  <span className={styles.leaderRank}>#{index + 1}</span>
+                  <Avatar src={player.avatarURL} alt={getDisplayName(player)} size="sm" />
+                  <strong>{getDisplayName(player)}</strong>
+                  {getFlagUrl(player.country) && (
+                    <img src={getFlagUrl(player.country)} alt={player.country} loading="lazy" />
+                  )}
+                  <span>{formatNumber(player.livePoints || 0)} pts</span>
+                </Link>
+              ))}
+              {highlights.topCommunity.length === 0 && (
+                <p className={styles.leaderEmpty}>No Community List points yet.</p>
+              )}
+            </div>
+          </article>
         </section>
       )}
 
