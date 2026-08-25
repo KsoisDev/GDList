@@ -37,7 +37,15 @@ export function loadMainLevels() {
 }
 
 export function loadCommunityLevels() {
-  return getCached('communityLevels', () => getCollection('levels', [where('type', '==', 'community')]), LIST_TTL_MS)
+  return getCached('communityLevels', async () => {
+    const data = await getCollection('levels', [where('type', '==', 'community')])
+    return data.sort((a, b) => {
+      const av = (a.victoryCount || 0) > 0 ? 0 : 1
+      const bv = (b.victoryCount || 0) > 0 ? 0 : 1
+      if (av !== bv) return av - bv
+      return (a.position || 0) - (b.position || 0)
+    })
+  }, LIST_TTL_MS)
 }
 
 export function loadTags() {
