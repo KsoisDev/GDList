@@ -22,7 +22,7 @@ import {
 import Avatar from '../components/ui/Avatar'
 import { useAuth } from '../hooks/useAuth'
 import { loadUsers, loadCommunityLevels } from '../services/readCache'
-import { getCollection, where, query, orderBy, limit } from '../services/firestore'
+import { getCollection, where } from '../services/firestore'
 import { formatDateRelative, formatNumber, getDisplayName } from '../utils/format'
 import { getFlagUrl } from '../utils/countries'
 import styles from './Home.module.css'
@@ -71,14 +71,18 @@ export default function Home() {
       loadCommunityLevels(),
       getCollection('completions', [
         where('levelType', '==', 'community'),
-        orderBy('completedAt', 'desc'),
-        limit(4),
       ]),
     ])
       .then(([usersResult, communityLevelsResult, recentResult]) => {
         const users = usersResult.status === 'fulfilled' ? usersResult.value : []
         const communityLevels = communityLevelsResult.status === 'fulfilled' ? communityLevelsResult.value : []
-        const recentCompletions = recentResult.status === 'fulfilled' ? recentResult.value : []
+        const recentCompletions = (recentResult.status === 'fulfilled' ? recentResult.value : [])
+          .sort((a, b) => {
+            const ta = a.completedAt?.toMillis?.() || 0
+            const tb = b.completedAt?.toMillis?.() || 0
+            return tb - ta
+          })
+          .slice(0, 4)
 
         const usersById = Object.fromEntries(users.map(u => [u.id, u]))
 
