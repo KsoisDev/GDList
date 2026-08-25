@@ -46,6 +46,7 @@ export async function recalcAllUsersPoints() {
   // 2. Refresh completion points from current level data and aggregate per user
   const refreshed = []
   const totals = new Map()
+  const completionCounts = new Map()
 
   for (const entry of kept.values()) {
     const c = entry.data
@@ -61,6 +62,10 @@ export async function recalcAllUsersPoints() {
     const agg = totals.get(c.userId) || { main: 0, community: 0 }
     agg[type] += points
     totals.set(c.userId, agg)
+
+    const counts = completionCounts.get(c.userId) || { main: 0, community: 0 }
+    counts[type] += 1
+    completionCounts.set(c.userId, counts)
   }
 
   // 3. Write batches: refreshed points, duplicate deletions, victor snapshots, user stats
@@ -130,10 +135,13 @@ export async function recalcAllUsersPoints() {
   usersSnap.forEach(d => {
     const u = d.data()
     const agg = totals.get(d.id) || { main: 0, community: 0 }
+    const counts = completionCounts.get(d.id) || { main: 0, community: 0 }
     const stats = {
       mainPoints: roundPoints(agg.main),
       communityPoints: roundPoints(agg.community),
       totalPoints: roundPoints(agg.main + agg.community),
+      mainCompletions: counts.main,
+      communityCompletions: counts.community,
     }
     const old = u.stats || {}
     if (
