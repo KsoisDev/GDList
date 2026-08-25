@@ -187,7 +187,7 @@ export default function CommunityList() {
           <Spinner size="lg" />
         </div>
       ) : loadError ? (
-        <Card padding="lg" className={styles.empty}>
+        <Card padding="lg" className={styles.errorState}>
           <p>{loadError}</p>
           <Button variant="secondary" size="sm" onClick={load}>Try Again</Button>
         </Card>

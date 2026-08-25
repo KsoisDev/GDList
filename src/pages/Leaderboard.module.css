@@ -166,3 +166,16 @@
   text-align: center;
   color: var(--text-secondary);
 }
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 48px 20px;
+  text-align: center;
+  color: #ff9caf;
+  border: 1px solid rgba(255, 68, 102, 0.2);
+  background: rgba(255, 68, 102, 0.06);
+  border-radius: var(--radius-lg);
+}

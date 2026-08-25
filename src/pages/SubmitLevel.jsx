@@ -238,7 +238,7 @@ export default function SubmitLevel() {
               </div>
             )}
 
-            {error && <p className={styles.error} role="alert">{error}</p>}
+            {error && <p className="errorPanel" role="alert">{error}</p>}
 
             <Button type="submit" variant="primary" fullWidth loading={submitting} icon={Send}>
               Submit Level

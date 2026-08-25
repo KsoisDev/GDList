@@ -851,7 +851,7 @@ export default function ReviewSubmissions() {
                     </Button>
                   </div>
                 </div>
-                {error && <p className={styles.error}>{error}</p>}
+                {error && <p className="errorPanel">{error}</p>}
               </Card>
             </motion.div>
           ))}

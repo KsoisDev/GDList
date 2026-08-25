@@ -191,12 +191,12 @@ export default function AdminDashboard() {
           </button>
         </div>
         {syncMessage && (
-          <p className={styles.error} style={{ marginTop: 16, color: syncError ? 'var(--accent-red)' : 'var(--accent-green)' }}>
+          <p className={syncError ? 'errorPanel' : 'successPanel'} style={{ marginTop: 16 }}>
             {syncMessage}
           </p>
         )}
         {recalcMessage && (
-          <p className={styles.error} style={{ marginTop: 8, color: recalcError ? 'var(--accent-red)' : 'var(--accent-green)' }}>
+          <p className={recalcError ? 'errorPanel' : 'successPanel'} style={{ marginTop: 8 }}>
             {recalcMessage}
           </p>
         )}

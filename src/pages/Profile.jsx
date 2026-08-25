@@ -285,7 +285,7 @@ export default function Profile() {
                 {' · +'} {deleteTarget.points} pts
               </p>
             )}
-            {deleteError && <p className={styles.deleteError}>{deleteError}</p>}
+            {deleteError && <p className={styles.deleteError} role="alert">{deleteError}</p>}
             <div className={styles.reportActions}>
               <Button variant="ghost" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button>
               <Button variant="danger" onClick={handleDeleteCompletion} loading={deleting} icon={Trash2}>

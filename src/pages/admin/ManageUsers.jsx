@@ -112,7 +112,7 @@ export default function ManageUsers() {
 
   return (
     <PageShell title="Manage Users" subtitle={`${users.length} registered users`}>
-      {actionError && <p className={styles.error} role="alert">{actionError}</p>}
+      {actionError && <p className="errorPanel" role="alert">{actionError}</p>}
       <div className={`${styles.table} ${styles.usersTable}`}>
         <div className={`${styles.tableHeader} ${styles.usersHeader}`}>
           <span>User</span>

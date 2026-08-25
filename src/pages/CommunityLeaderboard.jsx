@@ -107,7 +107,7 @@ export default function CommunityLeaderboard() {
           <Spinner size="lg" />
         </div>
       ) : loadError ? (
-        <div className={styles.empty} role="alert">
+        <div className={styles.errorState} role="alert">
           <p>{loadError}</p>
           <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>Try Again</Button>
         </div>
