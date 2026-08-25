@@ -76,7 +76,9 @@ export default function SubmitLevel() {
         return
       }
     } catch (err) {
-      console.warn('Duplicate check failed, continuing:', err)
+      console.error('Duplicate check failed:', err)
+      setError('Could not verify duplicates. Please try again.')
+      return
     }
 
     setSubmitting(true)

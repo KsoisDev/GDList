@@ -31,7 +31,7 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read: if isSelf(userId) || isAdmin();
+      allow read: if true;
 
       allow create: if isSelf(userId)
         && request.resource.data.keys().hasOnly([
