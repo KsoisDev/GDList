@@ -401,13 +401,14 @@
 }
 
 .notifMarkAll {
-  background: none;
+  background: transparent;
   border: none;
   color: var(--accent-blue);
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: opacity var(--transition-fast);
+  padding: 0;
 }
 
 .notifMarkAll:hover {
@@ -437,8 +438,11 @@
   border-top: 0;
   border-left: 0;
   border-right: 0;
+  border-radius: 0;
+  background: transparent;
   color: inherit;
   text-align: left;
+  font: inherit;
 }
 
 .notifItem:last-child {
