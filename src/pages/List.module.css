@@ -824,6 +824,27 @@
   background: rgba(12, 22, 38, 0.68);
 }
 
+.savedDataNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid rgba(240, 181, 72, 0.24);
+  border-radius: 12px;
+  background: rgba(111, 76, 14, 0.14);
+  color: #e8c77f;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 640px) {
+  .savedDataNotice {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 .mainThemedTable {
   border-color: rgba(111, 149, 205, 0.14);
   border-radius: 15px;

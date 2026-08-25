@@ -9,6 +9,7 @@ import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
 import { getCollection, where } from '../services/firestore'
+import { cacheMainLevels, getMainLevelsFallback } from '../services/mainListFallback'
 import { formatNumber } from '../utils/format'
 import { DIFFICULTY_COLORS } from '../utils/constants'
 import styles from './List.module.css'
@@ -18,6 +19,7 @@ export default function MainList() {
   const [levels, setLevels] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
+  const [loadNotice, setLoadNotice] = useState('')
   const [retryKey, setRetryKey] = useState(0)
   const [search, setSearch] = useState('')
 
@@ -25,15 +27,28 @@ export default function MainList() {
     async function load() {
       setLoading(true)
       setLoadError('')
+      setLoadNotice('')
       try {
         const data = await getCollection('levels', [where('type', '==', 'main')])
         const withWins = data
           .filter(l => (l.victoryCount || 0) > 0)
           .sort((a, b) => a.position - b.position)
+        cacheMainLevels(withWins)
         setLevels(withWins.map((level, index) => ({ ...level, _webRank: index + 1 })))
       } catch (err) {
         console.error('Failed to load levels:', err)
-        setLoadError('The main list could not be loaded. Check your connection and try again.')
+        try {
+          const fallback = await getMainLevelsFallback()
+          if (fallback.length === 0) throw new Error('The saved list is empty')
+          const rankedFallback = fallback
+            .sort((a, b) => a.position - b.position)
+            .map((level, index) => ({ ...level, _webRank: index + 1 }))
+          setLevels(rankedFallback)
+          setLoadNotice('Live updates are temporarily unavailable. Showing the last saved Basement ranking.')
+        } catch (fallbackError) {
+          console.error('Failed to load the saved main list:', fallbackError)
+          setLoadError('The main list could not be loaded. Check your connection and try again.')
+        }
       } finally {
         setLoading(false)
       }
@@ -112,6 +127,13 @@ export default function MainList() {
             className={styles.searchBar}
           />
         </div>
+
+        {loadNotice && (
+          <div className={styles.savedDataNotice} role="status">
+            <span>{loadNotice}</span>
+            <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>Refresh live list</Button>
+          </div>
+        )}
 
         {loading ? (
           <div className={styles.loading}><Spinner size="lg" /></div>

@@ -1,0 +1,2008 @@
+{
+  "version": 1,
+  "generatedAt": "2026-08-25T10:35:44.184Z",
+  "levels": [
+    {
+      "id": "main_652",
+      "name": "CHIL",
+      "position": 40,
+      "points": 340.7,
+      "creator": "McCoco",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "ITqtOoJb6mZLUOGaqUfDq7fTMm33"
+        }
+      ]
+    },
+    {
+      "id": "main_464",
+      "name": "poocubed",
+      "position": 55,
+      "points": 306.1,
+      "creator": "Liisp",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "ITqtOoJb6mZLUOGaqUfDq7fTMm33"
+        }
+      ]
+    },
+    {
+      "id": "main_496",
+      "name": "Saul Goodman",
+      "position": 58,
+      "points": 300.2,
+      "creator": "Renn241",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "ITqtOoJb6mZLUOGaqUfDq7fTMm33"
+        }
+      ]
+    },
+    {
+      "id": "main_630",
+      "name": "Sevvend Clubstep",
+      "position": 60,
+      "points": 296.3,
+      "creator": "cherryteam",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "ITqtOoJb6mZLUOGaqUfDq7fTMm33"
+        }
+      ]
+    },
+    {
+      "id": "main_526",
+      "name": "COMBUSTION",
+      "position": 63,
+      "points": 290.8,
+      "creator": "[SKWAD] Cersia",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "ITqtOoJb6mZLUOGaqUfDq7fTMm33"
+        }
+      ]
+    },
+    {
+      "id": "main_495",
+      "name": "Solar Flare",
+      "position": 70,
+      "points": 278.6,
+      "creator": "Linear",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "ITqtOoJb6mZLUOGaqUfDq7fTMm33"
+        }
+      ]
+    },
+    {
+      "id": "main_615",
+      "name": "Gaggatrondra",
+      "position": 73,
+      "points": 273.8,
+      "creator": "MoistyJc",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "ITqtOoJb6mZLUOGaqUfDq7fTMm33"
+        },
+        {
+          "userId": "Erv6JlXH5rQjmyFjx2BMaswKnQI2"
+        }
+      ]
+    },
+    {
+      "id": "main_521",
+      "name": "Damascus",
+      "position": 86,
+      "points": 254.8,
+      "creator": "Dzeser",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "ITqtOoJb6mZLUOGaqUfDq7fTMm33"
+        }
+      ]
+    },
+    {
+      "id": "main_590",
+      "name": "The Yangire",
+      "position": 89,
+      "points": 250.8,
+      "creator": "Dorami",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "ITqtOoJb6mZLUOGaqUfDq7fTMm33"
+        }
+      ]
+    },
+    {
+      "id": "main_687",
+      "name": "Trickshot",
+      "position": 96,
+      "points": 241.9,
+      "creator": "[DL] vonic",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "ITqtOoJb6mZLUOGaqUfDq7fTMm33"
+        }
+      ]
+    },
+    {
+      "id": "manual_the_golden",
+      "name": "The Golden",
+      "position": 117,
+      "points": 219,
+      "creator": "Bo",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "main_unknown",
+      "name": "UNKNOWN",
+      "position": 124,
+      "points": 212.3,
+      "creator": "NineDice",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "duh2zFN8z0cWQ6MzsmWkFXoEq103"
+        }
+      ]
+    },
+    {
+      "id": "main_zodiac",
+      "name": "Zodiac",
+      "position": 161,
+      "points": 182.8,
+      "creator": "BIANOX",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "uFRYBZTZLFSzYZUhZur1d92dvyC3"
+        }
+      ]
+    },
+    {
+      "id": "main_judgement_knights",
+      "name": "Judgement Knights",
+      "position": 167,
+      "points": 178.8,
+      "creator": "HangerLord",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "main_promethean",
+      "name": "Promethean",
+      "position": 177,
+      "points": 172.4,
+      "creator": "Endlevel",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "duh2zFN8z0cWQ6MzsmWkFXoEq103"
+        }
+      ]
+    },
+    {
+      "id": "main_shimmer_amplitron",
+      "name": "shimmer (amplitron)",
+      "position": 186,
+      "points": 167,
+      "creator": "Amplitron",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "aHWDAfQEmzOOJozXUZ6JQcrQJti1"
+        }
+      ]
+    },
+    {
+      "id": "main_crimson_planet",
+      "name": "Crimson Planet",
+      "position": 189,
+      "points": 165.3,
+      "creator": "TrueOmega",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "duh2zFN8z0cWQ6MzsmWkFXoEq103"
+        }
+      ]
+    },
+    {
+      "id": "main_cobwebs",
+      "name": "Cobwebs",
+      "position": 212,
+      "points": 153.2,
+      "creator": "NineDice",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "main_deep_bass",
+      "name": "Deep Bass",
+      "position": 230,
+      "points": 144.7,
+      "creator": "Wespdx",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "manual_bloodlust",
+      "name": "Bloodlust",
+      "position": 249,
+      "points": 136.7,
+      "creator": "knobbelboy",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "uFRYBZTZLFSzYZUhZur1d92dvyC3"
+        }
+      ]
+    },
+    {
+      "id": "manual_congregation",
+      "name": "Congregation",
+      "position": 266,
+      "points": 130.1,
+      "creator": "Presta",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "EqR5GgSHsicgqItAAJEWZD04dIw2"
+        }
+      ]
+    },
+    {
+      "id": "manual_knights_of_thunder",
+      "name": "Knights of Thunder",
+      "position": 274,
+      "points": 127.2,
+      "creator": "HangerLord",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        },
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "manual_death_corridor_z",
+      "name": "death corridor z",
+      "position": 304,
+      "points": 117.2,
+      "creator": "Sunix",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "manual_arctic_lights",
+      "name": "Arctic lights",
+      "position": 305,
+      "points": 116.9,
+      "creator": " Metalface221",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "main_hyper_paracosm",
+      "name": "Hyper Paracosm",
+      "position": 352,
+      "points": 103.6,
+      "creator": "iIiViRuZiIi",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "manual_wasureta",
+      "name": "Wasureta",
+      "position": 356,
+      "points": 102.6,
+      "creator": "Helpegasus",
+      "difficulty": "extreme",
+      "victoryCount": 3,
+      "victors": [
+        {
+          "userId": "eKtuVKuEfreD9fGhcx3M5YBoQ2i2"
+        },
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        },
+        {
+          "userId": "aHWDAfQEmzOOJozXUZ6JQcrQJti1"
+        }
+      ]
+    },
+    {
+      "id": "main_sonic_wave_rebirth",
+      "name": "Sonic Wave Rebirth",
+      "position": 372,
+      "points": 98.7,
+      "creator": "Serponge",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "duh2zFN8z0cWQ6MzsmWkFXoEq103"
+        },
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_sonic_wave",
+      "name": "Sonic Wave",
+      "position": 373,
+      "points": 98.5,
+      "creator": "Sunix",
+      "difficulty": "extreme",
+      "victoryCount": 4,
+      "victors": [
+        {
+          "userId": "PobUqE6hDqQcyGDARI1xGJM3aK13"
+        },
+        {
+          "userId": "7ybDr9rJ44dOpJEnV5usLGBs62t2"
+        },
+        {
+          "userId": "duh2zFN8z0cWQ6MzsmWkFXoEq103"
+        },
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_kuzureta",
+      "name": "kuzureta",
+      "position": 387,
+      "points": 95.2,
+      "creator": "Teno",
+      "difficulty": "extreme",
+      "victoryCount": 3,
+      "victors": [
+        {
+          "userId": "0ssKPyvK4bSHbxdLtpaiYOulcEz2"
+        },
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        },
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_molten_core",
+      "name": "Molten Core",
+      "position": 404,
+      "points": 91.5,
+      "creator": "Janucha",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        }
+      ]
+    },
+    {
+      "id": "manual_goner",
+      "name": "Goner",
+      "position": 406,
+      "points": 91.1,
+      "creator": "Nightning",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "iVBn9QmNLAbjps8ld2wKDdAa3Cs2"
+        }
+      ]
+    },
+    {
+      "id": "manual_devil_vortex",
+      "name": "Devil Vortex",
+      "position": 450,
+      "points": 82.4,
+      "creator": "Rustam",
+      "difficulty": "extreme",
+      "victoryCount": 3,
+      "victors": [
+        {
+          "userId": "GLYttSHzeNcW8tsRZ1zraEOdR5I3"
+        },
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        },
+        {
+          "userId": "duh2zFN8z0cWQ6MzsmWkFXoEq103"
+        }
+      ]
+    },
+    {
+      "id": "main_killbot",
+      "name": "Killbot",
+      "position": 508,
+      "points": 72.5,
+      "creator": "Bold",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "0dqhJD6WRvdcKX3U7LC4cGAC4mx1"
+        }
+      ]
+    },
+    {
+      "id": "manual_artificial_ascent",
+      "name": "Artificial Ascent",
+      "position": 516,
+      "points": 71.3,
+      "creator": "ZenthicAlpha",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "eKtuVKuEfreD9fGhcx3M5YBoQ2i2"
+        }
+      ]
+    },
+    {
+      "id": "manual_power_grid",
+      "name": "Power Grid",
+      "position": 522,
+      "points": 70.4,
+      "creator": "YraX",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "AIjB6ImOSugCXSBCiyVYFs03z7E3"
+        }
+      ]
+    },
+    {
+      "id": "manual_quantum_processing",
+      "name": "quantum processing",
+      "position": 549,
+      "points": 66.5,
+      "creator": "Riot",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        },
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        }
+      ]
+    },
+    {
+      "id": "manual_black_blizzard",
+      "name": "Black Blizzard",
+      "position": 555,
+      "points": 65.6,
+      "creator": "KrmaL",
+      "difficulty": "extreme",
+      "victoryCount": 3,
+      "victors": [
+        {
+          "userId": "uFRYBZTZLFSzYZUhZur1d92dvyC3"
+        },
+        {
+          "userId": "On2orbujNjZjpHJsgpqbG8VY4Gj2"
+        },
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_ethereal_artifice",
+      "name": "Ethereal Artifice",
+      "position": 558,
+      "points": 65.2,
+      "creator": "Zeroya",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        }
+      ]
+    },
+    {
+      "id": "manual_astral_divinity",
+      "name": "Astral Divinity",
+      "position": 566,
+      "points": 64.1,
+      "creator": "knobbelboy",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "GLYttSHzeNcW8tsRZ1zraEOdR5I3"
+        },
+        {
+          "userId": "duh2zFN8z0cWQ6MzsmWkFXoEq103"
+        }
+      ]
+    },
+    {
+      "id": "main_misfire",
+      "name": "MISFIRE",
+      "position": 574,
+      "points": 63.1,
+      "creator": "Galaxxyss",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "Q2Xjdi0B0HfiUFC96u2hviHREz03"
+        }
+      ]
+    },
+    {
+      "id": "main_bausha_vortex",
+      "name": "Bausha Vortex",
+      "position": 580,
+      "points": 62.3,
+      "creator": "Pennutoh",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        },
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "main_balengu_vortex",
+      "name": "Balengu Vortex",
+      "position": 584,
+      "points": 61.8,
+      "creator": "Temp",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_hatred",
+      "name": "Hatred",
+      "position": 611,
+      "points": 58.4,
+      "creator": "AZuLer4",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "manual_auditory_breaker",
+      "name": "Auditory Breaker",
+      "position": 624,
+      "points": 56.8,
+      "creator": "LazerBlitz",
+      "difficulty": "extreme",
+      "victoryCount": 3,
+      "victors": [
+        {
+          "userId": "PobUqE6hDqQcyGDARI1xGJM3aK13"
+        },
+        {
+          "userId": "eKtuVKuEfreD9fGhcx3M5YBoQ2i2"
+        },
+        {
+          "userId": "duh2zFN8z0cWQ6MzsmWkFXoEq103"
+        }
+      ]
+    },
+    {
+      "id": "manual_athanatos",
+      "name": "athanatos",
+      "position": 679,
+      "points": 50.8,
+      "creator": "exenity",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        },
+        {
+          "userId": "TLdSvAAbLURulwPX3E89DgU809L2"
+        }
+      ]
+    },
+    {
+      "id": "manual_wild_rose",
+      "name": "Wild Rose",
+      "position": 685,
+      "points": 50.2,
+      "creator": "Galaxxyss",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "Cb3bD50YRshMcA5KXsM5goDnGKv2"
+        }
+      ]
+    },
+    {
+      "id": "main_new_record",
+      "name": "New Record",
+      "position": 687,
+      "points": 49.9,
+      "creator": "Temp",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_cryothorn_hell",
+      "name": "cryothorn hell",
+      "position": 701,
+      "points": 48.5,
+      "creator": "twisterdude161",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "main_infernal_abyss",
+      "name": "Infernal Abyss",
+      "position": 707,
+      "points": 47.9,
+      "creator": "GgB0y",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "duh2zFN8z0cWQ6MzsmWkFXoEq103"
+        }
+      ]
+    },
+    {
+      "id": "main_hot_rod",
+      "name": "hot rod",
+      "position": 712,
+      "points": 47.4,
+      "creator": "stcubing",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "Q2Xjdi0B0HfiUFC96u2hviHREz03"
+        }
+      ]
+    },
+    {
+      "id": "manual_blade_of_justice",
+      "name": "Blade of justice",
+      "position": 733,
+      "points": 45.4,
+      "creator": "Unknown",
+      "difficulty": "extreme",
+      "victoryCount": 5,
+      "victors": [
+        {
+          "userId": "GLYttSHzeNcW8tsRZ1zraEOdR5I3"
+        },
+        {
+          "userId": "eKtuVKuEfreD9fGhcx3M5YBoQ2i2"
+        },
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        },
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        },
+        {
+          "userId": "On2orbujNjZjpHJsgpqbG8VY4Gj2"
+        }
+      ]
+    },
+    {
+      "id": "main_phobos",
+      "name": "Phobos",
+      "position": 740,
+      "points": 44.8,
+      "creator": "KrmaL",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_silentium_gradas",
+      "name": "Silentium Gradas",
+      "position": 746,
+      "points": 44.2,
+      "creator": " Stormfly",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "uFRYBZTZLFSzYZUhZur1d92dvyC3"
+        }
+      ]
+    },
+    {
+      "id": "manual_sakupen_hell",
+      "name": "sakupen hell",
+      "position": 753,
+      "points": 43.6,
+      "creator": "TrusTa",
+      "difficulty": "extreme",
+      "victoryCount": 3,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        },
+        {
+          "userId": "duh2zFN8z0cWQ6MzsmWkFXoEq103"
+        },
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_moment",
+      "name": "moment",
+      "position": 818,
+      "points": 38.1,
+      "creator": "Lexycat",
+      "difficulty": "extreme",
+      "victoryCount": 3,
+      "victors": [
+        {
+          "userId": "eKtuVKuEfreD9fGhcx3M5YBoQ2i2"
+        },
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        },
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "manual_gravity",
+      "name": "gravity",
+      "position": 826,
+      "points": 37.5,
+      "creator": "Kaza",
+      "difficulty": "extreme",
+      "victoryCount": 4,
+      "victors": [
+        {
+          "userId": "0ssKPyvK4bSHbxdLtpaiYOulcEz2"
+        },
+        {
+          "userId": "eKtuVKuEfreD9fGhcx3M5YBoQ2i2"
+        },
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        },
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "manual_bloodbath",
+      "name": "Bloodbath",
+      "position": 827,
+      "points": 37.4,
+      "creator": "Riot",
+      "difficulty": "extreme",
+      "victoryCount": 12,
+      "victors": [
+        {
+          "userId": "GLYttSHzeNcW8tsRZ1zraEOdR5I3"
+        },
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        },
+        {
+          "userId": "uFRYBZTZLFSzYZUhZur1d92dvyC3"
+        },
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        },
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        },
+        {
+          "userId": "eKtuVKuEfreD9fGhcx3M5YBoQ2i2"
+        },
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        },
+        {
+          "userId": "On2orbujNjZjpHJsgpqbG8VY4Gj2"
+        },
+        {
+          "userId": "rYnWO3VXCDQ93iBbLw6dfKvOROL2"
+        },
+        {
+          "userId": "duh2zFN8z0cWQ6MzsmWkFXoEq103"
+        },
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        },
+        {
+          "userId": "0dqhJD6WRvdcKX3U7LC4cGAC4mx1"
+        }
+      ]
+    },
+    {
+      "id": "manual_eon",
+      "name": "Eon",
+      "position": 829,
+      "points": 37.2,
+      "creator": "Renn241",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        }
+      ]
+    },
+    {
+      "id": "manual_idols",
+      "name": "Idols",
+      "position": 833,
+      "points": 36.9,
+      "creator": "Zafkiel7",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "X5mqj75bFNMaVk75STk4uDswLk32"
+        }
+      ]
+    },
+    {
+      "id": "manual_down_bass",
+      "name": "down bass",
+      "position": 849,
+      "points": 35.7,
+      "creator": "Spectruh",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        },
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_prismatic_haze",
+      "name": "Prismatic Haze",
+      "position": 862,
+      "points": 34.7,
+      "creator": "-",
+      "difficulty": "extreme",
+      "victoryCount": 5,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        },
+        {
+          "userId": "TLdSvAAbLURulwPX3E89DgU809L2"
+        },
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        },
+        {
+          "userId": "Q2Xjdi0B0HfiUFC96u2hviHREz03"
+        },
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "manual_overtime",
+      "name": "Overtime",
+      "position": 924,
+      "points": 30.3,
+      "creator": "KlaurosssS",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "Q0XgZTPHYkMGgKGNefsK575KRoy2"
+        }
+      ]
+    },
+    {
+      "id": "manual_innards",
+      "name": "Innards",
+      "position": 928,
+      "points": 30,
+      "creator": "Kaito",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        }
+      ]
+    },
+    {
+      "id": "manual_digital_disarray",
+      "name": "Digital Disarray",
+      "position": 969,
+      "points": 27.4,
+      "creator": "Giron",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        }
+      ]
+    },
+    {
+      "id": "manual_aftermath",
+      "name": "Aftermath",
+      "position": 984,
+      "points": 26.5,
+      "creator": "Exenity",
+      "difficulty": "extreme",
+      "victoryCount": 4,
+      "victors": [
+        {
+          "userId": "GLYttSHzeNcW8tsRZ1zraEOdR5I3"
+        },
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        },
+        {
+          "userId": "On2orbujNjZjpHJsgpqbG8VY4Gj2"
+        },
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_audio_extraction",
+      "name": "Audio Extraction",
+      "position": 1032,
+      "points": 23.6,
+      "creator": "GoodSmile",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "Q0XgZTPHYkMGgKGNefsK575KRoy2"
+        }
+      ]
+    },
+    {
+      "id": "main_heartbeat_krmal",
+      "name": "Heartbeat",
+      "position": 1048,
+      "points": 26.36,
+      "creator": "KrmaL",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        },
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        }
+      ]
+    },
+    {
+      "id": "manual_evangelion",
+      "name": "Evangelion",
+      "position": 1064,
+      "points": 21.8,
+      "creator": "Yoonsrdynamix",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "rYnWO3VXCDQ93iBbLw6dfKvOROL2"
+        }
+      ]
+    },
+    {
+      "id": "manual_brain_power",
+      "name": "Brain Power",
+      "position": 1081,
+      "points": 20.9,
+      "creator": "zafkiel7",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        }
+      ]
+    },
+    {
+      "id": "main_welcome_to_gd_news",
+      "name": "Welcome To GD News",
+      "position": 1117,
+      "points": 19,
+      "creator": "vortrox",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "Q2Xjdi0B0HfiUFC96u2hviHREz03"
+        }
+      ]
+    },
+    {
+      "id": "manual_wind_storm",
+      "name": "Wind Storm",
+      "position": 1121,
+      "points": 18.8,
+      "creator": "Aimbotter2123",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        }
+      ]
+    },
+    {
+      "id": "manual_cupid",
+      "name": "Cupid",
+      "position": 1133,
+      "points": 18.2,
+      "creator": "vyp",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        }
+      ]
+    },
+    {
+      "id": "manual_lonely_lights",
+      "name": "lonely lights",
+      "position": 1139,
+      "points": 17.9,
+      "creator": "Elvii",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "main_convulsing_light",
+      "name": "Convulsing Light",
+      "position": 1152,
+      "points": 17.2,
+      "creator": "Yerylik",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_loop",
+      "name": "Loop",
+      "position": 1159,
+      "points": 16.9,
+      "creator": "Darmuth",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "2nE2MqMws3aiPSInvoxwUMtsjI33"
+        }
+      ]
+    },
+    {
+      "id": "manual_tuapeka",
+      "name": "TUAPEKA",
+      "position": 1177,
+      "points": 16,
+      "creator": "feijoaoa",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "rYnWO3VXCDQ93iBbLw6dfKvOROL2"
+        }
+      ]
+    },
+    {
+      "id": "manual_brave",
+      "name": "Brave",
+      "position": 1183,
+      "points": 15.8,
+      "creator": "browyn",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        }
+      ]
+    },
+    {
+      "id": "main_60",
+      "name": "SUBVERSIVE",
+      "position": 1189,
+      "points": 15.5,
+      "creator": "Snowr33de",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_m_a_n_i_x",
+      "name": "M A N I X",
+      "position": 1213,
+      "points": 14.4,
+      "creator": "Krmal & Manix648",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        }
+      ]
+    },
+    {
+      "id": "main_stellaluna",
+      "name": "Stellaluna",
+      "position": 1241,
+      "points": 13.1,
+      "creator": "SamMaxx",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "duh2zFN8z0cWQ6MzsmWkFXoEq103"
+        }
+      ]
+    },
+    {
+      "id": "main_58",
+      "name": "Tech Manifestation",
+      "position": 1243,
+      "points": 13,
+      "creator": "Pleoslim",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "duh2zFN8z0cWQ6MzsmWkFXoEq103"
+        }
+      ]
+    },
+    {
+      "id": "manual_retention",
+      "name": "Retention",
+      "position": 1251,
+      "points": 12.7,
+      "creator": "WOOGI1411",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        }
+      ]
+    },
+    {
+      "id": "main_116",
+      "name": "Falling Up",
+      "position": 1252,
+      "points": 12.6,
+      "creator": "KrmaL",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_la_llorona",
+      "name": "La Llorona",
+      "position": 1257,
+      "points": 12.4,
+      "creator": "CherryTeam",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        }
+      ]
+    },
+    {
+      "id": "manual_ilovecyan",
+      "name": "ILOVECYAN",
+      "position": 1268,
+      "points": 11.9,
+      "creator": "AVRG",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "rYnWO3VXCDQ93iBbLw6dfKvOROL2"
+        }
+      ]
+    },
+    {
+      "id": "manual_3abncnmoct6",
+      "name": "3ABNCNMOCT6",
+      "position": 1272,
+      "points": 11.8,
+      "creator": "IIIGamBiTIII",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "CeMoGMtd8QMkWw6dqIddCokeCVP2"
+        }
+      ]
+    },
+    {
+      "id": "manual_diligence",
+      "name": "Diligence",
+      "position": 1283,
+      "points": 11.3,
+      "creator": "Davphla",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "On2orbujNjZjpHJsgpqbG8VY4Gj2"
+        }
+      ]
+    },
+    {
+      "id": "manual_doradura",
+      "name": "Doradura",
+      "position": 1294,
+      "points": 10.9,
+      "creator": "IvashkaUA",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        }
+      ]
+    },
+    {
+      "id": "manual_deception_dive",
+      "name": "Deception Dive",
+      "position": 1298,
+      "points": 10.7,
+      "creator": "Rustam",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        }
+      ]
+    },
+    {
+      "id": "manual_awakening_horus",
+      "name": "Awakening Horus",
+      "position": 1300,
+      "points": 10.6,
+      "creator": "Juhou",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        }
+      ]
+    },
+    {
+      "id": "manual_crowd_control",
+      "name": "crowd control",
+      "position": 1301,
+      "points": 10.6,
+      "creator": "Deadlox",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "TLdSvAAbLURulwPX3E89DgU809L2"
+        }
+      ]
+    },
+    {
+      "id": "manual_faith",
+      "name": "Faith",
+      "position": 1314,
+      "points": 10,
+      "creator": "ZeroSR",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "On2orbujNjZjpHJsgpqbG8VY4Gj2"
+        }
+      ]
+    },
+    {
+      "id": "manual_allegiance",
+      "name": "Allegiance",
+      "position": 1344,
+      "points": 8.8,
+      "creator": "Unknown",
+      "difficulty": "extreme",
+      "victoryCount": 5,
+      "victors": [
+        {
+          "userId": "GLYttSHzeNcW8tsRZ1zraEOdR5I3"
+        },
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        },
+        {
+          "userId": "uFRYBZTZLFSzYZUhZur1d92dvyC3"
+        },
+        {
+          "userId": "VGJW36ngrEYfjGqBHWQHQ6BfokE3"
+        },
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        }
+      ]
+    },
+    {
+      "id": "manual_blacklights",
+      "name": "BLACKLIGHTS",
+      "position": 1346,
+      "points": 8.8,
+      "creator": "whlt",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "main_214",
+      "name": "HyperSonic",
+      "position": 1357,
+      "points": 8.3,
+      "creator": "-",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_virtual_collapse",
+      "name": "Virtual Collapse",
+      "position": 1387,
+      "points": 7.2,
+      "creator": "TeamUprising",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        }
+      ]
+    },
+    {
+      "id": "manual_the_flawless",
+      "name": "The Flawless",
+      "position": 1391,
+      "points": 7,
+      "creator": "fin",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        },
+        {
+          "userId": "GLYttSHzeNcW8tsRZ1zraEOdR5I3"
+        }
+      ]
+    },
+    {
+      "id": "manual_robi",
+      "name": "Robi",
+      "position": 1392,
+      "points": 7,
+      "creator": " robianny",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        }
+      ]
+    },
+    {
+      "id": "manual_helios",
+      "name": "Helios",
+      "position": 1402,
+      "points": 6.6,
+      "creator": "Canonlaw",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        }
+      ]
+    },
+    {
+      "id": "main_hidden_in_the_sand",
+      "name": "Hidden in the Sand",
+      "position": 1404,
+      "points": 6.6,
+      "creator": "ASBCHazel",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "Q2Xjdi0B0HfiUFC96u2hviHREz03"
+        }
+      ]
+    },
+    {
+      "id": "manual_violetwall",
+      "name": "Violetwall",
+      "position": 1413,
+      "points": 6.2,
+      "creator": "Unknown",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        },
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        }
+      ]
+    },
+    {
+      "id": "main_stop_breathing",
+      "name": "Stop Breathing",
+      "position": 1425,
+      "points": 5.8,
+      "creator": "NikVer",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "WakgveDVIUg1WExX4GKbBK0jtoz2"
+        }
+      ]
+    },
+    {
+      "id": "main_tung_tung_sahurcles",
+      "name": "Tung Tung Sahurcles",
+      "position": 1426,
+      "points": 5.8,
+      "creator": "Arraegen",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "uFRYBZTZLFSzYZUhZur1d92dvyC3"
+        },
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "manual_dark_odyssey",
+      "name": "Dark odyssey",
+      "position": 1431,
+      "points": 5.6,
+      "creator": "JonathanGD",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "GLYttSHzeNcW8tsRZ1zraEOdR5I3"
+        }
+      ]
+    },
+    {
+      "id": "manual_reverie",
+      "name": "Reverie",
+      "position": 1438,
+      "points": 5.3,
+      "creator": "GaidenHertuny",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "On2orbujNjZjpHJsgpqbG8VY4Gj2"
+        }
+      ]
+    },
+    {
+      "id": "manual_azurite",
+      "name": "Azurite",
+      "position": 1441,
+      "points": 3.2,
+      "creator": "Unknown",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        },
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        }
+      ]
+    },
+    {
+      "id": "manual_forbidden_isle",
+      "name": "Forbidden Isle",
+      "position": 1449,
+      "points": 4.9,
+      "creator": "Sillow",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        },
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        }
+      ]
+    },
+    {
+      "id": "main_142",
+      "name": "Cataclysm",
+      "position": 1471,
+      "points": 4.2,
+      "creator": "GgB0y",
+      "difficulty": "extreme",
+      "victoryCount": 6,
+      "victors": [
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        },
+        {
+          "userId": "GLYttSHzeNcW8tsRZ1zraEOdR5I3"
+        },
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        },
+        {
+          "userId": "Xlnqmtn8qZTV2RsVpemx6bK7BXv2"
+        },
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        },
+        {
+          "userId": "TLdSvAAbLURulwPX3E89DgU809L2"
+        }
+      ]
+    },
+    {
+      "id": "manual_lost_love",
+      "name": "Lost Love",
+      "position": 1474,
+      "points": 4.1,
+      "creator": "TheBlackHell",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "rYnWO3VXCDQ93iBbLw6dfKvOROL2"
+        }
+      ]
+    },
+    {
+      "id": "manual_aurora",
+      "name": "Aurora",
+      "position": 1481,
+      "points": 33.1,
+      "creator": "Hasuopf",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        }
+      ]
+    },
+    {
+      "id": "manual_komodo",
+      "name": "Komodo",
+      "position": 1482,
+      "points": 3.8,
+      "creator": " Espii",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        }
+      ]
+    },
+    {
+      "id": "manual_shotgun",
+      "name": "Shotgun",
+      "position": 1493,
+      "points": 3.4,
+      "creator": "SpinStudios",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        }
+      ]
+    },
+    {
+      "id": "main_the_depths_above",
+      "name": "The Depths Above",
+      "position": 1507,
+      "points": 3,
+      "creator": "Bram4Real",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "4MYjaLimuSVQQlhBVaIfy6IpbPX2"
+        }
+      ]
+    },
+    {
+      "id": "manual_tantrum",
+      "name": "Tantrum",
+      "position": 1516,
+      "points": 2.7,
+      "creator": "DanZmeN",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        }
+      ]
+    },
+    {
+      "id": "manual_fun_friday",
+      "name": "Fun Friday",
+      "position": 1518,
+      "points": 2.6,
+      "creator": "Zeronium",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "Q0XgZTPHYkMGgKGNefsK575KRoy2"
+        }
+      ]
+    },
+    {
+      "id": "manual_mizureta",
+      "name": "mizureta",
+      "position": 1523,
+      "points": 2.4,
+      "creator": "dutchiee",
+      "difficulty": "extreme",
+      "victoryCount": 3,
+      "victors": [
+        {
+          "userId": "0ssKPyvK4bSHbxdLtpaiYOulcEz2"
+        },
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        },
+        {
+          "userId": "Q2Xjdi0B0HfiUFC96u2hviHREz03"
+        }
+      ]
+    },
+    {
+      "id": "manual_misty_mountains",
+      "name": "Misty Mountains",
+      "position": 1524,
+      "points": 2.4,
+      "creator": "We4TherMan",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        }
+      ]
+    },
+    {
+      "id": "manual_niwa",
+      "name": "Niwa",
+      "position": 1527,
+      "points": 2.3,
+      "creator": "Teno",
+      "difficulty": "extreme",
+      "victoryCount": 4,
+      "victors": [
+        {
+          "userId": "GLYttSHzeNcW8tsRZ1zraEOdR5I3"
+        },
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        },
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        },
+        {
+          "userId": "0dqhJD6WRvdcKX3U7LC4cGAC4mx1"
+        }
+      ]
+    },
+    {
+      "id": "manual_brutal",
+      "name": "BRUTAL",
+      "position": 1548,
+      "points": 1.6,
+      "creator": "Tshack",
+      "difficulty": "extreme",
+      "victoryCount": 3,
+      "victors": [
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        },
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        },
+        {
+          "userId": "rYnWO3VXCDQ93iBbLw6dfKvOROL2"
+        }
+      ]
+    },
+    {
+      "id": "manual_sweater_weather",
+      "name": "Sweater Weather",
+      "position": 1561,
+      "points": 1.2,
+      "creator": "VelYT",
+      "difficulty": "extreme",
+      "victoryCount": 4,
+      "victors": [
+        {
+          "userId": "VGJW36ngrEYfjGqBHWQHQ6BfokE3"
+        },
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        },
+        {
+          "userId": "On2orbujNjZjpHJsgpqbG8VY4Gj2"
+        },
+        {
+          "userId": "duh2zFN8z0cWQ6MzsmWkFXoEq103"
+        }
+      ]
+    },
+    {
+      "id": "main_acu",
+      "name": "Acu",
+      "position": 1563,
+      "points": 1.2,
+      "creator": "neigefeu",
+      "difficulty": "extreme",
+      "victoryCount": 9,
+      "victors": [
+        {
+          "userId": "Q2Xjdi0B0HfiUFC96u2hviHREz03"
+        },
+        {
+          "userId": "GLYttSHzeNcW8tsRZ1zraEOdR5I3"
+        },
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        },
+        {
+          "userId": "0ssKPyvK4bSHbxdLtpaiYOulcEz2"
+        },
+        {
+          "userId": "EIN23eqFmoZcbNvDM8kYrzZCbsF2"
+        },
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        },
+        {
+          "userId": "On2orbujNjZjpHJsgpqbG8VY4Gj2"
+        },
+        {
+          "userId": "WakgveDVIUg1WExX4GKbBK0jtoz2"
+        },
+        {
+          "userId": "AzDinKWErnROpRyxVs5zuIndwcn1"
+        }
+      ]
+    },
+    {
+      "id": "manual_through_the_decay",
+      "name": "through the decay",
+      "position": 1565,
+      "points": 1.1,
+      "creator": "Unknown",
+      "difficulty": "extreme",
+      "victoryCount": 2,
+      "victors": [
+        {
+          "userId": "Y6YmAukIWgWt6OQWjhgFmG6E34l2"
+        },
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        }
+      ]
+    },
+    {
+      "id": "manual_precipitance",
+      "name": "Precipitance",
+      "position": 1566,
+      "points": 1.1,
+      "creator": "Extravagon",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "5jAqugpMeIgU9YGBBZFyLNdnbR52"
+        }
+      ]
+    },
+    {
+      "id": "manual_rauchkammer",
+      "name": "rauchkammer",
+      "position": 1568,
+      "points": 1,
+      "creator": "devilmine",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "x0OSrL6mbAbw37I8srXPtdXQWYS2"
+        }
+      ]
+    },
+    {
+      "id": "manual_ice_carbon_diablo_x",
+      "name": "Ice Carbon Diablo X",
+      "position": 1668,
+      "points": 0.5,
+      "creator": "Roadbose",
+      "difficulty": "extreme",
+      "victoryCount": 1,
+      "victors": [
+        {
+          "userId": "xKWDSz6bosdXiYlmTOXv6jUlV3j2"
+        }
+      ]
+    }
+  ]
+}

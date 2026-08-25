@@ -3,6 +3,8 @@ import {
   doc,
   getDoc,
   getDocs,
+  getDocFromCache,
+  getDocsFromCache,
   setDoc,
   addDoc,
   updateDoc,
@@ -28,10 +30,17 @@ function withReadTimeout(promise, label) {
 }
 
 export async function getDocument(collectionName, id) {
-  const snap = await withReadTimeout(
-    getDoc(doc(db, collectionName, id)),
-    `Loading ${collectionName}`,
-  )
+  const ref = doc(db, collectionName, id)
+  let snap
+  try {
+    snap = await withReadTimeout(getDoc(ref), `Loading ${collectionName}`)
+  } catch (error) {
+    try {
+      snap = await getDocFromCache(ref)
+    } catch {
+      throw error
+    }
+  }
   return snap.exists() ? { id: snap.id, ...snap.data() } : null
 }
 
@@ -39,7 +48,18 @@ export async function getCollection(collectionName, constraints = []) {
   const q = constraints.length > 0
     ? query(collection(db, collectionName), ...constraints)
     : collection(db, collectionName)
-  const snap = await withReadTimeout(getDocs(q), `Loading ${collectionName}`)
+  let snap
+  try {
+    snap = await withReadTimeout(getDocs(q), `Loading ${collectionName}`)
+  } catch (error) {
+    try {
+      const cachedSnap = await getDocsFromCache(q)
+      if (cachedSnap.empty) throw error
+      snap = cachedSnap
+    } catch {
+      throw error
+    }
+  }
   return snap.docs.map(d => ({ id: d.id, ...d.data() }))
 }
 
