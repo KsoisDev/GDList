@@ -8,8 +8,7 @@ import Avatar from '../components/ui/Avatar'
 import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
-import { getCollection, where } from '../services/firestore'
-import { computeUserCommunityPoints } from '../services/communityList'
+import { loadUsers } from '../services/readCache'
 import { formatNumber, getDisplayName } from '../utils/format'
 import { getFlagUrl } from '../utils/countries'
 import styles from './Leaderboard.module.css'
@@ -27,40 +26,18 @@ export default function CommunityLeaderboard() {
       setLoading(true)
       setLoadError('')
       try {
-        const [comps, levels] = await Promise.all([
-          getCollection('completions'),
-          getCollection('levels', [where('type', '==', 'community')]),
-        ])
-        const pointsMap = {}
-        levels.forEach(l => { pointsMap[l.id] = l.position })
-        const { totals, counts } = computeUserCommunityPoints(comps, pointsMap)
-        const publicProfiles = new Map()
-        levels.forEach(level => {
-          const victors = level.victors || []
-          victors.forEach(victor => {
-            if (!victor.userId) return
-            const previous = publicProfiles.get(victor.userId) || {}
-            publicProfiles.set(victor.userId, {
-              ...previous,
-              id: victor.userId,
-              username: victor.username || victor.displayName || previous.username || 'Basement player',
-              displayName: victor.displayName || victor.username || previous.displayName || 'Basement player',
-              avatarURL: victor.avatarURL || previous.avatarURL || '',
-              country: victor.country || previous.country || '',
-            })
-          })
-        })
-
-        const sorted = Array.from(publicProfiles.values())
-          .map(u => ({
-            ...u,
-            liveCommunityPoints: totals[u.id] || 0,
-            liveCount: counts[u.id] || 0,
-          }))
-          .filter(u => u.liveCommunityPoints > 0)
-          .sort((a, b) => b.liveCommunityPoints - a.liveCommunityPoints)
+        const users = await loadUsers()
+        const sorted = users
+          .filter(u => (u.stats?.communityPoints || 0) > 0)
+          .sort((a, b) => (b.stats?.communityPoints || 0) - (a.stats?.communityPoints || 0))
           .slice(0, 100)
-        setPlayers(sorted.map((player, index) => ({ ...player, _rank: index + 1 })))
+          .map((player, index) => ({
+            ...player,
+            liveCommunityPoints: player.stats?.communityPoints || 0,
+            liveCount: player.stats?.communityCompletions || 0,
+            _rank: index + 1,
+          }))
+        setPlayers(sorted)
       } catch (err) {
         console.error('Failed to load community leaderboard:', err)
         setLoadError('The community leaderboard could not be loaded.')

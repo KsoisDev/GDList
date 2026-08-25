@@ -21,8 +21,8 @@ import {
 } from 'lucide-react'
 import Avatar from '../components/ui/Avatar'
 import { useAuth } from '../hooks/useAuth'
-import { getCollection } from '../services/firestore'
-import { computeUserCommunityPoints } from '../services/communityList'
+import { loadUsers, loadCommunityLevels } from '../services/readCache'
+import { getCollection, where, query, orderBy, limit } from '../services/firestore'
 import { formatDateRelative, formatNumber, getDisplayName } from '../utils/format'
 import { getFlagUrl } from '../utils/countries'
 import styles from './Home.module.css'
@@ -67,78 +67,38 @@ export default function Home() {
     setLoadError('')
 
     Promise.allSettled([
-      getCollection('completions'),
-      getCollection('levels'),
+      loadUsers(),
+      loadCommunityLevels(),
+      getCollection('completions', [
+        where('levelType', '==', 'community'),
+        orderBy('completedAt', 'desc'),
+        limit(4),
+      ]),
     ])
-      .then(([completionsResult, levelsResult]) => {
-        const users = []
-        const completions = completionsResult.status === 'fulfilled' ? completionsResult.value : []
-        const levels = levelsResult.status === 'fulfilled' ? levelsResult.value : []
-        const communityLevels = levels.filter(level => level.type === 'community')
-        const communityLevelIds = new Set(communityLevels.map(level => level.id))
-        const communityCompletions = completions.filter(completion =>
-          completion.status !== 'rejected'
-          && (completion.levelType === 'community' || communityLevelIds.has(completion.levelId))
-        )
-        const publicProfiles = {}
-        levels.forEach(level => {
-          ;(level.victors || []).forEach(victor => {
-            if (!victor.userId) return
-            publicProfiles[victor.userId] = {
-              id: victor.userId,
-              username: victor.username || victor.displayName || 'Basement player',
-              displayName: victor.displayName || victor.username || 'Basement player',
-              avatarURL: victor.avatarURL || '',
-              country: victor.country || '',
-            }
-          })
-        })
-        const profilesById = Object.fromEntries([
-          ...Object.values(publicProfiles).map(profile => [profile.id, profile]),
-          ...users.map(profile => [profile.id, profile]),
-        ])
-        const namesById = Object.fromEntries(
-          Object.values(profilesById).map(profile => [profile.id, getDisplayName(profile)]),
-        )
-        const pointsMap = Object.fromEntries(
-          communityLevels.filter(level => (level.position || 0) > 0).map(level => [level.id, level.position]),
-        )
-        const { totals } = computeUserCommunityPoints(communityCompletions, pointsMap)
-        const mainTotals = completions.reduce((totalsByUser, completion) => {
-          if (completion.status === 'rejected' || completion.levelType === 'community' || !completion.userId) {
-            return totalsByUser
-          }
-          totalsByUser[completion.userId] = (totalsByUser[completion.userId] || 0) + (Number(completion.points) || 0)
-          return totalsByUser
-        }, {})
-        const leaderboardProfiles = Object.values(profilesById)
-        const topMain = leaderboardProfiles
-          .map(profile => ({
-            ...profile,
-            stats: {
-              ...profile.stats,
-              mainPoints: profile.stats?.mainPoints || mainTotals[profile.id] || 0,
-            },
-          }))
-          .filter(user => (user.stats?.mainPoints || 0) > 0)
+      .then(([usersResult, communityLevelsResult, recentResult]) => {
+        const users = usersResult.status === 'fulfilled' ? usersResult.value : []
+        const communityLevels = communityLevelsResult.status === 'fulfilled' ? communityLevelsResult.value : []
+        const recentCompletions = recentResult.status === 'fulfilled' ? recentResult.value : []
+
+        const usersById = Object.fromEntries(users.map(u => [u.id, u]))
+
+        const topMain = users
+          .filter(u => (u.stats?.mainPoints || 0) > 0)
           .sort((a, b) => (b.stats?.mainPoints || 0) - (a.stats?.mainPoints || 0))
           .slice(0, 3)
-        const topCommunity = leaderboardProfiles
-          .map(user => ({ ...user, livePoints: totals[user.id] || 0 }))
-          .filter(user => user.livePoints > 0)
-          .sort((a, b) => b.livePoints - a.livePoints)
+
+        const topCommunity = users
+          .filter(u => (u.stats?.communityPoints || 0) > 0)
+          .sort((a, b) => (b.stats?.communityPoints || 0) - (a.stats?.communityPoints || 0))
           .slice(0, 3)
-        const recent = communityCompletions
-          .sort((a, b) => {
-            const aTime = a.completedAt?.toMillis?.() || a.createdAt?.toMillis?.() || 0
-            const bTime = b.completedAt?.toMillis?.() || b.createdAt?.toMillis?.() || 0
-            return bTime - aTime
-          })
-          .slice(0, 4)
-          .map(completion => ({
-            ...completion,
-            username: namesById[completion.userId] || 'A community player',
-          }))
+
+        const recent = recentCompletions.map(c => ({
+          ...c,
+          username: usersById[c.userId]
+            ? getDisplayName(usersById[c.userId])
+            : c.username || 'A community player',
+        }))
+
         const levelTime = level => (
           level.createdAt?.toMillis?.()
           || level.victors?.[0]?.completedAt?.toMillis?.()
@@ -161,12 +121,12 @@ export default function Home() {
             newLevels,
             communityLevels: rankedLevels,
             stats: {
-              users: Math.max(users.length, Object.keys(publicProfiles).length),
-              records: communityCompletions.length,
+              users: users.length,
+              records: users.reduce((sum, u) => sum + (u.stats?.communityCompletions || 0), 0),
               levels: communityLevels.length,
             },
           })
-          const partialFailure = [completionsResult, levelsResult]
+          const partialFailure = [usersResult, communityLevelsResult, recentResult]
             .some(result => result.status === 'rejected')
           setLoadError(partialFailure ? 'Some live community data could not be loaded.' : '')
         }

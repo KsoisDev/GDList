@@ -14,6 +14,7 @@ import Select from '../components/ui/Select'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
 import { updateDocument, getCollection, where } from '../services/firestore'
+import { loadCommunityLevels, invalidateCache } from '../services/readCache'
 import { communityPoints } from '../utils/communityPoints'
 import { computeBadges } from '../utils/badges'
 import { getDisplayName, formatNumber, formatDate } from '../utils/format'
@@ -89,7 +90,7 @@ export default function MyProfile() {
     try {
       const [comps, communityLevels] = await Promise.all([
         getCollection('completions', [where('userId', '==', user.uid)]),
-        getCollection('levels', [where('type', '==', 'community')]),
+        loadCommunityLevels(),
       ])
       const posMap = {}
       communityLevels.forEach(l => { posMap[l.id] = l.position })

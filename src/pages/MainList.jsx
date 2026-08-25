@@ -26,7 +26,7 @@ export default function MainList() {
       setLoading(true)
       setLoadError('')
       try {
-        const data = await getCollection('levels', [where('type', '==', 'main')])
+        const data = await loadMainLevels()
         const withWins = data
           .filter(l => (l.victoryCount || 0) > 0)
           .sort((a, b) => a.position - b.position)

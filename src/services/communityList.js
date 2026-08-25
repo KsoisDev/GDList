@@ -2,6 +2,7 @@ import { getCollection, getDocument, doc, writeBatch, where } from './firestore'
 import { db } from './firebase'
 import { communityPoints, roundPoints } from '../utils/communityPoints'
 import { logLevelChange } from './changelog'
+import { invalidateCache } from './readCache'
 
 const isVerified = l => (l.victoryCount || 0) > 0
 const BATCH_SIZE = 450
@@ -137,6 +138,7 @@ export async function recalculateCommunityScores() {
   })
 
   await commitUpdates(updates)
+  invalidateCache('communityLevels')
   return { levels: ranked.length, completions: completions.length, users: users.length }
 }
 

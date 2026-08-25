@@ -1,6 +1,7 @@
 import { collection, getDocs, writeBatch, doc } from 'firebase/firestore'
 import { db } from './firebase'
 import { roundPoints } from '../utils/communityPoints'
+import { invalidateCache } from './readCache'
 
 const BATCH_LIMIT = 400
 
@@ -160,6 +161,7 @@ export async function recalcAllUsersPoints() {
     }
   }
 
+  invalidateCache('users')
   return {
     completionsTotal: completionsSnap.size,
     duplicatesRemoved: duplicates.length,

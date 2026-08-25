@@ -2,6 +2,7 @@ import { getCollection, writeBatch, doc, where } from './firestore'
 import { db } from './firebase'
 import { roundPoints } from '../utils/communityPoints'
 import { fetchAredlLevels } from './aredl'
+import { invalidateCache } from './readCache'
 
 const normalizeName = name => String(name || '').trim().toLowerCase()
 
@@ -47,6 +48,7 @@ export async function syncMainLevelsFromAredl() {
     await batch.commit()
   }
 
+  invalidateCache('mainLevels')
   return { total: levels.length, updated: updated.length, unmatched }
 }
 

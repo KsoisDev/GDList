@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { doc, runTransaction, serverTimestamp } from 'firebase/firestore'
+import { doc, runTransaction, serverTimestamp, query, where, getDocs, collection, documentId } from 'firebase/firestore'
 import { Check, X, RefreshCw, ExternalLink } from 'lucide-react'
 import PageShell from '../../components/layout/PageShell'
 import Card from '../../components/ui/Card'
@@ -28,6 +28,18 @@ const TABS = [
 ]
 
 const emptyConfig = { difficulty: 'extreme', points: 0, position: 0, externalUrl: '', creator: 'Unknown', gameId: '', sendTo: 'unverified' }
+
+const IN_CHUNK = 30
+async function chunkedGetByIds(colName, ids) {
+  const map = new Map()
+  if (!ids.length) return map
+  for (let i = 0; i < ids.length; i += IN_CHUNK) {
+    const chunk = ids.slice(i, i + IN_CHUNK)
+    const snap = await getDocs(query(collection(db, colName), where(documentId(), 'in', chunk)))
+    snap.forEach(d => map.set(d.id, { id: d.id, ...d.data() }))
+  }
+  return map
+}
 
 async function claimSubmission(submissionId, reviewerId) {
   const submissionRef = doc(db, 'submissions', submissionId)
@@ -126,46 +138,53 @@ export default function ReviewSubmissions() {
           return tb - ta
         })
 
-      const enriched = await Promise.all(
-        data.map(async (sub) => {
-          let levelName = sub.demonName || sub.manualLevelName || sub.levelName || 'Unknown'
-          if (!levelName || levelName === 'Unknown') {
-            if (sub.levelId) {
-              const level = await getDocument('levels', sub.levelId)
-              levelName = level?.name || 'Unknown'
-            }
+      const levelIds = new Set()
+      const userIds = new Set()
+      data.forEach(sub => {
+        if (sub.levelId) levelIds.add(sub.levelId)
+        if (sub.userId) userIds.add(sub.userId)
+      })
+
+      const [levelDocs, userDocs] = await Promise.all([
+        chunkedGetByIds('levels', Array.from(levelIds)),
+        chunkedGetByIds('users', Array.from(userIds)),
+      ])
+
+      const enriched = data.map(sub => {
+        let levelName = sub.demonName || sub.manualLevelName || sub.levelName || 'Unknown'
+        if (!levelName || levelName === 'Unknown') {
+          if (sub.levelId) {
+            levelName = levelDocs.get(sub.levelId)?.name || 'Unknown'
           }
-          const submitter = await getDocument('users', sub.userId)
+        }
+        const submitter = userDocs.get(sub.userId)
 
-          const existingLevel = sub.levelType === 'community' && sub.levelId
-            ? await getDocument('levels', sub.levelId)
-            : null
+        const existingLevel = sub.levelType === 'community' && sub.levelId
+          ? levelDocs.get(sub.levelId) || null
+          : null
 
-          const suggestedPos = sub.demonPosition ? Number(sub.demonPosition) : 0
-          const isCommunitySub = sub.levelType === 'community' || sub.requestType === 'level'
-          const aredlLevel = sub.demonApiId ? await lookupAredlLevel(sub.demonApiId) : null
-          const suggestedPoints = isCommunitySub
-            ? ''
-            : (sub.adminLevelConfig?.points
-                || (aredlLevel?.points != null ? aredlLevel.points : ''))
+        const suggestedPos = sub.demonPosition ? Number(sub.demonPosition) : 0
+        const isCommunitySub = sub.levelType === 'community' || sub.requestType === 'level'
+        const suggestedPoints = isCommunitySub
+          ? ''
+          : (sub.adminLevelConfig?.points || '')
 
-          return {
-            ...sub,
-            levelName,
-            submitterName: getDisplayName(submitter),
-            _existingLevel: existingLevel,
-            _initialConfig: {
-              difficulty: sub.adminLevelConfig?.difficulty || existingLevel?.difficulty || 'extreme',
-              points: suggestedPoints,
-              position: sub.adminLevelConfig?.position || existingLevel?.position || suggestedPos,
-              creator: sub.adminLevelConfig?.creator || existingLevel?.creator || sub.demonCreator || sub.creator || 'Unknown',
-              externalUrl: sub.externalUrl || '',
-              gameId: sub.adminLevelConfig?.gameId || existingLevel?.gameId || sub.demonGameId || sub.gameId || '',
-              sendTo: (existingLevel?.victoryCount || sub.isVerified) ? 'active' : 'unverified',
-            },
-          }
-        })
-      )
+        return {
+          ...sub,
+          levelName,
+          submitterName: getDisplayName(submitter),
+          _existingLevel: existingLevel,
+          _initialConfig: {
+            difficulty: sub.adminLevelConfig?.difficulty || existingLevel?.difficulty || 'extreme',
+            points: suggestedPoints,
+            position: sub.adminLevelConfig?.position || existingLevel?.position || suggestedPos,
+            creator: sub.adminLevelConfig?.creator || existingLevel?.creator || sub.demonCreator || sub.creator || 'Unknown',
+            externalUrl: sub.externalUrl || '',
+            gameId: sub.adminLevelConfig?.gameId || existingLevel?.gameId || sub.demonGameId || sub.gameId || '',
+            sendTo: (existingLevel?.victoryCount || sub.isVerified) ? 'active' : 'unverified',
+          },
+        }
+      })
       setSubmissions(enriched)
       const initial = {}
       enriched.forEach(sub => { initial[sub.id] = { ...sub._initialConfig } })

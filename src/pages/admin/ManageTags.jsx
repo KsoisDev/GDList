@@ -9,6 +9,7 @@ import Input from '../../components/ui/Input'
 import Spinner from '../../components/ui/Spinner'
 import { useAuth } from '../../hooks/useAuth'
 import { getCollection, createDocument, updateDocument, deleteDocument } from '../../services/firestore'
+import { invalidateCache } from '../../services/readCache'
 import { hasAccess } from '../../utils/constants'
 import styles from './Admin.module.css'
 
@@ -53,6 +54,7 @@ export default function ManageTags() {
       }
       setForm({ name: '', color: COLOR_PRESETS[0] })
       setEditing(null)
+      invalidateCache('tags')
       await load()
     } catch (err) {
       console.error(err)
@@ -70,6 +72,7 @@ export default function ManageTags() {
     if (!confirm('Delete this tag? Levels tagged with it will keep no tag reference.')) return
     try {
       await deleteDocument('tags', id)
+      invalidateCache('tags')
       await load()
     } catch (err) {
       console.error(err)

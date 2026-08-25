@@ -11,7 +11,8 @@ import Select from '../components/ui/Select'
 import Button from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
-import { getDocument, updateDocument, getCollection } from '../services/firestore'
+import { getDocument, updateDocument } from '../services/firestore'
+import { loadTags } from '../services/readCache'
 import { setCommunityPosition } from '../services/communityList'
 import { getLevelChangelog, changelogActionLabel } from '../services/changelog'
 import { formatNumber, formatDate, parseDecimal } from '../utils/format'
@@ -39,7 +40,7 @@ export default function LevelDetail() {
         const data = await getDocument('levels', levelId)
         setLevel(data)
         if (data?.type === 'community') {
-          getCollection('tags')
+          loadTags()
             .then(t => setTags(t))
             .catch(err => console.error('Failed to load tags:', err))
           getLevelChangelog(levelId)
