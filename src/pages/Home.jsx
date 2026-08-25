@@ -411,7 +411,7 @@ export default function Home() {
                   {getFlagUrl(player.country) && (
                     <img src={getFlagUrl(player.country)} alt={player.country} loading="lazy" />
                   )}
-                  <span>{formatNumber(player.livePoints || 0)} pts</span>
+                  <span>{formatNumber(player.stats?.communityPoints || 0)} pts</span>
                 </Link>
               ))}
               {highlights.topCommunity.length === 0 && (
