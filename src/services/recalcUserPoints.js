@@ -148,6 +148,8 @@ export async function recalcAllUsersPoints() {
       norm2(old.mainPoints) !== stats.mainPoints
       || norm2(old.communityPoints) !== stats.communityPoints
       || norm2(old.totalPoints) !== stats.totalPoints
+      || (old.mainCompletions || 0) !== stats.mainCompletions
+      || (old.communityCompletions || 0) !== stats.communityCompletions
     ) {
       batch.update(doc(db, 'users', d.id), { stats })
       usersUpdated += 1
