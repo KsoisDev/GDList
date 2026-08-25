@@ -131,6 +131,26 @@
   background: #9b72e8;
 }
 
+.viewPathBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 18px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: #5599ff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: opacity var(--transition-fast, 0.15s);
+}
+
+.viewPathBtn:hover {
+  opacity: 0.8;
+}
+
 @media (max-width: 520px) {
   .milestoneRow,
   .splitHeading {

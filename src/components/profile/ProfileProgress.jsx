@@ -1,11 +1,13 @@
-import { useId } from 'react'
-import { Flag, Layers3 } from 'lucide-react'
+import { useId, useState } from 'react'
+import { Flag, Layers3, Route } from 'lucide-react'
 import { formatNumber } from '../../utils/format'
 import { getRankInfo } from '../../utils/ranks'
+import RankPath from './RankPath'
 import styles from './ProfileProgress.module.css'
 
 export default function ProfileProgress({ totalPoints, mainCount, communityCount }) {
   const titleId = useId()
+  const [showPath, setShowPath] = useState(false)
   const safePoints = Math.max(0, Number(totalPoints) || 0)
   const { rank, nextRank, tier, totalTiers, progressPct, pointsToNext } = getRankInfo(safePoints)
   const RankIcon = rank.icon
@@ -67,6 +69,18 @@ export default function ProfileProgress({ totalPoints, mainCount, communityCount
         <span className={styles.mainSplit} style={{ width: `${mainShare}%` }} />
         <span className={styles.communitySplit} style={{ width: `${communityShare}%` }} />
       </div>
+
+      <button
+        type="button"
+        className={styles.viewPathBtn}
+        onClick={() => setShowPath(v => !v)}
+        aria-expanded={showPath}
+      >
+        <Route size={15} aria-hidden="true" />
+        {showPath ? 'Hide path' : 'View path'}
+      </button>
+
+      {showPath && <RankPath totalPoints={safePoints} />}
     </section>
   )
 }
