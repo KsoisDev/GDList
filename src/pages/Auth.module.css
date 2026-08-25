@@ -102,13 +102,13 @@
 .error {
   color: #ff9caf;
   border: 1px solid rgba(255, 68, 102, 0.23);
-  background: rgba(255, 68, 102, 0.09);
+  background: var(--accent-red-dim);
 }
 
 .notice {
   color: #a9caff;
   border: 1px solid rgba(68, 136, 255, 0.24);
-  background: rgba(68, 136, 255, 0.09);
+  background: var(--accent-blue-dim);
 }
 
 .divider {

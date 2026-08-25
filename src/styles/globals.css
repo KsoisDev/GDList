@@ -93,6 +93,7 @@ a:hover {
 button {
   cursor: pointer;
   font-family: var(--font-family);
+  background: transparent;
 }
 
 :where(a, button, [role='button']):focus-visible {

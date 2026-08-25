@@ -19,11 +19,11 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return activeAccount() && account().role in ['admin', 'owner', 'developer'];
+      return activeAccount() && account().role in ['admin', 'owner'];
     }
 
     function isOwner() {
-      return activeAccount() && account().role in ['owner', 'developer'];
+      return activeAccount() && account().role == 'owner';
     }
 
     function verifiedAccount() {
@@ -31,7 +31,7 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read: if isSelf(userId) || isAdmin();
+      allow read: if true;
 
       allow create: if isSelf(userId)
         && request.resource.data.keys().hasOnly([
@@ -51,7 +51,10 @@ service cloud.firestore {
         && getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower)).data.uid == userId;
 
       allow update: if (isOwner()
-          && request.resource.data.role in ['user', 'admin', 'owner', 'developer'])
+          && request.resource.data.role in ['user', 'admin', 'owner'])
+        || (isOwner()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeveloper', 'updatedAt'])
+          && request.resource.data.isDeveloper == bool)
         || (isAdmin() && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['stats', 'updatedAt']))
         || (isSelf(userId) && activeAccount()

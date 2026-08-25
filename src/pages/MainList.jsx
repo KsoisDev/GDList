@@ -9,8 +9,8 @@ import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
 import { useLanguage } from '../hooks/useLanguage'
-import { getCollection, where } from '../services/firestore'
 import { cacheMainLevels, getMainLevelsFallback } from '../services/mainListFallback'
+import { loadMainLevels } from '../services/readCache'
 import { formatNumber } from '../utils/format'
 import { DIFFICULTY_COLORS } from '../utils/constants'
 import styles from './List.module.css'
@@ -31,7 +31,7 @@ export default function MainList() {
       setLoadError('')
       setLoadNotice('')
       try {
-        const data = await getCollection('levels', [where('type', '==', 'main')])
+        const data = await loadMainLevels()
         const withWins = data
           .filter(l => (l.victoryCount || 0) > 0)
           .sort((a, b) => a.position - b.position)
@@ -140,7 +140,7 @@ export default function MainList() {
         {loading ? (
           <div className={styles.loading}><Spinner size="lg" /></div>
         ) : loadError ? (
-          <div className={styles.empty} role="alert">
+          <div className={styles.errorState} role="alert">
             <p>{t(loadError)}</p>
             <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>{t('common.tryAgain')}</Button>
           </div>

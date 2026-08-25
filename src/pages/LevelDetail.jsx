@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Trophy, Youtube, Medal, ArrowLeft, Users, Edit3, Save, X } from 'lucide-react'
+import { Trophy, Youtube, Medal, ArrowLeft, Users, Edit3, Save, X, Radio } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
@@ -11,7 +11,8 @@ import Select from '../components/ui/Select'
 import Button from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
-import { getDocument, updateDocument, getCollection } from '../services/firestore'
+import { getDocument, updateDocument } from '../services/firestore'
+import { loadTags } from '../services/readCache'
 import { setCommunityPosition } from '../services/communityList'
 import { getLevelChangelog, changelogActionLabel } from '../services/changelog'
 import { formatNumber, formatDate, parseDecimal } from '../utils/format'
@@ -19,6 +20,7 @@ import { DIFFICULTIES, DIFFICULTY_COLORS, hasAccess } from '../utils/constants'
 import { getFlagUrl } from '../utils/countries'
 import { getVideoThumbnail } from '../utils/video'
 import styles from './LevelDetail.module.css'
+import theme from '../components/layout/ThemedPage.module.css'
 
 export default function LevelDetail() {
   const { user, userData } = useAuth()
@@ -39,7 +41,7 @@ export default function LevelDetail() {
         const data = await getDocument('levels', levelId)
         setLevel(data)
         if (data?.type === 'community') {
-          getCollection('tags')
+          loadTags()
             .then(t => setTags(t))
             .catch(err => console.error('Failed to load tags:', err))
           getLevelChangelog(levelId)
@@ -145,7 +147,8 @@ export default function LevelDetail() {
 
   if (loading) {
     return (
-      <PageShell>
+      <PageShell className={theme.pageShell}>
+        <div className={theme.glow} aria-hidden="true" />
         <div className={styles.loading}><Spinner size="lg" /></div>
       </PageShell>
     )
@@ -153,8 +156,13 @@ export default function LevelDetail() {
 
   if (!level) {
     return (
-      <PageShell title="Level Not Found">
-        <p>This level does not exist in our records.</p>
+      <PageShell className={theme.pageShell}>
+        <div className={theme.glow} aria-hidden="true" />
+        <div className={styles.notFound}>
+          <h1>Level Not Found</h1>
+          <p>This level does not exist in our records.</p>
+          <Button to="/list/main" variant="secondary" icon={ArrowLeft}>Back to Main List</Button>
+        </div>
       </PageShell>
     )
   }
@@ -165,219 +173,217 @@ export default function LevelDetail() {
   const thumbnail = getVideoThumbnail(levelVideoURL)
 
   return (
-    <PageShell>
-      <div className={styles.page}>
-        <Link to={`/list/${level.type === 'community' ? 'community' : 'main'}`} className={styles.backLink}>
-          <ArrowLeft size={16} /> Back to {level.type === 'community' ? 'Community' : 'Main'} List
-        </Link>
+    <PageShell className={theme.pageShell}>
+      <div className={theme.glow} aria-hidden="true" />
 
-        <Card padding="lg" className={styles.header}>
-          <div className={styles.headerContent}>
-            {thumbnail && (
-              <a href={levelVideoURL} target="_blank" rel="noopener noreferrer" className={styles.heroThumb}>
-                <img src={thumbnail} alt={`${level.name} video thumbnail`} loading="lazy" />
-                <span className={styles.heroPlay}><Youtube size={18} /></span>
-              </a>
+      <section className={styles.hero} aria-label="Level details">
+        <div className={styles.heroCopy}>
+          <Link to={`/list/${level.type === 'community' ? 'community' : 'main'}`} className={styles.backLink}>
+            <ArrowLeft size={16} /> Back to {level.type === 'community' ? 'Community' : 'Main'} List
+          </Link>
+
+          <span className={styles.eyebrow}>
+            <Radio size={14} aria-hidden="true" />
+            {level.type === 'community' ? 'COMMUNITY LIST' : 'MAIN LIST'}
+          </span>
+
+          <h1 className={styles.title}>{level.name} <span style={{ color: diffColor }}>#{level.position}</span></h1>
+
+          <div className={styles.meta}>
+            <span className={styles.metaText}>by {level.creator}</span>
+            {level.verifier && level.verifier !== 'Unknown' && (
+              <span className={styles.metaText}>Verified by {level.verifier}</span>
             )}
-            <div className={styles.rankBadge}>
-              <span className={styles.rankNumber}>#{level.position}</span>
+          </div>
+
+          {level.type === 'community' && (level.tags || []).length > 0 && (
+            <div className={styles.levelTags}>
+              {(level.tags || [])
+                .map(id => tags.find(t => t.id === id))
+                .filter(Boolean)
+                .map(tag => (
+                  <span key={tag.id} className={styles.miniTag} style={{ background: tag.color }}>
+                    {tag.name}
+                  </span>
+                ))}
             </div>
-            <div className={styles.headerInfo}>
-              <div className={styles.headerRow}>
-                <h1 className={styles.levelName}>{level.name}</h1>
-                {isAdmin && !editing && (
-                  <button type="button" className={styles.editBtn} onClick={() => { setEditFields({ name: level.name, creator: level.creator, difficulty: level.difficulty, gameId: level.gameId || '', position: level.position, points: level.points, videoURL: level.videoURL || '', tags: level.tags || [] }); setEditing(true) }}>
-                    <Edit3 size={16} /> Edit
-                  </button>
-                )}
-                {isAdmin && editing && (
-                  <div className={styles.editActions}>
-                    <Button variant="primary" size="sm" icon={Save} onClick={handleSave} loading={saving}>Save</Button>
-                    <Button variant="ghost" size="sm" icon={X} onClick={() => setEditing(false)}>Cancel</Button>
-                  </div>
-                )}
-              </div>
-              <div className={styles.meta}>
-                {level.type === 'community' ? (
-                  <Badge variant="default" size="sm" style={{ color: 'var(--accent-blue)', borderColor: 'var(--accent-blue)' }}>
-                    ID: {level.gameId || '—'}
-                  </Badge>
-                ) : (
-                  <Badge variant="default" size="sm" style={{ color: diffColor, borderColor: diffColor }}>
-                    {level.difficulty}
-                  </Badge>
-                )}
-                <span className={styles.metaText}>by {level.creator}</span>
-                {level.verifier && level.verifier !== 'Unknown' && (
-                  <span className={styles.metaText}>Verified by {level.verifier}</span>
-                )}
-              </div>
-              {level.type === 'community' && (level.tags || []).length > 0 && (
-                <div className={styles.levelTags}>
-                  {(level.tags || [])
-                    .map(id => tags.find(t => t.id === id))
-                    .filter(Boolean)
-                    .map(tag => (
-                      <span
+          )}
+
+          {isAdmin && !editing && (
+            <button type="button" className={styles.editBtn} onClick={() => { setEditFields({ name: level.name, creator: level.creator, difficulty: level.difficulty, gameId: level.gameId || '', position: level.position, points: level.points, videoURL: level.videoURL || '', tags: level.tags || [] }); setEditing(true) }}>
+              <Edit3 size={16} /> Edit Level
+            </button>
+          )}
+          {isAdmin && editing && (
+            <div className={styles.editActions}>
+              <Button variant="primary" size="sm" icon={Save} onClick={handleSave} loading={saving}>Save</Button>
+              <Button variant="ghost" size="sm" icon={X} onClick={() => setEditing(false)}>Cancel</Button>
+            </div>
+          )}
+        </div>
+
+        <div className={styles.heroStats}>
+          <div className={styles.heroStat}>
+            <Trophy size={18} style={{ color: 'var(--accent-gold)' }} />
+            <strong>{formatNumber(level.points)}</strong>
+            <span>Points</span>
+          </div>
+          <div className={styles.heroStat}>
+            <Users size={18} style={{ color: 'var(--accent-blue)' }} />
+            <strong>{formatNumber(level.victoryCount || 0)}</strong>
+            <span>Victories</span>
+          </div>
+          <div className={styles.heroStat}>
+            <Medal size={18} style={{ color: 'var(--accent-purple)' }} />
+            <strong>#{level.position}</strong>
+            <span>Position</span>
+          </div>
+          {level.firstCompletedAt && (
+            <div className={styles.heroStat}>
+              <strong>{formatDate(level.firstCompletedAt)}</strong>
+              <span>First Clear</span>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {isAdmin && editing && (
+        <div className={theme.surface}>
+          <div className={styles.editFields}>
+            <Input label="Name" value={editFields.name} onChange={e => setEditFields({ ...editFields, name: e.target.value })} />
+            <Input label="Creator" value={editFields.creator} onChange={e => setEditFields({ ...editFields, creator: e.target.value })} />
+            {level?.type === 'community' ? (
+              <Input label="Level ID (in-game)" value={editFields.gameId || ''} onChange={e => setEditFields({ ...editFields, gameId: e.target.value })} placeholder="e.g. 10565740" />
+            ) : (
+              <Select label="Difficulty" options={diffOptions} value={editFields.difficulty} onChange={e => setEditFields({ ...editFields, difficulty: e.target.value })} />
+            )}
+            <Input label="Position" type="number" value={editFields.position} onChange={e => setEditFields({ ...editFields, position: e.target.value })} />
+            {level?.type !== 'community' && (
+              <Input label="Points" type="number" value={editFields.points} onChange={e => setEditFields({ ...editFields, points: e.target.value })} />
+            )}
+            {level?.type === 'community' && (
+              <Input
+                label="Showcase Video URL"
+                type="url"
+                value={editFields.videoURL || ''}
+                onChange={e => setEditFields({ ...editFields, videoURL: e.target.value })}
+                placeholder="https://youtu.be/..., https://medal.tv/..."
+              />
+            )}
+            {level?.type === 'community' && tags.length > 0 && (
+              <div className={styles.tagPicker} style={{ gridColumn: '1 / -1' }}>
+                <span className={styles.tagPickerLabel}>Tags</span>
+                <div className={styles.tagPickerRow}>
+                  {tags.map(tag => {
+                    const active = (editFields.tags || []).includes(tag.id)
+                    return (
+                      <button
                         key={tag.id}
-                        className={styles.miniTag}
-                        style={{ background: tag.color }}
+                        type="button"
+                        className={`${styles.tagChip} ${active ? styles.tagChipActive : ''}`}
+                        style={active ? { background: tag.color, borderColor: tag.color } : undefined}
+                        aria-pressed={active}
+                        onClick={() => setEditFields(prev => ({
+                          ...prev,
+                          tags: active
+                            ? (prev.tags || []).filter(id => id !== tag.id)
+                            : [...(prev.tags || []), tag.id],
+                        }))}
                       >
                         {tag.name}
-                      </span>
-                    ))}
+                      </button>
+                    )
+                  })}
                 </div>
-              )}
-              {isAdmin && editing && (
-                <div className={styles.editFields}>
-                  <Input label="Name" value={editFields.name} onChange={e => setEditFields({ ...editFields, name: e.target.value })} />
-                  <Input label="Creator" value={editFields.creator} onChange={e => setEditFields({ ...editFields, creator: e.target.value })} />
-                  {level?.type === 'community' ? (
-                    <Input label="Level ID (in-game)" value={editFields.gameId || ''} onChange={e => setEditFields({ ...editFields, gameId: e.target.value })} placeholder="e.g. 10565740" />
-                  ) : (
-                    <Select label="Difficulty" options={diffOptions} value={editFields.difficulty} onChange={e => setEditFields({ ...editFields, difficulty: e.target.value })} />
-                  )}
-                  <Input label="Position" type="number" value={editFields.position} onChange={e => setEditFields({ ...editFields, position: e.target.value })} />
-                  {level?.type !== 'community' && (
-                    <Input label="Points" type="number" value={editFields.points} onChange={e => setEditFields({ ...editFields, points: e.target.value })} />
-                  )}
-                  {level?.type === 'community' && (
-                    <Input
-                      label="Showcase Video URL"
-                      type="url"
-                      value={editFields.videoURL || ''}
-                      onChange={e => setEditFields({ ...editFields, videoURL: e.target.value })}
-                      placeholder="https://youtu.be/..., https://medal.tv/..., https://tiktok.com/..., https://drive.google.com/..."
-                    />
-                  )}
-                  {level?.type === 'community' && tags.length > 0 && (
-                    <div className={styles.tagPicker} style={{ gridColumn: '1 / -1' }}>
-                      <span className={styles.tagPickerLabel}>Tags</span>
-                      <div className={styles.tagPickerRow}>
-                        {tags.map(tag => {
-                          const active = (editFields.tags || []).includes(tag.id)
-                          return (
-                            <button
-                              key={tag.id}
-                              type="button"
-                              className={`${styles.tagChip} ${active ? styles.tagChipActive : ''}`}
-                              style={active ? { background: tag.color, borderColor: tag.color } : undefined}
-                              aria-pressed={active}
-                              onClick={() => setEditFields(prev => ({
-                                ...prev,
-                                tags: active
-                                  ? (prev.tags || []).filter(id => id !== tag.id)
-                                  : [...(prev.tags || []), tag.id],
-                              }))}
-                            >
-                              {tag.name}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )}
-                  {editError && <p className={styles.editError}>{editError}</p>}
-                </div>
-              )}
-            </div>
+              </div>
+            )}
+            {editError && <p className={styles.editError}>{editError}</p>}
           </div>
-        </Card>
-
-        <div className={styles.statsGrid}>
-          <Card className={styles.statCard}>
-            <Trophy size={22} style={{ color: 'var(--accent-gold)' }} />
-            <span className={styles.statValue}>{formatNumber(level.points)}</span>
-            <span className={styles.statLabel}>Points</span>
-          </Card>
-          <Card className={styles.statCard}>
-            <Users size={22} style={{ color: 'var(--accent-blue)' }} />
-            <span className={styles.statValue}>{formatNumber(level.victoryCount || 0)}</span>
-            <span className={styles.statLabel}>Victories</span>
-          </Card>
-          <Card className={styles.statCard}>
-            <Medal size={22} style={{ color: 'var(--accent-purple)' }} />
-            <span className={styles.statValue}>#{level.position}</span>
-            <span className={styles.statLabel}>Position</span>
-          </Card>
-          {level.firstCompletedAt && (
-            <Card className={styles.statCard}>
-              <span className={styles.statValue}>{formatDate(level.firstCompletedAt)}</span>
-              <span className={styles.statLabel}>First Completion</span>
-            </Card>
-          )}
         </div>
+      )}
 
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Victors ({victors.length})</h2>
-          {victors.length === 0 ? (
-            <Card padding="md" className={styles.emptyCard}>
-              <p>No victors yet. Be the first!</p>
-            </Card>
-          ) : (
-            <div className={styles.victorsList}>
-              {victors.map((victor, i) => (
-                <motion.div
-                  key={`${victor.userId}-${i}`}
-                  className={styles.victorCard}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: Math.min(i, 12) * 0.03 }}
-                >
-                  <Link to={`/profile/${victor.userId}`} className={styles.victorInfo}>
-                    <Avatar src={victor.avatarURL} alt={victor.displayName || victor.username} size="sm" />
-                    <span className={styles.victorName}>{victor.displayName || victor.username}</span>
-                    {getFlagUrl(victor.country) && (
-                      <img src={getFlagUrl(victor.country)} alt={victor.country} className={styles.flagImg} loading="lazy" />
-                    )}
-                  </Link>
-                  <div className={styles.victorMeta}>
-                    <span className={styles.victorDate}>{formatDate(victor.completedAt)}</span>
-                    {victor.videoURL && (
-                      <a
-                        href={victor.videoURL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.videoLink}
-                        aria-label={`Watch ${victor.displayName || victor.username || 'player'} completion video`}
-                      >
-                        <Youtube size={16} aria-hidden="true" />
-                      </a>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
+      {thumbnail && (
+        <a href={levelVideoURL} target="_blank" rel="noopener noreferrer" className={styles.heroThumb}>
+          <img src={thumbnail} alt={`${level.name} video thumbnail`} loading="lazy" />
+          <span className={styles.heroPlay}><Youtube size={24} /></span>
+        </a>
+      )}
+
+      <div className={theme.surface}>
+        <div className={styles.surfaceHeading}>
+          <span className={theme.sectionLabel}>VERIFIED CLEARS</span>
+          <h2>Victors ({victors.length})</h2>
         </div>
-
-        {changes.length > 0 && (
-          <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Changelog</h2>
-            <div className={styles.changesList}>
-              {changes.map((c, i) => (
-                <motion.div
-                  key={c.id}
-                  className={styles.changeRow}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: Math.min(i, 12) * 0.02 }}
-                >
-                  <span className={styles.changeAction}>{changelogActionLabel(c.action)}</span>
-                  <span className={styles.changeDetail}>
-                    {c.action === 'added' && `Added at #${c.to ?? '—'}`}
-                    {c.action === 'removed' && `Removed from #${c.from ?? '—'}`}
-                    {c.action === 'moved' && `Moved #${c.from ?? '—'} → #${c.to ?? '—'}`}
-                    {c.action === 'renumbered' && `Renumbered #${c.from ?? '—'} → #${c.to ?? '—'}`}
-                    {!['added', 'removed', 'moved', 'renumbered'].includes(c.action) && (c.note || '')}
-                  </span>
-                  <span className={styles.changeDate}>{formatDate(c.createdAt)}</span>
-                </motion.div>
-              ))}
-            </div>
+        {victors.length === 0 ? (
+          <div className={styles.emptyCard}>
+            <p>No victors yet. Be the first!</p>
+          </div>
+        ) : (
+          <div className={styles.victorsList}>
+            {victors.map((victor, i) => (
+              <motion.div
+                key={`${victor.userId}-${i}`}
+                className={styles.victorCard}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(i, 12) * 0.03 }}
+              >
+                <Link to={`/profile/${victor.userId}`} className={styles.victorInfo}>
+                  <Avatar src={victor.avatarURL} alt={victor.displayName || victor.username} size="sm" />
+                  <span className={styles.victorName}>{victor.displayName || victor.username}</span>
+                  {getFlagUrl(victor.country) && (
+                    <img src={getFlagUrl(victor.country)} alt={victor.country} className={styles.flagImg} loading="lazy" />
+                  )}
+                </Link>
+                <div className={styles.victorMeta}>
+                  <span className={styles.victorDate}>{formatDate(victor.completedAt)}</span>
+                  {victor.videoURL && (
+                    <a
+                      href={victor.videoURL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.videoLink}
+                      aria-label={`Watch ${victor.displayName || victor.username || 'player'} completion video`}
+                    >
+                      <Youtube size={16} aria-hidden="true" />
+                    </a>
+                  )}
+                </div>
+              </motion.div>
+            ))}
           </div>
         )}
       </div>
+
+      {changes.length > 0 && (
+        <div className={theme.surface}>
+          <div className={styles.surfaceHeading}>
+            <span className={theme.sectionLabel}>HISTORY</span>
+            <h2>Changelog</h2>
+          </div>
+          <div className={styles.changesList}>
+            {changes.map((c, i) => (
+              <motion.div
+                key={c.id}
+                className={styles.changeRow}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(i, 12) * 0.02 }}
+              >
+                <span className={styles.changeAction}>{changelogActionLabel(c.action)}</span>
+                <span className={styles.changeDetail}>
+                  {c.action === 'added' && `Added at #${c.to ?? '—'}`}
+                  {c.action === 'removed' && `Removed from #${c.from ?? '—'}`}
+                  {c.action === 'moved' && `Moved #${c.from ?? '—'} → #${c.to ?? '—'}`}
+                  {c.action === 'renumbered' && `Renumbered #${c.from ?? '—'} → #${c.to ?? '—'}`}
+                  {!['added', 'removed', 'moved', 'renumbered'].includes(c.action) && (c.note || '')}
+                </span>
+                <span className={styles.changeDate}>{formatDate(c.createdAt)}</span>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
     </PageShell>
   )
 }

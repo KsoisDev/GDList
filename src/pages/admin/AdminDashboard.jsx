@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ListCheck, Users, Layers, FileText, Flag, Wrench, Tag, RefreshCw } from 'lucide-react'
+import { ListCheck, Users, Layers, FileText, Flag, Wrench, Tag, RefreshCw, UserCog } from 'lucide-react'
 import PageShell from '../../components/layout/PageShell'
 import Card from '../../components/ui/Card'
 import Spinner from '../../components/ui/Spinner'
@@ -8,6 +8,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useSiteConfig } from '../../hooks/useSiteConfig'
 import { getCollection } from '../../services/firestore'
 import { syncMainLevelsFromAredl } from '../../services/mainLevels'
+import { recalcAllUsersPoints } from '../../services/recalcUserPoints'
 import { hasAccess } from '../../utils/constants'
 import styles from './Admin.module.css'
 
@@ -21,6 +22,9 @@ export default function AdminDashboard() {
   const [syncing, setSyncing] = useState(false)
   const [syncMessage, setSyncMessage] = useState('')
   const [syncError, setSyncError] = useState(false)
+  const [recalculating, setRecalculating] = useState(false)
+  const [recalcMessage, setRecalcMessage] = useState('')
+  const [recalcError, setRecalcError] = useState(false)
 
   const handleSync = async () => {
     if (syncing) return
@@ -30,14 +34,37 @@ export default function AdminDashboard() {
     setSyncError(false)
     try {
       const result = await syncMainLevelsFromAredl()
-      const unmatchedText = result.unmatched.length > 0 ? ` · ${result.unmatched.length} without match` : ''
-      setSyncMessage(`Updated ${result.updated} of ${result.total} main levels with AREDL positions/points${unmatchedText}.`)
+      if (result.unmatched.length > 0) {
+        const shown = result.unmatched.slice(0, 8).map(u => u.name).join(', ')
+        const extra = result.unmatched.length > 8 ? ` +${result.unmatched.length - 8} more` : ''
+        setSyncMessage(`Updated ${result.updated} of ${result.total} main levels with AREDL positions/points. ${result.unmatched.length} without match (kept as-is): ${shown}${extra}.`)
+      } else {
+        setSyncMessage(`Updated all ${result.updated} main levels with AREDL positions/points.`)
+      }
     } catch (err) {
       console.error(err)
       setSyncError(true)
       setSyncMessage('Sync failed: ' + (err.message || err))
     } finally {
       setSyncing(false)
+    }
+  }
+
+  const handleRecalcUsers = async () => {
+    if (recalculating) return
+    if (!confirm("Recalculate all user points? This refreshes completion points from their current level values, removes duplicate completions (keeps the oldest), refreshes player names/countries/photos in rankings, and rewrites every user's stats.")) return
+    setRecalculating(true)
+    setRecalcMessage('')
+    setRecalcError(false)
+    try {
+      const r = await recalcAllUsersPoints()
+      setRecalcMessage(`Done: ${r.usersUpdated} of ${r.usersChecked} users updated · ${r.completionsRefreshed} completions refreshed · ${r.duplicatesRemoved} duplicates removed (of ${r.completionsTotal}) · ${r.snapshotsUpdated} level snapshots refreshed.`)
+    } catch (err) {
+      console.error(err)
+      setRecalcError(true)
+      setRecalcMessage('Recalc failed: ' + (err.message || err))
+    } finally {
+      setRecalculating(false)
     }
   }
 
@@ -153,10 +180,24 @@ export default function AdminDashboard() {
             <RefreshCw size={16} className={syncing ? styles.syncingSpin : ''} />
             {syncing ? 'Syncing Main List...' : 'Sync Main List from AREDL'}
           </button>
+          <button
+            type="button"
+            className={styles.quickLink}
+            onClick={handleRecalcUsers}
+            disabled={recalculating}
+          >
+            <UserCog size={16} className={recalculating ? styles.syncingSpin : ''} />
+            {recalculating ? 'Recalculating Points...' : 'Sync Users Points'}
+          </button>
         </div>
         {syncMessage && (
-          <p className={styles.error} style={{ marginTop: 16, color: syncError ? 'var(--accent-red)' : 'var(--accent-green)' }}>
+          <p className={syncError ? 'errorPanel' : 'successPanel'} style={{ marginTop: 16 }}>
             {syncMessage}
+          </p>
+        )}
+        {recalcMessage && (
+          <p className={recalcError ? 'errorPanel' : 'successPanel'} style={{ marginTop: 8 }}>
+            {recalcMessage}
           </p>
         )}
       </div>

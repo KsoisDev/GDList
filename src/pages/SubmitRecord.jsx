@@ -200,7 +200,9 @@ export default function SubmitRecord() {
         return
       }
     } catch (err) {
-      console.warn('Duplicate check failed, continuing:', err)
+      console.error('Duplicate check failed:', err)
+      setError('Could not verify duplicates. Please try again.')
+      return
     }
 
     setSubmitting(true)
@@ -320,7 +322,7 @@ export default function SubmitRecord() {
             </div>
 
             {loadError && (
-              <p className={styles.error} role="alert">{loadError}</p>
+              <p className="errorPanel" role="alert">{loadError}</p>
             )}
 
             {!manualMode ? (
@@ -423,7 +425,7 @@ export default function SubmitRecord() {
             />
 
             {error && !hasFieldError && (
-              <p className={styles.error} role="alert">{error}</p>
+              <p className="errorPanel" role="alert">{error}</p>
             )}
 
             <Button type="submit" variant="primary" fullWidth loading={submitting} icon={Send}>

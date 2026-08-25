@@ -10,8 +10,8 @@ import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
 import { useLanguage } from '../hooks/useLanguage'
-import { getCollection } from '../services/firestore'
-import { getCommunityLevels, deleteCommunityLevel } from '../services/communityList'
+import { loadCommunityLevels, loadTags, invalidateCache } from '../services/readCache'
+import { deleteCommunityLevel } from '../services/communityList'
 import { hasAccess } from '../utils/constants'
 import { getVideoThumbnail } from '../utils/video'
 import styles from './List.module.css'
@@ -35,7 +35,7 @@ export default function CommunityList() {
   const [tab, setTab] = useState('active')
 
   useEffect(() => {
-    getCollection('tags')
+    loadTags()
       .then(data => setTags(data))
       .catch(err => console.error('Failed to load tags:', err))
   }, [])
@@ -44,7 +44,8 @@ export default function CommunityList() {
     setLoading(true)
     setLoadError('')
     try {
-      const data = await getCommunityLevels()
+      const data = await loadCommunityLevels()
+      data.sort((a, b) => (a.position || 0) - (b.position || 0))
       setLevels(data)
     } catch (err) {
       console.error('Failed to load community levels:', err)
@@ -60,6 +61,7 @@ export default function CommunityList() {
     if (!confirm(`Delete "${level.name}" from the community list? Its victors will lose the community points earned on this level.`)) return
     try {
       await deleteCommunityLevel(level.id)
+      invalidateCache('communityLevels')
       await load()
     } catch (err) {
       console.error('Failed to delete level:', err)
@@ -188,7 +190,7 @@ export default function CommunityList() {
           <Spinner size="lg" />
         </div>
       ) : loadError ? (
-        <Card padding="lg" className={styles.empty}>
+        <Card padding="lg" className={styles.errorState}>
           <p>{t(loadError)}</p>
           <Button variant="secondary" size="sm" onClick={load}>{t('common.tryAgain')}</Button>
         </Card>

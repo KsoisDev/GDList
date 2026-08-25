@@ -8,7 +8,8 @@ import Avatar from '../components/ui/Avatar'
 import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
-import { getCollection } from '../services/firestore'
+import { useAuth } from '../hooks/useAuth'
+import { loadUsers } from '../services/readCache'
 import { formatNumber, getDisplayName } from '../utils/format'
 import { getFlagUrl } from '../utils/countries'
 import { useLanguage } from '../hooks/useLanguage'
@@ -28,65 +29,20 @@ export default function MainLeaderboard() {
       setLoading(true)
       setLoadError('')
       try {
-        const [completions, levels] = await Promise.all([
-          getCollection('completions'),
-          getCollection('levels'),
-        ])
-        const communityLevelIds = new Set(
-          levels.filter(level => level.type === 'community').map(level => level.id),
-        )
-        const mainCompletions = completions.filter(completion =>
-          completion.status !== 'rejected'
-          && completion.userId
-          && completion.levelType !== 'community'
-          && !communityLevelIds.has(completion.levelId)
-        )
-        const publicProfiles = new Map()
-        levels.forEach(level => {
-          ;(level.victors || []).forEach(victor => {
-            if (!victor.userId) return
-            const previous = publicProfiles.get(victor.userId) || {}
-            publicProfiles.set(victor.userId, {
-              ...previous,
-              id: victor.userId,
-              username: victor.username || victor.displayName || previous.username || 'Basement player',
-              displayName: victor.displayName || victor.username || previous.displayName || 'Basement player',
-              avatarURL: victor.avatarURL || previous.avatarURL || '',
-              country: victor.country || previous.country || '',
-            })
-          })
-        })
-
-        const totals = {}
-        const counts = {}
-        mainCompletions.forEach(completion => {
-          const userId = completion.userId
-          totals[userId] = (totals[userId] || 0) + (Number(completion.points) || 0)
-          counts[userId] = (counts[userId] || 0) + 1
-          if (!publicProfiles.has(userId)) {
-            publicProfiles.set(userId, {
-              id: userId,
-              username: completion.username || completion.displayName || 'Basement player',
-              displayName: completion.displayName || completion.username || 'Basement player',
-              avatarURL: completion.avatarURL || '',
-              country: completion.country || '',
-            })
-          }
-        })
-
-        const sorted = Array.from(publicProfiles.values())
-          .map(player => ({
+        const users = await loadUsers()
+        const sorted = users
+          .filter(u => (u.stats?.mainPoints || 0) > 0)
+          .sort((a, b) => (b.stats?.mainPoints || 0) - (a.stats?.mainPoints || 0))
+          .slice(0, 100)
+          .map((player, index) => ({
             ...player,
             stats: {
               ...player.stats,
-              mainPoints: totals[player.id] || 0,
-              mainCompletions: counts[player.id] || 0,
+              mainCompletions: player.stats?.mainCompletions || 0,
             },
+            _rank: index + 1,
           }))
-          .filter(player => player.stats.mainPoints > 0)
-          .sort((a, b) => b.stats.mainPoints - a.stats.mainPoints)
-          .slice(0, 100)
-        setPlayers(sorted.map((player, index) => ({ ...player, _rank: index + 1 })))
+        setPlayers(sorted)
       } catch (err) {
         console.error('Failed to load leaderboard:', err)
         setLoadError('leader.mainLoadFailed')
@@ -156,7 +112,7 @@ export default function MainLeaderboard() {
           <Spinner size="lg" />
         </div>
       ) : loadError ? (
-        <div className={styles.empty} role="alert">
+        <div className={styles.errorState} role="alert">
           <p>{t(loadError)}</p>
           <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>{t('common.tryAgain')}</Button>
         </div>
@@ -187,6 +143,9 @@ export default function MainLeaderboard() {
                 <Link to={`/profile/${player.id}`} className={styles.playerInfo}>
                   <Avatar src={player.avatarURL} alt={getDisplayName(player)} size="sm" />
                   <span className={styles.username}>{getDisplayName(player)}</span>
+                  {player.role === 'owner' && <span className={`${styles.roleBadge} ${styles.roleOwner}`}>Owner</span>}
+                  {player.role === 'admin' && <span className={`${styles.roleBadge} ${styles.roleAdmin}`}>Admin</span>}
+                  {player.isDeveloper && <span className={`${styles.roleBadge} ${styles.roleDev}`}>Dev</span>}
                   {getFlagUrl(player.country) && (
                     <img src={getFlagUrl(player.country)} alt={player.country} className={styles.flagImg} loading="lazy" />
                   )}

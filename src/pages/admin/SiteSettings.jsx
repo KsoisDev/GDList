@@ -122,8 +122,8 @@ export default function SiteSettings() {
             />
           </div>
 
-          {error && <p className={styles.error} role="alert">{error}</p>}
-          {saved && <p className={siteStyles.saved} role="status">Settings saved.</p>}
+          {error && <p className="errorPanel" role="alert">{error}</p>}
+          {saved && <p className="successPanel" role="status">Settings saved.</p>}
 
           <div className={siteStyles.actions}>
             <Button variant="primary" onClick={handleSave} loading={saving} icon={Save}>

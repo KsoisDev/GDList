@@ -6,6 +6,8 @@ import StartupError from './components/layout/StartupError'
 import { firebaseConfigError } from './services/firebase'
 import './styles/globals.css'
 import './styles/animations.css'
+import './styles/notifications.css'
+
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

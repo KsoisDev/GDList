@@ -73,7 +73,7 @@ export default function MergeMainLevels() {
             Merge All
           </Button>
         </div>
-        {message && <p className={styles.error}>{message}</p>}
+        {message && <p className="infoPanel">{message}</p>}
       </Card>
 
       {loading ? (

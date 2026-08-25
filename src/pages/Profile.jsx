@@ -11,6 +11,7 @@ import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
 import Spinner from '../components/ui/Spinner'
 import { getDocument, getCollection, createDocument, where } from '../services/firestore'
+import { loadCommunityLevels } from '../services/readCache'
 import { deleteCompletionRecord } from '../services/deleteCompletion'
 import { communityPoints } from '../utils/communityPoints'
 import { computeBadges } from '../utils/badges'
@@ -45,14 +46,13 @@ export default function Profile() {
   const load = async (uid = userId) => {
     setLoading(true)
     try {
-      const [profileResult, completionsResult, levelsResult, staffResult] = await Promise.allSettled([
+      const [profileResult, completionsResult, communityLevelsResult, staffResult] = await Promise.allSettled([
         getDocument('users', uid),
         getCollection('completions', [where('userId', '==', uid)]),
-        getCollection('levels'),
+        loadCommunityLevels(),
         getDocument('staff', uid),
       ])
-      const allLevels = levelsResult.status === 'fulfilled' ? levelsResult.value : []
-      const communityLevels = allLevels.filter(level => level.type === 'community')
+      const communityLevels = communityLevelsResult.status === 'fulfilled' ? communityLevelsResult.value : []
       const comps = completionsResult.status === 'fulfilled' ? completionsResult.value : []
       const userComps = [...comps].sort((a, b) => {
         const ta = a.completedAt?.toMillis?.() || 0
@@ -70,19 +70,16 @@ export default function Profile() {
       })
 
       let snapshotProfile = null
-      for (const level of allLevels) {
-        const victor = (level.victors || []).find(entry => entry.userId === uid)
-        if (victor) {
-          snapshotProfile = {
-            id: uid,
-            username: victor.username || victor.displayName || 'Basement player',
-            displayName: victor.displayName || victor.username || 'Basement player',
-            avatarURL: victor.avatarURL || '',
-            country: victor.country || '',
-            role: 'user',
-            createdAt: withLivePoints.at(-1)?.completedAt || null,
-          }
-          break
+      const latestComp = withLivePoints[0]
+      if (latestComp) {
+        snapshotProfile = {
+          id: uid,
+          username: latestComp.username || latestComp.displayName || 'Basement player',
+          displayName: latestComp.displayName || latestComp.username || 'Basement player',
+          avatarURL: latestComp.avatarURL || '',
+          country: latestComp.country || '',
+          role: 'user',
+          createdAt: latestComp.completedAt || null,
         }
       }
 
@@ -182,7 +179,7 @@ export default function Profile() {
                 )}
               </h1>
               <div className={styles.meta}>
-                <RoleBadge role={profile.role} title={profile.teamTitle} username={profile.username} banned={profile.banned} />
+                <RoleBadge role={profile.role} title={profile.teamTitle} username={profile.username} banned={profile.banned} isDeveloper={profile.isDeveloper} />
                 {badges.firstVictor && (
                   <Badge variant="gold" size="sm" title="First victor of a community level">
                     <Crown size={12} /> First Victor
@@ -288,7 +285,7 @@ export default function Profile() {
                 {' · +'} {deleteTarget.points} pts
               </p>
             )}
-            {deleteError && <p className={styles.deleteError}>{deleteError}</p>}
+            {deleteError && <p className={styles.deleteError} role="alert">{deleteError}</p>}
             <div className={styles.reportActions}>
               <Button variant="ghost" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button>
               <Button variant="danger" onClick={handleDeleteCompletion} loading={deleting} icon={Trash2}>

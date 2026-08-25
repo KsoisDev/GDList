@@ -11,10 +11,9 @@ export const ROLES = {
   USER: 'user',
   ADMIN: 'admin',
   OWNER: 'owner',
-  DEVELOPER: 'developer',
 }
 
-export const HIERARCHY = { user: 0, admin: 1, owner: 2, developer: 2 }
+export const HIERARCHY = { user: 0, admin: 1, owner: 2 }
 
 export function hasAccess(role, minRole) {
   const roleLevel = HIERARCHY[role]

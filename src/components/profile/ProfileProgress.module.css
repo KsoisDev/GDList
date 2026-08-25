@@ -19,28 +19,64 @@
 
 .heading {
   margin-bottom: 20px;
+  justify-content: flex-start;
 }
 
-.heading > svg {
-  color: #65a3ff;
+.rankIdentity {
+  display: flex;
+  align-items: center;
+  gap: 18px;
 }
 
-.heading span {
+.emblemGlow {
+  display: inline-flex;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 16px var(--glow));
+}
+
+.emblem {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 80px;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background:
+    linear-gradient(160deg, var(--from) 20%, var(--to) 105%),
+    linear-gradient(#fff2, transparent 45%);
+  color: #ffffff;
+}
+
+.emblem svg {
+  filter: drop-shadow(0 2px 4px rgba(4, 10, 20, 0.45));
+}
+
+.eyebrow {
   color: #5599ff;
   font-size: 0.67rem;
   font-weight: 800;
   letter-spacing: 0.17em;
+  text-transform: uppercase;
 }
 
-.heading h2 {
-  margin-top: 4px;
-  color: #f4f7fb;
-  font-size: 1.15rem;
+.rankName {
+  margin-top: 5px;
+  color: var(--to);
+  font-size: 1.55rem;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  background: linear-gradient(115deg, var(--from) 15%, var(--to) 85%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.milestoneRow strong {
-  color: #f4f7fb;
-  font-size: 1.2rem;
+.points {
+  display: block;
+  margin-top: 3px;
+  color: #aab8cd;
+  font-size: 0.85rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
 }
 
 .milestoneRow span,
@@ -48,6 +84,15 @@
   color: #7e8da4;
   font-size: 0.75rem;
   font-weight: 650;
+}
+
+.milestoneRow strong {
+  color: #cbd8ea;
+  font-weight: 800;
+}
+
+.nextName {
+  color: var(--to);
 }
 
 .progressTrack,
@@ -63,8 +108,9 @@
 .progressTrack > span {
   min-width: 2px;
   border-radius: inherit;
-  background: linear-gradient(90deg, #347ff0, #73afff);
-  box-shadow: 0 0 18px rgba(76, 148, 255, 0.42);
+  background: linear-gradient(90deg, var(--from), var(--to));
+  box-shadow: 0 0 18px var(--glow);
+  transition: width 0.45s ease;
 }
 
 .splitHeading {
@@ -85,11 +131,45 @@
   background: #9b72e8;
 }
 
+.viewPathBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 18px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: #5599ff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: opacity var(--transition-fast, 0.15s);
+}
+
+.viewPathBtn:hover {
+  opacity: 0.8;
+}
+
 @media (max-width: 520px) {
   .milestoneRow,
   .splitHeading {
     align-items: flex-start;
     flex-direction: column;
     gap: 6px;
+  }
+
+  .rankIdentity {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .emblem {
+    width: 58px;
+    height: 65px;
+  }
+
+  .rankName {
+    font-size: 1.3rem;
   }
 }

@@ -14,6 +14,7 @@ import Select from '../components/ui/Select'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
 import { updateDocument, getCollection, where } from '../services/firestore'
+import { loadCommunityLevels, invalidateCache } from '../services/readCache'
 import { communityPoints } from '../utils/communityPoints'
 import { computeBadges } from '../utils/badges'
 import { getDisplayName, formatNumber, formatDate } from '../utils/format'
@@ -89,7 +90,7 @@ export default function MyProfile() {
     try {
       const [comps, communityLevels] = await Promise.all([
         getCollection('completions', [where('userId', '==', user.uid)]),
-        getCollection('levels', [where('type', '==', 'community')]),
+        loadCommunityLevels(),
       ])
       const posMap = {}
       communityLevels.forEach(l => { posMap[l.id] = l.position })
@@ -131,7 +132,7 @@ export default function MyProfile() {
         country: country,
       })
       try {
-        await syncVictorsSnapshot(user.uid, { username: displayName.trim(), displayName: displayName.trim(), country })
+        await syncVictorsSnapshot(user.uid, { username: displayName.trim(), displayName: displayName.trim(), country, avatarURL: avatarURL.trim() || '' })
       } catch (syncErr) {
         console.warn('Victors name sync failed:', syncErr)
       }
@@ -311,7 +312,7 @@ export default function MyProfile() {
                     )}
                   </h1>
                   <div className={styles.meta}>
-                    <RoleBadge role={userData.role} username={userData.username} banned={userData.banned} />
+                    <RoleBadge role={userData.role} username={userData.username} banned={userData.banned} isDeveloper={userData.isDeveloper} />
                     {badges.firstVictor && (
                       <Badge variant="gold" size="sm" title="First victor of a community level">
                         <Crown size={12} /> First Victor

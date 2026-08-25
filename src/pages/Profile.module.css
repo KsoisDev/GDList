@@ -535,11 +535,6 @@
   border-radius: var(--radius-md);
 }
 
-.deleteError {
-  font-size: 0.8125rem;
-  color: var(--accent-red);
-}
-
 .dangerZone {
   margin-top: 16px;
   padding: 18px;

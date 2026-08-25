@@ -146,6 +146,36 @@
   transition: color var(--transition-fast);
 }
 
+.roleBadge {
+  flex-shrink: 0;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.roleOwner {
+  background: rgba(253, 230, 138, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(253, 230, 138, 0.25);
+}
+
+.roleAdmin {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.22);
+}
+
+.roleDev {
+  background: rgba(139, 92, 246, 0.12);
+  color: #a78bfa;
+  border: 1px solid rgba(139, 92, 246, 0.22);
+}
+
 .points {
   font-weight: 700;
   color: var(--accent-green);
@@ -165,4 +195,17 @@
   padding: 48px 20px;
   text-align: center;
   color: var(--text-secondary);
+}
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 48px 20px;
+  text-align: center;
+  color: #ff9caf;
+  border: 1px solid rgba(255, 68, 102, 0.2);
+  background: rgba(255, 68, 102, 0.06);
+  border-radius: var(--radius-lg);
 }

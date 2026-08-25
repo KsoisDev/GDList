@@ -355,13 +355,22 @@
   right: 0;
   width: 360px;
   max-height: 420px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-glass);
+  background: rgba(8, 17, 31, 0.98);
+  border: 1px solid rgba(112, 155, 219, 0.2);
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.025);
   display: flex;
   flex-direction: column;
+}
+
+.notifDropdown::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 100% 0, rgba(71, 139, 238, 0.08), transparent 28%);
+  pointer-events: none;
 }
 
 @media (max-width: 480px) {
@@ -392,13 +401,14 @@
 }
 
 .notifMarkAll {
-  background: none;
+  background: transparent;
   border: none;
   color: var(--accent-blue);
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: opacity var(--transition-fast);
+  padding: 0;
 }
 
 .notifMarkAll:hover {
@@ -428,8 +438,11 @@
   border-top: 0;
   border-left: 0;
   border-right: 0;
+  border-radius: 0;
+  background: transparent;
   color: inherit;
   text-align: left;
+  font: inherit;
 }
 
 .notifItem:last-child {
@@ -437,11 +450,15 @@
 }
 
 .notifItem:hover {
-  background: var(--bg-card);
+  background: linear-gradient(135deg, rgba(68, 136, 255, 0.06), rgba(68, 136, 255, 0.02));
 }
 
 .notifUnread {
-  background: rgba(76, 175, 80, 0.04);
+  background: rgba(76, 175, 80, 0.06);
+}
+
+.notifUnread:hover {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.08), rgba(76, 175, 80, 0.03));
 }
 
 .notifIcon {

@@ -78,7 +78,9 @@ export default function SubmitLevel() {
         return
       }
     } catch (err) {
-      console.warn('Duplicate check failed, continuing:', err)
+      console.error('Duplicate check failed:', err)
+      setError('Could not verify duplicates. Please try again.')
+      return
     }
 
     setSubmitting(true)
@@ -240,7 +242,7 @@ export default function SubmitLevel() {
               </div>
             )}
 
-            {error && <p className={styles.error} role="alert">{error}</p>}
+            {error && <p className="errorPanel" role="alert">{error}</p>}
 
             <Button type="submit" variant="primary" fullWidth loading={submitting} icon={Send}>
               {t('nav.submitLevel')}
