@@ -43,6 +43,7 @@ export default function CommunityList() {
     setLoadError('')
     try {
       const data = await loadCommunityLevels()
+      data.sort((a, b) => (a.position || 0) - (b.position || 0))
       setLevels(data)
     } catch (err) {
       console.error('Failed to load community levels:', err)
