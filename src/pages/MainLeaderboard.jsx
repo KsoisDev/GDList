@@ -141,6 +141,9 @@ export default function MainLeaderboard() {
                 <Link to={`/profile/${player.id}`} className={styles.playerInfo}>
                   <Avatar src={player.avatarURL} alt={getDisplayName(player)} size="sm" />
                   <span className={styles.username}>{getDisplayName(player)}</span>
+                  {player.role === 'owner' && <span className={`${styles.roleBadge} ${styles.roleOwner}`}>Owner</span>}
+                  {player.role === 'admin' && <span className={`${styles.roleBadge} ${styles.roleAdmin}`}>Admin</span>}
+                  {player.isDeveloper && <span className={`${styles.roleBadge} ${styles.roleDev}`}>Dev</span>}
                   {getFlagUrl(player.country) && (
                     <img src={getFlagUrl(player.country)} alt={player.country} className={styles.flagImg} loading="lazy" />
                   )}
