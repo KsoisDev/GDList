@@ -7,6 +7,7 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
+import { useLanguage } from '../hooks/useLanguage'
 import { getAuthErrorMessage, loginWithGoogle, registerWithEmail } from '../services/auth'
 import { isValidUsername } from '../utils/validators'
 import styles from './Auth.module.css'
@@ -27,6 +28,7 @@ export default function Register() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, loading: authLoading } = useAuth()
+  const { t } = useLanguage()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -38,15 +40,15 @@ export default function Register() {
   const destination = returnLocation(location.state)
 
   if (authLoading) {
-    return <AuthShell compact><div className={styles.centerStatus}><Spinner size="lg" /><p>Restoring your session…</p></div></AuthShell>
+    return <AuthShell compact><div className={styles.centerStatus}><Spinner size="lg" /><p>{t('auth.restore')}</p></div></AuthShell>
   }
 
   if (user) return <Navigate to={locationPath(destination)} replace />
 
   const validate = () => {
-    if (!isValidUsername(username.trim())) return 'Username must be 3–20 characters using letters, numbers, hyphens, or underscores.'
-    if (password.length < 8) return 'Use a password with at least 8 characters.'
-    if (password !== confirmPassword) return 'The passwords do not match.'
+    if (!isValidUsername(username.trim())) return t('auth.usernameError')
+    if (password.length < 8) return t('auth.passwordError')
+    if (password !== confirmPassword) return t('auth.passwordMatchError')
     return ''
   }
 
@@ -87,36 +89,36 @@ export default function Register() {
     <AuthShell>
       <div className={styles.authContent}>
         <div className={styles.header}>
-          <span className={styles.kicker}>Join the ranking</span>
-          <h2 className={styles.title}>Create your player account</h2>
-          <p className={styles.subtitle}>Save completions, submit proof, and build your profile.</p>
+          <span className={styles.kicker}>{t('auth.joinKicker')}</span>
+          <h2 className={styles.title}>{t('auth.registerTitle')}</h2>
+          <p className={styles.subtitle}>{t('auth.registerSubtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form} noValidate>
-          <Input label="Username" autoComplete="username" placeholder="PlayerName" value={username} onChange={event => setUsername(event.target.value)} icon={User} required />
-          <Input label="Email" type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={event => setEmail(event.target.value)} icon={Mail} required />
+          <Input label={t('auth.username')} autoComplete="username" placeholder="PlayerName" value={username} onChange={event => setUsername(event.target.value)} icon={User} required />
+          <Input label={t('auth.email')} type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={event => setEmail(event.target.value)} icon={Mail} required />
           <div className={styles.passwordGrid}>
-            <Input label="Password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="8+ characters" value={password} onChange={event => setPassword(event.target.value)} icon={Lock} required />
-            <Input label="Confirm password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="Repeat password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} icon={Lock} required />
+            <Input label={t('auth.password')} type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder={t('auth.passwordPlaceholder')} value={password} onChange={event => setPassword(event.target.value)} icon={Lock} required />
+            <Input label={t('auth.confirmPassword')} type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder={t('auth.repeatPassword')} value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} icon={Lock} required />
           </div>
-          <p className={styles.passwordHint}>Use at least 8 characters. A mix of words, numbers, and symbols is strongest.</p>
+          <p className={styles.passwordHint}>{t('auth.passwordHint')}</p>
           <div className={styles.formOptions}>
             <label className={styles.checkRow}>
               <input type="checkbox" checked={remember} onChange={event => setRemember(event.target.checked)} />
-              <span>Keep me signed in</span>
+              <span>{t('auth.keepSignedIn')}</span>
             </label>
             <label className={styles.checkRow}>
               <input type="checkbox" checked={showPassword} onChange={event => setShowPassword(event.target.checked)} />
-              <span>Show passwords</span>
+              <span>{t('auth.showPasswords')}</span>
             </label>
           </div>
           {error && <p className={styles.error} role="alert">{error}</p>}
-          <Button type="submit" variant="primary" fullWidth loading={loading} icon={UserPlus}>Create Account</Button>
+          <Button type="submit" variant="primary" fullWidth loading={loading} icon={UserPlus}>{t('nav.createAccount')}</Button>
         </form>
 
-        <div className={styles.divider}><span>or continue with</span></div>
+        <div className={styles.divider}><span>{t('auth.continueWith')}</span></div>
         <Button variant="secondary" fullWidth onClick={handleGoogle} loading={loading} icon={GoogleLogo}>Google</Button>
-        <p className={styles.footer}>Already registered? <Link to="/login" state={location.state}>Sign in</Link></p>
+        <p className={styles.footer}>{t('auth.already')} <Link to="/login" state={location.state}>{t('nav.signIn')}</Link></p>
       </div>
     </AuthShell>
   )

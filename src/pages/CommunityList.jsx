@@ -9,6 +9,7 @@ import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
+import { useLanguage } from '../hooks/useLanguage'
 import { getCollection } from '../services/firestore'
 import { getCommunityLevels, deleteCommunityLevel } from '../services/communityList'
 import { hasAccess } from '../utils/constants'
@@ -17,12 +18,13 @@ import styles from './List.module.css'
 import theme from '../components/layout/ThemedPage.module.css'
 
 const TABS = [
-  { id: 'active', label: 'Active' },
-  { id: 'unverified', label: 'Levels to Verify' },
+  { id: 'active', labelKey: 'community.active' },
+  { id: 'unverified', labelKey: 'community.toVerify' },
 ]
 
 export default function CommunityList() {
   const { user, userData } = useAuth()
+  const { t } = useLanguage()
   const isAdmin = hasAccess(userData?.role || 'user', 'admin')
   const [levels, setLevels] = useState([])
   const [tags, setTags] = useState([])
@@ -46,7 +48,7 @@ export default function CommunityList() {
       setLevels(data)
     } catch (err) {
       console.error('Failed to load community levels:', err)
-      setLoadError('The community list could not be loaded. Check your connection and try again.')
+      setLoadError('community.loadFailed')
     } finally {
       setLoading(false)
     }
@@ -103,52 +105,52 @@ export default function CommunityList() {
     <PageShell className={theme.pageShell}>
       <div className={theme.glow} aria-hidden="true" />
       <ThemedPageHero
-        eyebrow="BUILT BY BASEMENT PLAYERS"
-        title="Community"
-        accentTitle="Demon List"
-        description="Discover original challenges created, submitted, and completed by members of the Basement community."
+        eyebrow={t('community.eyebrow')}
+        title={t('community.title')}
+        accentTitle={t('community.accentTitle')}
+        description={t('community.description')}
         actions={[
-          { to: '/submit-level', label: 'Submit a level' },
-          { to: '/list/main', label: 'Main list' },
+          { to: '/submit-level', label: t('community.submitLevel') },
+          { to: '/list/main', label: t('community.mainList') },
         ]}
         stats={[
-          { icon: ListChecks, value: loading ? '—' : active.length, label: 'Ranked levels' },
-          { icon: Trophy, value: loading ? '—' : active.reduce((sum, level) => sum + (level.victoryCount || 0), 0), label: 'Verified clears' },
-          { icon: Clock3, value: loading ? '—' : unverified.length, label: 'Awaiting verification', featured: true },
+          { icon: ListChecks, value: loading ? '—' : active.length, label: t('main.rankedLevels') },
+          { icon: Trophy, value: loading ? '—' : active.reduce((sum, level) => sum + (level.victoryCount || 0), 0), label: t('main.verifiedClears') },
+          { icon: Clock3, value: loading ? '—' : unverified.length, label: t('community.awaiting'), featured: true },
         ]}
       />
 
-      <section className={theme.surface} aria-label="Community list rankings">
+      <section className={theme.surface} aria-label={t('nav.communityRankings')}>
         <div className={theme.surfaceHeading}>
           <div>
-            <span className={theme.sectionLabel}>COMMUNITY STANDINGS</span>
-            <h2>Original Basement levels</h2>
+            <span className={theme.sectionLabel}>{t('community.standings')}</span>
+            <h2>{t('community.originalLevels')}</h2>
           </div>
-          <span className={theme.count}>{visible.length} {visible.length === 1 ? 'level' : 'levels'}</span>
+          <span className={theme.count}>{visible.length} {visible.length === 1 ? t('common.level') : t('common.levelsLower')}</span>
         </div>
 
       <div className={styles.toolbar}>
         <div className={styles.toolbarLeft}>
           <span className={styles.count}>
-            {visible.length} {visible.length === 1 ? 'level' : 'levels'}
+            {visible.length} {visible.length === 1 ? t('common.level') : t('common.levelsLower')}
           </span>
           {selectedTags.length > 0 && (
             <button type="button" className={styles.clearFilter} onClick={() => setSelectedTags([])}>
-              <X size={14} aria-hidden="true" /> Clear filters
+              <X size={14} aria-hidden="true" /> {t('community.clearFilters')}
             </button>
           )}
         </div>
         <SearchBar
           value={search}
           onChange={setSearch}
-          placeholder="Search level, creator or ID..."
+          placeholder={t('community.searchPlaceholder')}
           className={styles.searchBar}
         />
       </div>
 
       {tags.length > 0 && (
         <div className={styles.tagFilters}>
-          <span className={styles.tagFiltersLabel}>Filter by tag:</span>
+          <span className={styles.tagFiltersLabel}>{t('community.filterTag')}</span>
           {tags.map(tag => {
             const active = selectedTags.includes(tag.id)
             return (
@@ -168,15 +170,15 @@ export default function CommunityList() {
       )}
 
       <div className={styles.tabs}>
-        {TABS.map(t => (
+        {TABS.map(tabOption => (
           <button
-            key={t.id}
+            key={tabOption.id}
             type="button"
-            className={`${styles.tab} ${tab === t.id ? styles.tabActive : ''}`}
-            onClick={() => setTab(t.id)}
-            aria-pressed={tab === t.id}
+            className={`${styles.tab} ${tab === tabOption.id ? styles.tabActive : ''}`}
+            onClick={() => setTab(tabOption.id)}
+            aria-pressed={tab === tabOption.id}
           >
-            {t.label}
+            {t(tabOption.labelKey)}
           </button>
         ))}
       </div>
@@ -187,31 +189,31 @@ export default function CommunityList() {
         </div>
       ) : loadError ? (
         <Card padding="lg" className={styles.empty}>
-          <p>{loadError}</p>
-          <Button variant="secondary" size="sm" onClick={load}>Try Again</Button>
+          <p>{t(loadError)}</p>
+          <Button variant="secondary" size="sm" onClick={load}>{t('common.tryAgain')}</Button>
         </Card>
       ) : tab === 'active' && visible.length === 0 ? (
         <Card padding="lg" className={styles.empty}>
           {selectedTags.length > 0
-            ? <p>No active community levels match the selected tags.</p>
-            : <p>No active community levels yet. Levels appear here once they have at least one completion.</p>}
+            ? <p>{t('community.noActiveTags')}</p>
+            : <p>{t('community.noActive')}</p>}
         </Card>
       ) : tab === 'unverified' && visible.length === 0 ? (
         <Card padding="lg" className={styles.empty}>
           {selectedTags.length > 0
-            ? <p>No levels to verify match the selected tags.</p>
-            : <p>No unverified levels. New level submissions will appear here once approved by an admin.</p>}
+            ? <p>{t('community.noVerifyTags')}</p>
+            : <p>{t('community.noVerify')}</p>}
         </Card>
       ) : (
         <div className={`${styles.table} ${isAdmin ? styles.withActions : ''} ${tab === 'unverified' ? styles.unverifiedTable : ''}`}>
           <div className={styles.tableHeader}>
             <span className={styles.colPos}>#</span>
-            <span className={styles.colName}>Level</span>
-            <span className={styles.colDiff}>ID</span>
-            {tab === 'active' && <span className={styles.colPoints}>Points</span>}
-            <span className={styles.colVerifier}>Creators</span>
-            <span className={styles.colCreator}>Submitter</span>
-            {isAdmin && <span className={styles.colActions}>Actions</span>}
+            <span className={styles.colName}>{t('common.level')}</span>
+            <span className={styles.colDiff}>{t('community.id')}</span>
+            {tab === 'active' && <span className={styles.colPoints}>{t('common.points')}</span>}
+            <span className={styles.colVerifier}>{t('common.creators')}</span>
+            <span className={styles.colCreator}>{t('common.submitter')}</span>
+            {isAdmin && <span className={styles.colActions}>{t('common.actions')}</span>}
           </div>
 
           {visible.map((level, i) => {
@@ -260,7 +262,7 @@ export default function CommunityList() {
                         {completed && <Trophy size={14} className={styles.completedTrophy} />}
                       </span>
                     )}
-                    <span className={styles.creator}>by {level.creator}</span>
+                    <span className={styles.creator}>{t('common.by', { name: level.creator })}</span>
                     {levelTags.length > 0 && (
                       <span className={styles.levelTags}>
                         {levelTags.map(tag => (
@@ -281,8 +283,8 @@ export default function CommunityList() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className={styles.videoBtn}
-                      title={tab === 'active' ? 'Verifier video' : 'Showcase video'}
-                      aria-label={tab === 'active' ? 'Verifier video' : 'Showcase video'}
+                      title={tab === 'active' ? t('community.verifierVideo') : t('community.showcaseVideo')}
+                      aria-label={tab === 'active' ? t('community.verifierVideo') : t('community.showcaseVideo')}
                     >
                       <Youtube size={18} />
                     </a>
@@ -308,8 +310,8 @@ export default function CommunityList() {
                   <Link
                     to={`/levels/${level.id}`}
                     className={styles.editBtn}
-                    title="Edit level"
-                    aria-label="Edit level"
+                    title={t('community.editLevel')}
+                    aria-label={t('community.editLevel')}
                   >
                     <Edit3 size={16} />
                   </Link>
@@ -317,8 +319,8 @@ export default function CommunityList() {
                     type="button"
                     className={styles.deleteBtn}
                     onClick={() => handleDelete(level)}
-                    title="Delete level"
-                    aria-label="Delete level"
+                    title={t('community.deleteLevel')}
+                    aria-label={t('community.deleteLevel')}
                   >
                     <Trash2 size={16} />
                   </button>

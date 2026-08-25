@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import Avatar from '../components/ui/Avatar'
 import { useAuth } from '../hooks/useAuth'
+import { useLanguage } from '../hooks/useLanguage'
 import { getCollection } from '../services/firestore'
 import { computeUserCommunityPoints } from '../services/communityList'
 import { formatDateRelative, formatNumber, getDisplayName } from '../utils/format'
@@ -30,18 +31,18 @@ import styles from './Home.module.css'
 const communityBenefits = [
   {
     icon: Layers3,
-    title: 'Two lists, one community',
-    description: 'Track official demons and the levels created inside the Basement community.',
+    titleKey: 'home.benefitOneTitle',
+    descriptionKey: 'home.benefitOneText',
   },
   {
     icon: ShieldCheck,
-    title: 'Records with proof',
-    description: 'Every submitted completion includes video evidence and a clear review status.',
+    titleKey: 'home.benefitTwoTitle',
+    descriptionKey: 'home.benefitTwoText',
   },
   {
     icon: Trophy,
-    title: 'Rankings that feel earned',
-    description: 'Climb separate main and community leaderboards as your completion history grows.',
+    titleKey: 'home.benefitThreeTitle',
+    descriptionKey: 'home.benefitThreeText',
   },
 ]
 
@@ -56,6 +57,7 @@ const emptyHighlights = {
 
 export default function Home() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [highlights, setHighlights] = useState(emptyHighlights)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -168,12 +170,12 @@ export default function Home() {
           })
           const partialFailure = [completionsResult, levelsResult]
             .some(result => result.status === 'rejected')
-          setLoadError(partialFailure ? 'Some live community data could not be loaded.' : '')
+          setLoadError(partialFailure ? 'home.partialData' : '')
         }
       })
       .catch(error => {
         console.error('Failed to load home data:', error)
-        if (mounted) setLoadError('Live community data could not be loaded.')
+        if (mounted) setLoadError('home.noData')
       })
       .finally(() => {
         if (mounted) setLoading(false)
@@ -187,7 +189,7 @@ export default function Home() {
       id: `record-${record.id}`,
       type: 'record',
       title: record.username,
-      text: `completed ${record.levelName || 'a demon'}`,
+      text: t('home.completed', { level: record.levelName || t('home.aDemon') }),
       time: formatDateRelative(record.completedAt || record.createdAt),
       href: record.levelId ? `/levels/${record.levelId}` : '/list/community',
     }))
@@ -195,18 +197,18 @@ export default function Home() {
       id: `level-${level.id}`,
       type: 'level',
       title: level.name,
-      text: `joined the community list · by ${level.creator || 'Unknown'}`,
+      text: t('home.joinedList', { creator: level.creator || t('common.unknown') }),
       time: formatDateRelative(level.createdAt || level.firstCompletedAt),
       href: `/levels/${level.id}`,
     }))
 
     return [...records, ...levels].slice(0, 5)
-  }, [highlights])
+  }, [highlights, t])
 
   const statItems = [
-    { icon: Users, value: highlights.stats.users, label: 'Players' },
-    { icon: Trophy, value: highlights.stats.records, label: 'Records' },
-    { icon: List, value: highlights.stats.levels, label: 'Levels' },
+    { icon: Users, value: highlights.stats.users, label: t('common.players') },
+    { icon: Trophy, value: highlights.stats.records, label: t('common.records') },
+    { icon: List, value: highlights.stats.levels, label: t('common.levels') },
   ]
   const previewLevels = highlights.communityLevels
   const activeListHref = '/list/community'
@@ -228,20 +230,19 @@ export default function Home() {
         >
           <div className={styles.eyebrow}>
             <Radio size={14} />
-            <span>THE TNAILLZXGD COMMUNITY LIST</span>
+            <span>{t('home.eyebrow')}</span>
           </div>
 
           <h1 className={styles.heroTitle}>
-            The Basement<br />
-            <span>Demon List</span>
+            {t('home.title')}<br />
+            <span>{t('home.accentTitle')}</span>
           </h1>
 
           <p className={styles.heroSubtitle}>
-            A community-built ranking for Geometry Dash players who want to prove their runs,
-            discover their next challenge, and climb together.
+            {t('home.subtitle')}
           </p>
 
-          <div className={styles.stats} aria-label="Community statistics">
+          <div className={styles.stats} aria-label={t('home.overview')}>
             {statItems.map(({ icon: Icon, value, label }) => (
               <div className={styles.stat} key={label}>
                 <Icon size={17} aria-hidden="true" />
@@ -255,17 +256,17 @@ export default function Home() {
 
           <div className={styles.heroActions}>
             <Link className={styles.primaryAction} to="/list/community">
-              Explore the list <ArrowRight size={17} />
+              {t('home.exploreList')} <ArrowRight size={17} />
             </Link>
             <Link className={styles.secondaryAction} to="/submit">
-              Submit a record <Trophy size={17} />
+              {t('home.submitRecord')} <Trophy size={17} />
             </Link>
             <Link className={styles.secondaryAction} to="/submit-level">
-              Submit a level <Upload size={17} />
+              {t('home.submitLevel')} <Upload size={17} />
             </Link>
           </div>
 
-          <div className={styles.socialLinks} aria-label="Community social links">
+          <div className={styles.socialLinks} aria-label={t('home.socialLinks')}>
             <a href="https://discord.gg/75FaX3gmM2" target="_blank" rel="noopener noreferrer">
               <Users size={14} /> Discord
             </a>
@@ -278,8 +279,8 @@ export default function Home() {
           </div>
           {loadError && (
             <div className={styles.dataNotice} role="alert">
-              <span>{loadError}</span>
-              <button type="button" onClick={() => setRetryKey(key => key + 1)}>Try again</button>
+              <span>{t(loadError)}</span>
+              <button type="button" onClick={() => setRetryKey(key => key + 1)}>{t('home.retry')}</button>
             </div>
           )}
         </motion.div>
@@ -289,14 +290,14 @@ export default function Home() {
           initial={{ opacity: 0, x: 28 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.16, duration: 0.55, ease: 'easeOut' }}
-          aria-label="List preview"
+          aria-label={t('home.listPreview')}
         >
           <div className={styles.spotlightTopline}>
             <div>
               <span className={styles.liveDot} />
-              <span>CURRENT RANKING</span>
+              <span>{t('home.currentRanking')}</span>
             </div>
-            <Link to={activeListHref}>Open full list <ArrowRight size={14} /></Link>
+            <Link to={activeListHref}>{t('home.openFullList')} <ArrowRight size={14} /></Link>
           </div>
 
           <div className={styles.previewList}>
@@ -309,7 +310,7 @@ export default function Home() {
                 <span className={styles.previewRank}>#{level.position}</span>
                 <span className={styles.previewName}>
                   <strong>{level.name}</strong>
-                  <small>by {level.creator || 'Unknown'}</small>
+                  <small>{t('common.by', { name: level.creator || t('common.unknown') })}</small>
                 </span>
                 <span className={styles.previewPoints}>{formatNumber(level.points || 0)} pts</span>
                 <ChevronRight size={15} />
@@ -319,20 +320,20 @@ export default function Home() {
             {!loading && previewLevels.length === 0 && (
               <div className={styles.previewEmpty}>
                 <List size={20} />
-                <strong>Community list</strong>
-                <span>Ranked levels will appear here as soon as the database is connected.</span>
+                <strong>{t('home.communityList')}</strong>
+                <span>{t('home.previewEmpty')}</span>
               </div>
             )}
           </div>
 
           <Link className={styles.spotlightFooter} to={activeListHref}>
-            Browse every community level
+            {t('home.browseAll')}
             <ArrowRight size={15} />
           </Link>
         </motion.aside>
       </section>
 
-      <section className={styles.dashboard} aria-label="Community overview">
+      <section className={styles.dashboard} aria-label={t('home.overview')}>
         <motion.article
           className={`${styles.panel} ${styles.activityPanel}`}
           initial={{ opacity: 0, y: 28 }}
@@ -342,9 +343,9 @@ export default function Home() {
           <header className={styles.panelHeader}>
             <div>
               <Activity size={18} />
-              <h2>Recent activity</h2>
+              <h2>{t('home.recentActivity')}</h2>
             </div>
-            <Link to="/list/community">View all <ArrowRight size={14} /></Link>
+            <Link to="/list/community">{t('home.viewAll')} <ArrowRight size={14} /></Link>
           </header>
 
           <div className={styles.activityList}>
@@ -361,14 +362,14 @@ export default function Home() {
                   <strong>{item.title}</strong>
                   <span>{item.text}</span>
                 </span>
-                <time>{item.time || 'Recently'}</time>
+                <time>{item.time || t('common.recently')}</time>
               </Link>
             ))}
 
             {!loading && activity.length === 0 && (
               <div className={styles.emptyActivity}>
                 <Sparkles size={18} />
-                <span>The next verified record will appear here.</span>
+                <span>{t('home.nextRecord')}</span>
               </div>
             )}
           </div>
@@ -384,17 +385,17 @@ export default function Home() {
           <header className={styles.panelHeader}>
             <div>
               <CheckCircle2 size={18} />
-              <h2>Why Basement List?</h2>
+              <h2>{t('home.why')}</h2>
             </div>
           </header>
 
           <div className={styles.benefitList}>
-            {communityBenefits.map(({ icon: Icon, title, description }) => (
-              <div className={styles.benefit} key={title}>
+            {communityBenefits.map(({ icon: Icon, titleKey, descriptionKey }) => (
+              <div className={styles.benefit} key={titleKey}>
                 <span><Icon size={18} /></span>
                 <div>
-                  <h3>{title}</h3>
-                  <p>{description}</p>
+                  <h3>{t(titleKey)}</h3>
+                  <p>{t(descriptionKey)}</p>
                 </div>
               </div>
             ))}
@@ -403,14 +404,14 @@ export default function Home() {
       </section>
 
       {!loading && (
-        <section className={styles.leaderboards} aria-label="Top player rankings">
+        <section className={styles.leaderboards} aria-label={t('footer.rankings')}>
           <article className={styles.leaders}>
             <div className={styles.leadersHeading}>
               <div>
                 <Crown size={18} />
-                <span>Main List leaders</span>
+                <span>{t('home.mainLeaders')}</span>
               </div>
-              <Link to="/leaderboard/main">Full leaderboard <ArrowRight size={14} /></Link>
+              <Link to="/leaderboard/main">{t('home.fullLeaderboard')} <ArrowRight size={14} /></Link>
             </div>
             <div className={styles.leaderList}>
               {highlights.topMain.map((player, index) => (
@@ -425,7 +426,7 @@ export default function Home() {
                 </Link>
               ))}
               {highlights.topMain.length === 0 && (
-                <p className={styles.leaderEmpty}>Main rankings are temporarily unavailable.</p>
+                <p className={styles.leaderEmpty}>{t('home.mainUnavailable')}</p>
               )}
             </div>
           </article>
@@ -434,9 +435,9 @@ export default function Home() {
             <div className={styles.leadersHeading}>
               <div>
                 <Crown size={18} />
-                <span>Community List leaders</span>
+                <span>{t('home.communityLeaders')}</span>
               </div>
-              <Link to="/leaderboard/community">Full leaderboard <ArrowRight size={14} /></Link>
+              <Link to="/leaderboard/community">{t('home.fullLeaderboard')} <ArrowRight size={14} /></Link>
             </div>
             <div className={styles.leaderList}>
               {highlights.topCommunity.map((player, index) => (
@@ -451,7 +452,7 @@ export default function Home() {
                 </Link>
               ))}
               {highlights.topCommunity.length === 0 && (
-                <p className={styles.leaderEmpty}>Community rankings are temporarily unavailable.</p>
+                <p className={styles.leaderEmpty}>{t('home.communityUnavailable')}</p>
               )}
             </div>
           </article>
@@ -460,15 +461,15 @@ export default function Home() {
 
       <section className={styles.finalCta}>
         <div>
-          <span>READY FOR YOUR NEXT DEMON?</span>
-          <h2>Make your run part of the list.</h2>
+          <span>{t('home.ready')}</span>
+          <h2>{t('home.cta')}</h2>
         </div>
         <div>
           <Link className={styles.primaryAction} to={user ? '/submit' : '/register'}>
-            {user ? 'Submit a record' : 'Create an account'} <ArrowRight size={17} />
+            {user ? t('home.submitRecord') : t('home.createAccount')} <ArrowRight size={17} />
           </Link>
           <Link className={styles.textAction} to={user ? '/profile' : '/login'}>
-            {user ? 'My profile' : 'Sign in'}
+            {user ? t('home.myProfile') : t('home.signIn')}
           </Link>
         </div>
       </section>

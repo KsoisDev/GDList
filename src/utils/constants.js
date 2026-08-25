@@ -34,11 +34,11 @@ export const LEVEL_TYPES = {
 }
 
 export const NAV_LINKS = [
-  { path: '/', label: 'Home' },
-  { path: '/list/main', label: 'Main List' },
-  { path: '/list/community', label: 'Community List' },
-  { path: '/leaderboard/main', label: 'Main Rankings' },
-  { path: '/leaderboard/community', label: 'Community Rankings' },
+  { path: '/', labelKey: 'nav.home' },
+  { path: '/list/main', labelKey: 'nav.mainList' },
+  { path: '/list/community', labelKey: 'nav.communityList' },
+  { path: '/leaderboard/main', labelKey: 'nav.mainRankings' },
+  { path: '/leaderboard/community', labelKey: 'nav.communityRankings' },
 ]
 
 export const DIFFICULTY_COLORS = {

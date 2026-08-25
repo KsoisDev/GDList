@@ -8,6 +8,7 @@ import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
+import { useLanguage } from '../hooks/useLanguage'
 import { getCollection, where } from '../services/firestore'
 import { cacheMainLevels, getMainLevelsFallback } from '../services/mainListFallback'
 import { formatNumber } from '../utils/format'
@@ -16,6 +17,7 @@ import styles from './List.module.css'
 
 export default function MainList() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [levels, setLevels] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -44,10 +46,10 @@ export default function MainList() {
             .sort((a, b) => a.position - b.position)
             .map((level, index) => ({ ...level, _webRank: index + 1 }))
           setLevels(rankedFallback)
-          setLoadNotice('Live updates are temporarily unavailable. Showing the last saved Basement ranking.')
+          setLoadNotice('main.savedNotice')
         } catch (fallbackError) {
           console.error('Failed to load the saved main list:', fallbackError)
-          setLoadError('The main list could not be loaded. Check your connection and try again.')
+          setLoadError('main.loadFailed')
         }
       } finally {
         setLoading(false)
@@ -77,16 +79,16 @@ export default function MainList() {
       <div className={styles.mainListGlow} aria-hidden="true" />
       <section className={styles.mainListHero} aria-labelledby="main-list-title">
         <div className={styles.mainHeroCopy}>
-          <span className={styles.mainEyebrow}><Radio size={14} aria-hidden="true" /> LIVE COMMUNITY RANKING</span>
-          <h1 id="main-list-title" className={styles.mainTitle}>Main <span>Demon List</span></h1>
+          <span className={styles.mainEyebrow}><Radio size={14} aria-hidden="true" /> {t('main.eyebrow')}</span>
+          <h1 id="main-list-title" className={styles.mainTitle}>{t('main.title')} <span>{t('main.accentTitle')}</span></h1>
           <p className={styles.mainDescription}>
-            The official demons completed by Basement players, ranked by difficulty and backed by verified community records.
+            {t('main.description')}
           </p>
           <div className={styles.mainActions}>
             <Link to="/submit" className={styles.mainPrimaryAction}>
-              Submit a record <ArrowRight size={16} aria-hidden="true" />
+              {t('home.submitRecord')} <ArrowRight size={16} aria-hidden="true" />
             </Link>
-            <Link to="/list/community" className={styles.mainSecondaryAction}>Community list</Link>
+            <Link to="/list/community" className={styles.mainSecondaryAction}>{t('main.communityList')}</Link>
           </div>
         </div>
 
@@ -94,17 +96,17 @@ export default function MainList() {
           <div className={styles.mainStat}>
             <ListChecks size={18} aria-hidden="true" />
             <strong>{loading ? '—' : formatNumber(levels.length)}</strong>
-            <span>Ranked levels</span>
+            <span>{t('main.rankedLevels')}</span>
           </div>
           <div className={styles.mainStat}>
             <Trophy size={18} aria-hidden="true" />
             <strong>{loading ? '—' : formatNumber(totalVictories)}</strong>
-            <span>Verified clears</span>
+            <span>{t('main.verifiedClears')}</span>
           </div>
           <div className={`${styles.mainStat} ${styles.mainTopStat}`}>
             <span className={styles.mainRankMark}>#1</span>
-            <strong>{loading ? 'Loading' : topLevel?.name || 'Unranked'}</strong>
-            <span>Current hardest</span>
+            <strong>{loading ? t('common.loading') : topLevel?.name || t('common.unranked')}</strong>
+            <span>{t('main.currentHardest')}</span>
           </div>
         </div>
       </section>
@@ -112,26 +114,26 @@ export default function MainList() {
       <section className={styles.mainListSurface} aria-label="Main list rankings">
         <div className={styles.mainSurfaceHeading}>
           <div>
-            <span className={styles.mainSectionLabel}>CURRENT STANDINGS</span>
-            <h2>Official completions</h2>
+            <span className={styles.mainSectionLabel}>{t('main.currentStandings')}</span>
+            <h2>{t('main.officialCompletions')}</h2>
           </div>
-          <span className={styles.mainCount}>{filtered.length} {filtered.length === 1 ? 'level' : 'levels'}</span>
+          <span className={styles.mainCount}>{filtered.length} {filtered.length === 1 ? t('common.level') : t('common.levelsLower')}</span>
         </div>
 
         <div className={`${styles.toolbar} ${styles.mainToolbar}`}>
-          <span className={styles.count}>Search the ranking by level or creator</span>
+          <span className={styles.count}>{t('main.searchHelp')}</span>
           <SearchBar
             value={search}
             onChange={setSearch}
-            placeholder="Search level or creator..."
+            placeholder={t('main.searchPlaceholder')}
             className={styles.searchBar}
           />
         </div>
 
         {loadNotice && (
           <div className={styles.savedDataNotice} role="status">
-            <span>{loadNotice}</span>
-            <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>Refresh live list</Button>
+            <span>{t(loadNotice)}</span>
+            <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>{t('main.refreshLive')}</Button>
           </div>
         )}
 
@@ -139,25 +141,25 @@ export default function MainList() {
           <div className={styles.loading}><Spinner size="lg" /></div>
         ) : loadError ? (
           <div className={styles.empty} role="alert">
-            <p>{loadError}</p>
-            <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>Try Again</Button>
+            <p>{t(loadError)}</p>
+            <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>{t('common.tryAgain')}</Button>
           </div>
         ) : filtered.length === 0 ? (
           <div className={styles.empty}>
             {search
-              ? <p>No levels match "{search}".</p>
-              : <p>No levels completed yet. Submit your first record!</p>}
+              ? <p>{t('main.noMatches', { search })}</p>
+              : <p>{t('main.noLevels')}</p>}
           </div>
         ) : (
           <div className={`${styles.table} ${styles.mainThemedTable}`}>
           <div className={styles.headerMain}>
-            <span className={styles.colWeb}>#Web</span>
-            <span className={styles.colOff}>#Official</span>
-            <span className={styles.colName}>Level</span>
-            <span className={styles.colDiff}>Difficulty</span>
-            <span className={styles.colPoints}>Points</span>
-            <span className={styles.colCreator}>Creator</span>
-            <span className={styles.colVictories}>Victories</span>
+            <span className={styles.colWeb}>{t('main.webRank')}</span>
+            <span className={styles.colOff}>{t('main.officialRank')}</span>
+            <span className={styles.colName}>{t('common.level')}</span>
+            <span className={styles.colDiff}>{t('main.difficulty')}</span>
+            <span className={styles.colPoints}>{t('common.points')}</span>
+            <span className={styles.colCreator}>{t('common.creator')}</span>
+            <span className={styles.colVictories}>{t('common.victories')}</span>
           </div>
 
           {filtered.map((level, i) => {
@@ -183,7 +185,7 @@ export default function MainList() {
                         <span className={styles.levelName}>{level.name}</span>
                         {completed && <Trophy size={14} className={styles.completedTrophy} />}
                       </span>
-                      <span className={styles.creator}>by {level.creator}</span>
+                      <span className={styles.creator}>{t('common.by', { name: level.creator })}</span>
                     </div>
                   </div>
                 </span>

@@ -11,10 +11,12 @@ import Button from '../components/ui/Button'
 import { getCollection } from '../services/firestore'
 import { formatNumber, getDisplayName } from '../utils/format'
 import { getFlagUrl } from '../utils/countries'
+import { useLanguage } from '../hooks/useLanguage'
 import styles from './Leaderboard.module.css'
 import theme from '../components/layout/ThemedPage.module.css'
 
 export default function MainLeaderboard() {
+  const { t } = useLanguage()
   const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -87,7 +89,7 @@ export default function MainLeaderboard() {
         setPlayers(sorted.map((player, index) => ({ ...player, _rank: index + 1 })))
       } catch (err) {
         console.error('Failed to load leaderboard:', err)
-        setLoadError('The main leaderboard could not be loaded.')
+        setLoadError('leader.mainLoadFailed')
       } finally {
         setLoading(false)
       }
@@ -115,36 +117,36 @@ export default function MainLeaderboard() {
     <PageShell className={theme.pageShell}>
       <div className={theme.glow} aria-hidden="true" />
       <ThemedPageHero
-        eyebrow="OFFICIAL DEMON STANDINGS"
-        title="Main"
-        accentTitle="Rankings"
-        description="The Basement's official demon standings, calculated from every verified main-list completion."
+        eyebrow={t('leader.mainEyebrow')}
+        title={t('leader.mainTitle')}
+        accentTitle={t('leader.mainAccent')}
+        description={t('leader.mainDescription')}
         actions={[
-          { to: '/submit', label: 'Submit a record' },
-          { to: '/leaderboard/community', label: 'Community rankings' },
+          { to: '/submit', label: t('leader.submitRecord') },
+          { to: '/leaderboard/community', label: t('leader.communityRankings') },
         ]}
         stats={[
-          { icon: Users, value: loading ? '—' : players.length, label: 'Ranked players' },
-          { icon: CheckCircle2, value: loading ? '—' : players.reduce((sum, player) => sum + (player.stats?.mainCompletions || 0), 0), label: 'Counted clears' },
-          { icon: Crown, value: loading ? 'Loading' : players[0] ? getDisplayName(players[0]) : 'Unranked', label: 'Current leader', featured: true },
+          { icon: Users, value: loading ? '—' : players.length, label: t('leader.rankedPlayers') },
+          { icon: CheckCircle2, value: loading ? '—' : players.reduce((sum, player) => sum + (player.stats?.mainCompletions || 0), 0), label: t('leader.countedClears') },
+          { icon: Crown, value: loading ? t('common.loading') : players[0] ? getDisplayName(players[0]) : t('common.unranked'), label: t('leader.currentLeader'), featured: true },
         ]}
       />
 
-      <section className={theme.surface} aria-label="Main-list player standings">
+      <section className={theme.surface} aria-label={t('nav.mainRankings')}>
         <div className={theme.surfaceHeading}>
           <div>
-            <span className={theme.sectionLabel}>LIVE LEADERBOARD</span>
-            <h2>Player standings</h2>
+            <span className={theme.sectionLabel}>{t('leader.live')}</span>
+            <h2>{t('leader.standings')}</h2>
           </div>
-          <span className={theme.count}>{filtered.length} {filtered.length === 1 ? 'player' : 'players'}</span>
+          <span className={theme.count}>{filtered.length} {filtered.length === 1 ? t('common.player') : t('common.playersLower')}</span>
         </div>
 
       <div className={styles.toolbar}>
-        <span className={styles.count}>{filtered.length} players</span>
+        <span className={styles.count}>{filtered.length} {t('common.playersLower')}</span>
         <SearchBar
           value={search}
           onChange={setSearch}
-          placeholder="Search player..."
+          placeholder={t('leader.searchPlaceholder')}
           className={styles.searchBar}
         />
       </div>
@@ -155,16 +157,16 @@ export default function MainLeaderboard() {
         </div>
       ) : loadError ? (
         <div className={styles.empty} role="alert">
-          <p>{loadError}</p>
-          <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>Try Again</Button>
+          <p>{t(loadError)}</p>
+          <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>{t('common.tryAgain')}</Button>
         </div>
       ) : (
         <div className={styles.table}>
           <div className={styles.tableHeader}>
-            <span className={styles.colRank}>Rank</span>
-            <span className={styles.colPlayer}>Player</span>
-            <span className={styles.colPoints}>Points</span>
-            <span className={styles.colCompletions}>Completions</span>
+            <span className={styles.colRank}>{t('common.rank')}</span>
+            <span className={styles.colPlayer}>{t('common.playerLabel')}</span>
+            <span className={styles.colPoints}>{t('common.points')}</span>
+            <span className={styles.colCompletions}>{t('common.completions')}</span>
           </div>
 
           {filtered.map((player, i) => (
@@ -177,7 +179,7 @@ export default function MainLeaderboard() {
             >
               <span className={styles.colRank}>
                 <span className={styles.rank}>
-                  <span className={styles.rankA11y}>Rank {player._rank}</span>
+                  <span className={styles.rankA11y}>{t('leader.rankLabel', { rank: player._rank })}</span>
                   <span aria-hidden="true">{getRankIcon(player._rank - 1) || `#${player._rank}`}</span>
                 </span>
               </span>
@@ -202,8 +204,8 @@ export default function MainLeaderboard() {
           {filtered.length === 0 && (
             <div className={styles.empty}>
               {search
-                ? <p>No players match "{search}".</p>
-                : <p>No players with points yet. Submit your first completion!</p>}
+                ? <p>{t('leader.noMatches', { search })}</p>
+                : <p>{t('leader.noMainPoints')}</p>}
             </div>
           )}
         </div>

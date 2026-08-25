@@ -45,7 +45,7 @@
   gap: 4px;
 }
 
-@media (min-width: 1080px) {
+@media (min-width: 1240px) {
   .desktopNav {
     display: flex;
   }
@@ -82,7 +82,7 @@
   display: none;
 }
 
-@media (min-width: 1080px) {
+@media (min-width: 1240px) {
   .profileWrapper {
     display: block;
   }
@@ -213,7 +213,7 @@
   display: none;
 }
 
-@media (min-width: 1080px) {
+@media (min-width: 1240px) {
   .authButtons {
     display: flex;
   }
@@ -229,7 +229,7 @@
   padding: 8px;
 }
 
-@media (min-width: 1080px) {
+@media (min-width: 1240px) {
   .menuBtn {
     display: none;
   }

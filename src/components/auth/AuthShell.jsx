@@ -1,14 +1,16 @@
 import { CheckCircle2, Layers3, ShieldCheck, Trophy } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import styles from './AuthShell.module.css'
+import { useLanguage } from '../../hooks/useLanguage'
 
 const benefits = [
-  { icon: Trophy, text: 'Track completions and ranking progress' },
-  { icon: Layers3, text: 'Submit records and community levels' },
-  { icon: ShieldCheck, text: 'Review status and account notifications' },
+  { icon: Trophy, textKey: 'auth.track' },
+  { icon: Layers3, textKey: 'auth.submit' },
+  { icon: ShieldCheck, textKey: 'auth.review' },
 ]
 
 export default function AuthShell({ children, compact = false }) {
+  const { t } = useLanguage()
   return (
     <main className={styles.page}>
       <div className={`${styles.frame} ${compact ? styles.compact : ''}`}>
@@ -18,19 +20,19 @@ export default function AuthShell({ children, compact = false }) {
             <span>Basement List</span>
           </Link>
           <div className={styles.brandCopy}>
-            <span className={styles.eyebrow}>Player access</span>
-            <h1>One account.<br />Every climb.</h1>
-            <p>Join the community ranking the toughest Geometry Dash levels from the basement up.</p>
+            <span className={styles.eyebrow}>{t('auth.playerAccess')}</span>
+            <h1>{t('auth.headline')}</h1>
+            <p>{t('auth.description')}</p>
           </div>
           <ul className={styles.benefits}>
-            {benefits.map(({ icon: Icon, text }) => (
-              <li key={text}>
+            {benefits.map(({ icon: Icon, textKey }) => (
+              <li key={textKey}>
                 <span><Icon size={17} /></span>
-                {text}
+                {t(textKey)}
               </li>
             ))}
           </ul>
-          <p className={styles.communityNote}>Built for the Geometry Dash community.</p>
+          <p className={styles.communityNote}>{t('auth.communityNote')}</p>
         </aside>
         <section className={styles.contentPanel}>{children}</section>
       </div>

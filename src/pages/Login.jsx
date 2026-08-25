@@ -7,6 +7,7 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
+import { useLanguage } from '../hooks/useLanguage'
 import { getAuthErrorMessage, loginWithEmail, loginWithGoogle } from '../services/auth'
 import styles from './Auth.module.css'
 
@@ -20,6 +21,7 @@ export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, loading: authLoading } = useAuth()
+  const { t } = useLanguage()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(true)
@@ -29,7 +31,7 @@ export default function Login() {
   const returnPath = getReturnPath(location.state)
 
   if (authLoading) {
-    return <AuthShell compact><div className={styles.centerStatus}><Spinner size="lg" /><p>Restoring your session…</p></div></AuthShell>
+    return <AuthShell compact><div className={styles.centerStatus}><Spinner size="lg" /><p>{t('auth.restore')}</p></div></AuthShell>
   }
 
   if (user) return <Navigate to={returnPath} replace />
@@ -67,16 +69,16 @@ export default function Login() {
     <AuthShell>
       <div className={styles.authContent}>
         <div className={styles.header}>
-          <span className={styles.kicker}>Welcome back</span>
-          <h2 className={styles.title}>Sign in to Basement</h2>
-          <p className={styles.subtitle}>Continue your list progress and manage submissions.</p>
+          <span className={styles.kicker}>{t('auth.welcome')}</span>
+          <h2 className={styles.title}>{t('auth.signInTitle')}</h2>
+          <p className={styles.subtitle}>{t('auth.signInSubtitle')}</p>
         </div>
 
         {location.state?.notice && <p className={styles.notice} role="status">{location.state.notice}</p>}
 
         <form onSubmit={handleSubmit} className={styles.form} noValidate>
           <Input
-            label="Email"
+            label={t('auth.email')}
             type="email"
             autoComplete="email"
             placeholder="you@example.com"
@@ -86,10 +88,10 @@ export default function Login() {
             required
           />
           <Input
-            label="Password"
+            label={t('auth.password')}
             type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
-            placeholder="Enter your password"
+            placeholder={t('auth.enterPassword')}
             value={password}
             onChange={event => setPassword(event.target.value)}
             icon={Lock}
@@ -98,27 +100,27 @@ export default function Login() {
           <div className={styles.formOptions}>
             <label className={styles.checkRow}>
               <input type="checkbox" checked={remember} onChange={event => setRemember(event.target.checked)} />
-              <span>Keep me signed in</span>
+              <span>{t('auth.keepSignedIn')}</span>
             </label>
             <label className={styles.checkRow}>
               <input type="checkbox" checked={showPassword} onChange={event => setShowPassword(event.target.checked)} />
-              <span>Show password</span>
+              <span>{t('auth.showPassword')}</span>
             </label>
           </div>
-          <div className={styles.forgotRow}><Link to="/forgot-password">Forgot password?</Link></div>
+          <div className={styles.forgotRow}><Link to="/forgot-password">{t('auth.forgot')}</Link></div>
           {error && <p className={styles.error} role="alert">{error}</p>}
           <Button type="submit" variant="primary" fullWidth loading={loading} icon={LogIn}>
-            Sign In
+            {t('nav.signIn')}
           </Button>
         </form>
 
-        <div className={styles.divider}><span>or continue with</span></div>
+        <div className={styles.divider}><span>{t('auth.continueWith')}</span></div>
 
         <Button variant="secondary" fullWidth onClick={handleGoogle} loading={loading} icon={GoogleLogo}>
           Google
         </Button>
 
-        <p className={styles.footer}>New to the list? <Link to="/register" state={location.state}>Create an account</Link></p>
+        <p className={styles.footer}>{t('auth.newUser')} <Link to="/register" state={location.state}>{t('nav.createAccount')}</Link></p>
       </div>
     </AuthShell>
   )

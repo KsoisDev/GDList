@@ -9,6 +9,7 @@ import SearchSelect from '../components/ui/SearchSelect'
 import Button from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
+import { useLanguage } from '../hooks/useLanguage'
 import { getCollection, where, getDocument, createDocument } from '../services/firestore'
 import { fetchListedDemons } from '../services/gdl'
 import { fetchAredlLevels } from '../services/aredl'
@@ -19,6 +20,7 @@ import theme from '../components/layout/ThemedPage.module.css'
 
 export default function SubmitRecord() {
   const { user, loading: authLoading } = useAuth()
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const [levelType, setLevelType] = useState('main')
   const [selectedDemon, setSelectedDemon] = useState(null)
@@ -74,14 +76,14 @@ export default function SubmitRecord() {
           }
         }
       } catch (err) {
-        setLoadError('Failed to load levels. Try again later.')
+        setLoadError(t('submit.loadFailed'))
         console.error('Failed to load levels:', err)
       } finally {
         if (mounted) setLoading(false)
       }
     }
     load()
-  }, [levelType])
+  }, [levelType, t])
 
   if (authLoading) {
     return (
@@ -169,23 +171,23 @@ export default function SubmitRecord() {
     setError('')
 
     if (!manualMode && levelType === 'main' && !selectedDemon) {
-      setError('Please select a level')
+      setError(t('submit.selectLevel'))
       return
     }
     if (!manualMode && levelType === 'community' && !selectedDemon) {
-      setError('Please select a level')
+      setError(t('submit.selectLevel'))
       return
     }
     if (manualMode && !manualLevelName.trim()) {
-      setError('Please enter the level name')
+      setError(t('submit.enterLevel'))
       return
     }
     if (!isValidVideoUrl(videoUrl)) {
-      setError('Please provide a valid video URL (YouTube, Medal, TikTok or Google Drive)')
+      setError(t('submit.validVideo'))
       return
     }
     if (externalUrl && !isValidExternalUrl(externalUrl)) {
-      setError('Link must be from demonlist.org')
+      setError(t('submit.validExternal'))
       return
     }
 
@@ -193,8 +195,8 @@ export default function SubmitRecord() {
       const dup = await findDuplicate()
       if (dup) {
         setError(dup.completed
-          ? `You already have a verified completion for "${dup.levelName}".`
-          : 'You already have a pending submission for this level.')
+          ? t('submit.completedDuplicate', { level: dup.levelName })
+          : t('submit.pendingDuplicate'))
         return
       }
     } catch (err) {
@@ -249,16 +251,16 @@ export default function SubmitRecord() {
       <PageShell className={theme.pageShell}>
         <div className={theme.glow} aria-hidden="true" />
         <Card padding="lg" className={`${styles.successCard} ${theme.successSurface}`}>
-          <h2 className={styles.successTitle}>Submission Sent!</h2>
+          <h2 className={styles.successTitle}>{t('submit.sent')}</h2>
           <p className={styles.successText}>
-            Your record has been submitted and is pending review by an admin.
+            {t('submit.sentText')}
           </p>
           <div className={styles.successActions}>
             <Button variant="primary" onClick={() => setSuccess(false)}>
-              Submit Another
+              {t('submit.another')}
             </Button>
             <Button variant="secondary" onClick={() => navigate('/profile')}>
-              My Profile
+              {t('nav.myProfile')}
             </Button>
           </div>
         </Card>
@@ -267,45 +269,45 @@ export default function SubmitRecord() {
   }
 
   const levelOptions = getLevelOptions()
-  const selectionError = error === 'Please select a level' ? error : ''
-  const levelNameError = error === 'Please enter the level name' ? error : ''
-  const videoError = error.startsWith('Please provide a valid video URL') ? error : ''
-  const externalLinkError = error === 'Link must be from demonlist.org' ? error : ''
+  const selectionError = error === t('submit.selectLevel') ? error : ''
+  const levelNameError = error === t('submit.enterLevel') ? error : ''
+  const videoError = error === t('submit.validVideo') ? error : ''
+  const externalLinkError = error === t('submit.validExternal') ? error : ''
   const hasFieldError = !!(selectionError || levelNameError || videoError || externalLinkError)
 
   return (
     <PageShell className={theme.pageShell}>
       <div className={theme.glow} aria-hidden="true" />
       <ThemedPageHero
-        eyebrow="PROVE YOUR COMPLETION"
-        title="Submit a"
-        accentTitle="Record"
-        description="Send your completion proof to the Basement review team and add an approved clear to your profile and rankings."
+        eyebrow={t('submit.prove')}
+        title={t('submit.submitA')}
+        accentTitle={t('submit.record')}
+        description={t('submit.recordDescription')}
         stats={[
-          { icon: Video, value: 'Video proof', label: 'YouTube, Medal, TikTok or Drive' },
-          { icon: ShieldCheck, value: 'Admin review', label: 'Every record is checked' },
-          { icon: FileCheck2, value: 'Ranked result', label: 'Approved clears earn points', featured: true },
+          { icon: Video, value: t('submit.videoProof'), label: t('submit.videoProofHint') },
+          { icon: ShieldCheck, value: t('submit.adminReview'), label: t('submit.adminReviewHint') },
+          { icon: FileCheck2, value: t('submit.rankedResult'), label: t('submit.rankedResultHint'), featured: true },
         ]}
       />
 
-      <section className={`${theme.surface} ${theme.formSurface}`} aria-label="Record submission form">
+      <section className={`${theme.surface} ${theme.formSurface}`} aria-label={t('submit.formLabel')}>
         <div className={theme.surfaceHeading}>
           <div>
-            <span className={theme.sectionLabel}>NEW COMPLETION</span>
-            <h2>Record details</h2>
+            <span className={theme.sectionLabel}>{t('submit.newCompletion')}</span>
+            <h2>{t('submit.recordDetails')}</h2>
           </div>
         </div>
         <div className={`${styles.container} ${theme.formContainer}`}>
         <Card padding="lg" className={theme.innerCard}>
           <form onSubmit={handleSubmit} className={styles.form}>
-            <div className={styles.typeToggle} role="group" aria-label="Choose list type">
+            <div className={styles.typeToggle} role="group" aria-label={t('submit.chooseList')}>
               <button
                 type="button"
                 className={`${styles.typeBtn} ${levelType === 'main' ? styles.active : ''}`}
                 onClick={() => { setLevelType('main'); setError('') }}
                 aria-pressed={levelType === 'main'}
               >
-                Main List
+                {t('nav.mainList')}
               </button>
               <button
                 type="button"
@@ -313,7 +315,7 @@ export default function SubmitRecord() {
                 onClick={() => { setLevelType('community'); setError('') }}
                 aria-pressed={levelType === 'community'}
               >
-                Community List
+                {t('nav.communityList')}
               </button>
             </div>
 
@@ -324,8 +326,8 @@ export default function SubmitRecord() {
             {!manualMode ? (
               <>
                 <SearchSelect
-                  label="Level"
-                  placeholder="Search for a level..."
+                  label={t('common.level')}
+                  placeholder={t('submit.searchLevel')}
                   options={levelOptions}
                   value={levelType === 'main' ? (selectedDemon ? String(selectedDemon.id) : '') : (selectedDemon || '')}
                   onChange={e => {
@@ -351,7 +353,7 @@ export default function SubmitRecord() {
                   <Link to="/submit-level" className={styles.manualToggle}>
                     <ExternalLink size={18} />
                     <span>
-                      <strong>Level not listed?</strong> Submit the level
+                      <strong>{t('submit.levelNotListed')}</strong> {t('submit.submitTheLevel')}
                     </span>
                     <span className={styles.manualArrow}>→</span>
                   </Link>
@@ -363,7 +365,7 @@ export default function SubmitRecord() {
                   >
                     <ExternalLink size={18} />
                     <span>
-                      <strong>Level not listed?</strong> Enter it manually
+                      <strong>{t('submit.levelNotListed')}</strong> {t('submit.enterManually')}
                     </span>
                     <span className={styles.manualArrow}>→</span>
                   </button>
@@ -372,37 +374,37 @@ export default function SubmitRecord() {
             ) : (
               <>
                 <div className={styles.manualHeader}>
-                  <span className={styles.manualLabel}>Manual Entry</span>
+                  <span className={styles.manualLabel}>{t('submit.manualEntry')}</span>
                   <button
                     type="button"
                     className={styles.backBtn}
                     onClick={() => { setManualMode(false); setError('') }}
                   >
-                    Back to search
+                    {t('submit.backSearch')}
                   </button>
                 </div>
                 <Input
-                  label="Level Name"
+                  label={t('submit.levelName')}
                   placeholder="e.g. Bloodbath"
                   value={manualLevelName}
                   onChange={e => setManualLevelName(e.target.value)}
                   error={!manualLevelName.trim() ? levelNameError : ''}
                 />
                 <Input
-                  label="Link (optional) — demonlist.org"
+                  label={t('submit.linkOptional')}
                   type="url"
                   placeholder="https://demonlist.org/list/..."
                   value={externalUrl}
                   onChange={e => setExternalUrl(e.target.value)}
                   icon={ExternalLink}
-                  error={externalUrl && !isValidExternalUrl(externalUrl) ? 'Must be from demonlist.org' : ''}
+                  error={externalUrl && !isValidExternalUrl(externalUrl) ? t('submit.validExternal') : ''}
                 />
               </>
             )}
 
             {levelType === 'community' && (
               <Input
-                label="Level ID (in-game)"
+                label={t('submit.levelId')}
                 type="text"
                 placeholder="e.g. 10565740"
                 value={gameId}
@@ -411,7 +413,7 @@ export default function SubmitRecord() {
             )}
 
             <Input
-              label="Video URL"
+              label={t('submit.videoUrl')}
               type="url"
               placeholder="https://youtu.be/..., https://medal.tv/..., https://tiktok.com/..., https://drive.google.com/..."
               value={videoUrl}
@@ -425,7 +427,7 @@ export default function SubmitRecord() {
             )}
 
             <Button type="submit" variant="primary" fullWidth loading={submitting} icon={Send}>
-              Submit Record
+              {t('nav.submitRecord')}
             </Button>
           </form>
         </Card>
