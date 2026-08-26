@@ -21,6 +21,7 @@ const CommunityList = lazy(() => import('./pages/CommunityList'))
 const LevelDetail = lazy(() => import('./pages/LevelDetail'))
 const MainLeaderboard = lazy(() => import('./pages/MainLeaderboard'))
 const CommunityLeaderboard = lazy(() => import('./pages/CommunityLeaderboard'))
+const DevLog = lazy(() => import('./pages/DevLog'))
 const Profile = lazy(() => import('./pages/Profile'))
 const MyProfile = lazy(() => import('./pages/MyProfile'))
 const SubmitRecord = lazy(() => import('./pages/SubmitRecord'))
@@ -76,6 +77,7 @@ export default function App() {
                   <Route path="/levels/:levelId" element={<RequireMaintenanceAccess><LevelDetail /></RequireMaintenanceAccess>} />
                   <Route path="/leaderboard/main" element={<RequireMaintenanceAccess><MainLeaderboard /></RequireMaintenanceAccess>} />
                   <Route path="/leaderboard/community" element={<RequireMaintenanceAccess><CommunityLeaderboard /></RequireMaintenanceAccess>} />
+                  <Route path="/dev-log" element={<DevLog />} />
                   <Route path="/profile" element={<RequireAuth><MyProfile /></RequireAuth>} />
                   <Route path="/profile/:userId" element={<Profile />} />
                   <Route path="/submit" element={<RequireMaintenanceAccess><RequireVerifiedEmail><SubmitRecord /></RequireVerifiedEmail></RequireMaintenanceAccess>} />

@@ -6,6 +6,7 @@ import {
   ArrowRight,
   CheckCircle2,
   ChevronRight,
+  Code2,
   Crown,
   Flame,
   Layers3,
@@ -24,6 +25,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useLanguage } from '../hooks/useLanguage'
 import { loadUsers, loadCommunityLevels } from '../services/readCache'
 import { getCollection, where } from '../services/firestore'
+import { LATEST_DEV_LOG, formatDevLogDate } from '../data/devLog'
 import { formatDateRelative, formatNumber, getDisplayName } from '../utils/format'
 import { getFlagUrl } from '../utils/countries'
 import styles from './Home.module.css'
@@ -57,7 +59,7 @@ const emptyHighlights = {
 
 export default function Home() {
   const { user } = useAuth()
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const [highlights, setHighlights] = useState(emptyHighlights)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -422,6 +424,25 @@ export default function Home() {
           </article>
         </section>
       )}
+
+      <section className={styles.devLogPreview} aria-labelledby="latest-dev-log-title">
+        <div className={styles.devLogTopline}>
+          <span><Code2 size={16} aria-hidden="true" /> {t('devLog.latestUpdate')}</span>
+          <time dateTime={LATEST_DEV_LOG.date}>
+            {formatDevLogDate(LATEST_DEV_LOG.date, language, { day: 'numeric', month: 'short', year: 'numeric' })}
+          </time>
+        </div>
+        <div className={styles.devLogBody}>
+          <div>
+            <span className={styles.devLogBadge}>{t(LATEST_DEV_LOG.badgeKey)}</span>
+            <h2 id="latest-dev-log-title">{t(LATEST_DEV_LOG.titleKey)}</h2>
+            <p>{t(LATEST_DEV_LOG.summaryKey)}</p>
+          </div>
+          <Link className={styles.devLogAction} to={`/dev-log#${LATEST_DEV_LOG.id}`}>
+            {t('devLog.readLatest')} <ArrowRight size={16} aria-hidden="true" />
+          </Link>
+        </div>
+      </section>
 
       <section className={styles.finalCta}>
         <div>
