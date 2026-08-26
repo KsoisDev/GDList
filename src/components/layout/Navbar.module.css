@@ -48,7 +48,7 @@
   gap: 4px;
 }
 
-@media (min-width: 1240px) {
+@media (min-width: 1280px) {
   .desktopNav {
     display: flex;
   }
@@ -86,7 +86,7 @@
   display: none;
 }
 
-@media (min-width: 1240px) {
+@media (min-width: 1280px) {
   .profileWrapper {
     display: block;
   }
@@ -217,7 +217,7 @@
   display: none;
 }
 
-@media (min-width: 1240px) {
+@media (min-width: 1280px) {
   .authButtons {
     display: flex;
   }
@@ -233,7 +233,7 @@
   padding: 8px;
 }
 
-@media (min-width: 1240px) {
+@media (min-width: 1280px) {
   .menuBtn {
     display: none;
   }
@@ -557,5 +557,88 @@
   .menuBtn svg {
     width: 24px;
     height: 24px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    gap: 8px;
+    max-width: none;
+    padding-inline: 12px;
+  }
+
+  .logo {
+    flex: none;
+  }
+
+  .desktopNav {
+    min-width: 0;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .navLink {
+    flex: 0 0 auto;
+    padding-inline: 6px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .navDivider {
+    margin-inline: 2px;
+  }
+
+  .submitBtn {
+    flex: 0 0 auto;
+    padding-inline: 8px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .actions {
+    justify-self: end;
+    gap: 6px;
+  }
+
+  .profileBtn {
+    max-width: 164px;
+  }
+
+  .username {
+    max-width: 84px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 1440px) {
+  .container {
+    gap: 12px;
+    padding-inline: 16px;
+  }
+
+  .desktopNav {
+    gap: 2px;
+  }
+
+  .navLink {
+    padding-inline: 8px;
+    font-size: 0.8125rem;
+  }
+
+  .navDivider {
+    margin-inline: 4px;
+  }
+
+  .submitBtn {
+    padding-inline: 10px;
+    font-size: 0.8125rem;
+  }
+
+  .actions {
+    gap: 8px;
   }
 }
