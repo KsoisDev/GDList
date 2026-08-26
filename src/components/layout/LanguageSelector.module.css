@@ -57,3 +57,16 @@
     width: 32px;
   }
 }
+
+@media (max-width: 380px) {
+  .picker {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding-inline: 4px;
+  }
+
+  .picker select {
+    width: 30px;
+    font-size: 0.7rem;
+  }
+}

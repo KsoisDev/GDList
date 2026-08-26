@@ -583,7 +583,6 @@
 .dashboard,
 .leaderboards,
 .leaders,
-.devLogPreview,
 .finalCta {
   position: relative;
   z-index: 1;
@@ -860,107 +859,6 @@
   white-space: nowrap;
 }
 
-.devLogPreview {
-  overflow: hidden;
-  margin-top: 18px;
-  border: 1px solid rgba(91, 154, 249, 0.2);
-  border-radius: 15px;
-  background:
-    radial-gradient(circle at 100% 0, rgba(71, 139, 238, 0.13), transparent 34%),
-    rgba(8, 16, 29, 0.94);
-}
-
-.devLogTopline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  min-height: 51px;
-  padding: 0 22px;
-  border-bottom: 1px solid rgba(126, 154, 196, 0.11);
-}
-
-.devLogTopline > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #dce4ef;
-  font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-}
-
-.devLogTopline svg {
-  color: var(--home-blue-bright);
-}
-
-.devLogTopline time {
-  color: #687991;
-  font-size: 0.68rem;
-  font-weight: 650;
-}
-
-.devLogBody {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 36px;
-  padding: 25px 26px 27px;
-}
-
-.devLogBody > div {
-  max-width: 690px;
-}
-
-.devLogBadge {
-  display: inline-block;
-  margin-bottom: 9px;
-  color: #4fe0ae;
-  font-size: 0.61rem;
-  font-weight: 850;
-  letter-spacing: 0.13em;
-}
-
-.devLogBody h2 {
-  margin: 0;
-  color: #eef3f9;
-  font-size: clamp(1.25rem, 3vw, 1.65rem);
-  font-weight: 850;
-  letter-spacing: -0.03em;
-}
-
-.devLogBody p {
-  margin: 9px 0 0;
-  color: #7889a1;
-  font-size: 0.78rem;
-  line-height: 1.65;
-}
-
-.devLogAction {
-  display: inline-flex;
-  min-height: 42px;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 17px;
-  border: 1px solid rgba(91, 154, 249, 0.28);
-  border-radius: 9px;
-  color: #c8d8ef;
-  background: rgba(65, 130, 228, 0.1);
-  font-size: 0.73rem;
-  font-weight: 750;
-  text-decoration: none;
-  transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
-}
-
-.devLogAction:hover {
-  border-color: rgba(117, 173, 255, 0.55);
-  color: #fff;
-  background: rgba(65, 130, 228, 0.18);
-  transform: translateY(-2px);
-}
-
 .finalCta {
   display: flex;
   align-items: center;
@@ -1074,18 +972,6 @@
   .finalCta {
     align-items: flex-start;
     flex-direction: column;
-  }
-}
-
-@media (max-width: 680px) {
-  .devLogBody {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .devLogAction {
-    align-self: flex-start;
   }
 }
 

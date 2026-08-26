@@ -22,9 +22,12 @@
 
 .logo {
   display: flex;
+  flex: 0 1 auto;
   align-items: center;
   gap: 4px;
+  min-width: 0;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .logoText {
@@ -73,6 +76,7 @@
 
 .actions {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 12px;
 }
@@ -514,4 +518,44 @@
   gap: 4px;
   font-size: 0.6875rem;
   color: var(--text-tertiary);
+}
+
+@media (max-width: 380px) {
+  .container {
+    gap: 4px;
+    padding-inline: 8px;
+  }
+
+  .logo {
+    gap: 2px;
+  }
+
+  .logoText,
+  .logoAccent {
+    font-size: clamp(0.875rem, 5.5vw, 1rem);
+  }
+
+  .actions {
+    min-width: max-content;
+    gap: 3px;
+  }
+
+  .menuBtn {
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+  }
+
+  .bellWrapper,
+  .bellBtn {
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .menuBtn svg {
+    width: 24px;
+    height: 24px;
+  }
 }
