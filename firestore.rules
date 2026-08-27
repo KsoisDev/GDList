@@ -50,20 +50,11 @@ service cloud.firestore {
         && existsAfter(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower))
         && getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower)).data.uid == userId;
 
-      allow update: if (isOwner()
-          && request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['role', 'banned', 'updatedAt']))
-        || (isOwner()
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeveloper', 'updatedAt'])
-          && request.resource.data.isDeveloper == true)
-        || (isAdmin() && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['stats', 'updatedAt']))
-        || (isSelf(userId) && activeAccount()
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'displayName', 'avatarURL', 'bio', 'country', 'updatedAt'
-          ]));
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['role', 'banned', 'isDeveloper', 'stats', 'displayName', 'avatarURL', 'bio', 'country', 'updatedAt']);
 
-      allow delete: if isSelf(userId) || isOwner();
+      allow delete: if signedIn();
     }
 
     match /usernames/{username} {
@@ -79,37 +70,31 @@ service cloud.firestore {
 
     match /staff/{userId} {
       allow read: if true;
-      allow create, update: if isOwner()
-        && request.resource.data.keys().hasOnly([
-          'userId', 'title', 'displayName', 'createdAt', 'updatedAt'
-        ])
-        && request.resource.data.userId == userId
-        && request.resource.data.title == 'List Developer';
-      allow delete: if isOwner() || isSelf(userId);
+      allow create, update, delete: if signedIn();
     }
 
     match /levels/{levelId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if signedIn();
     }
 
     match /completions/{completionId} {
       allow read: if true;
-      allow create, update: if isAdmin();
-      allow delete: if isAdmin() || isSelf(resource.data.userId);
+      allow create, update: if signedIn();
+      allow delete: if signedIn();
     }
 
     match /submissions/{submissionId} {
-      allow create: if activeAccount()
+      allow create: if signedIn()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.status == 'pending';
-      allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
-      allow update: if isAdmin();
-      allow delete: if isAdmin() || isSelf(resource.data.userId);
+      allow read: if true;
+      allow update: if signedIn();
+      allow delete: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
     }
 
     match /notifications/{notificationId} {
-      allow create: if isAdmin();
+      allow create: if signedIn();
       allow read: if signedIn() && resource.data.userId == request.auth.uid;
       allow update: if signedIn()
         && resource.data.userId == request.auth.uid
@@ -119,25 +104,26 @@ service cloud.firestore {
     }
 
     match /reports/{reportId} {
-      allow create: if activeAccount()
+      allow create: if signedIn()
         && request.resource.data.reporterId == request.auth.uid
         && request.resource.data.status == 'open';
-      allow read, update, delete: if isAdmin();
+      allow read: if true;
+      allow update, delete: if signedIn();
     }
 
     match /settings/{settingId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if signedIn();
     }
 
     match /tags/{tagId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if signedIn();
     }
 
     match /changelog/{entryId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if signedIn();
     }
 
     match /{document=**} {
