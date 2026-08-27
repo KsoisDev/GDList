@@ -51,10 +51,11 @@ service cloud.firestore {
         && getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower)).data.uid == userId;
 
       allow update: if (isOwner()
-          && request.resource.data.role in ['user', 'admin', 'owner'])
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['role', 'banned', 'updatedAt']))
         || (isOwner()
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeveloper', 'updatedAt'])
-          && request.resource.data.isDeveloper == bool)
+          && request.resource.data.isDeveloper == true)
         || (isAdmin() && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['stats', 'updatedAt']))
         || (isSelf(userId) && activeAccount()
@@ -84,7 +85,7 @@ service cloud.firestore {
         ])
         && request.resource.data.userId == userId
         && request.resource.data.title == 'List Developer';
-      allow delete: if isOwner();
+      allow delete: if isOwner() || isSelf(userId);
     }
 
     match /levels/{levelId} {
@@ -94,17 +95,17 @@ service cloud.firestore {
 
     match /completions/{completionId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin() || isSelf(resource.data.userId);
     }
 
     match /submissions/{submissionId} {
-      allow create: if verifiedAccount()
+      allow create: if activeAccount()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.status == 'pending';
       allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
       allow update: if isAdmin();
-      allow delete: if isAdmin()
-        || (signedIn() && resource.data.userId == request.auth.uid && resource.data.status == 'pending');
+      allow delete: if isAdmin() || isSelf(resource.data.userId);
     }
 
     match /notifications/{notificationId} {
@@ -121,7 +122,7 @@ service cloud.firestore {
       allow create: if activeAccount()
         && request.resource.data.reporterId == request.auth.uid
         && request.resource.data.status == 'open';
-      allow read, update, delete: if isOwner();
+      allow read, update, delete: if isAdmin();
     }
 
     match /settings/{settingId} {

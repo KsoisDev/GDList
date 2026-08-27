@@ -1,6 +1,7 @@
 import {
   browserLocalPersistence,
   browserSessionPersistence,
+  inMemoryPersistence,
   createUserWithEmailAndPassword,
   deleteUser,
   EmailAuthProvider,
@@ -58,7 +59,11 @@ function actionSettings(path) {
 }
 
 export async function configureAuthPersistence(remember = true) {
-  await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence)
+  try {
+    await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence)
+  } catch {
+    try { await setPersistence(auth, inMemoryPersistence) } catch {}
+  }
 }
 
 export async function createUserDoc(user, overrides = {}) {

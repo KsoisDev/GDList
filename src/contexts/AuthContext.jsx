@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useCallback, useRef } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
+import { onAuthStateChanged, getIdToken } from 'firebase/auth'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { auth, db } from '../services/firebase'
 import { getDocument } from '../services/firestore'
@@ -109,6 +109,7 @@ export function AuthProvider({ children }) {
         return
       }
 
+      getIdToken(firebaseUser, true).catch(() => {})
       loadCurrentUserData({ showLoading: true }).catch(() => {})
     }, (error) => {
       settleInitialAuth()
@@ -173,6 +174,14 @@ export function AuthProvider({ children }) {
       unsubscribe()
     }
   }, [userId])
+
+  useEffect(() => {
+    if (!user) return
+    const interval = setInterval(() => {
+      getIdToken(user, true).catch(() => {})
+    }, 30 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [user])
 
   const refreshUserData = useCallback(
     () => loadCurrentUserData({ showLoading: false }),
