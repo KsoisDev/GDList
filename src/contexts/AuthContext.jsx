@@ -3,7 +3,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { auth, db } from '../services/firebase'
 import { getDocument } from '../services/firestore'
-import { createUserDoc } from '../services/auth'
+import { createUserDoc, getRegistrationBootstrapPromise } from '../services/auth'
 
 export const AuthContext = createContext(null)
 const AUTH_INIT_TIMEOUT_MS = 8000
@@ -21,6 +21,11 @@ export function AuthProvider({ children }) {
   const hasUserData = Boolean(userData)
 
   const readUserData = useCallback(async (firebaseUser) => {
+    const bootstrap = getRegistrationBootstrapPromise()
+    if (bootstrap) {
+      try { await bootstrap } catch {}
+    }
+
     let data = await getDocument('users', firebaseUser.uid)
     if (!data) {
       await createUserDoc(firebaseUser)

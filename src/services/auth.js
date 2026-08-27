@@ -25,6 +25,10 @@ const googleProvider = new GoogleAuthProvider()
 googleProvider.setCustomParameters({ prompt: 'select_account' })
 let registrationBootstrapPromise = null
 
+export function getRegistrationBootstrapPromise() {
+  return registrationBootstrapPromise
+}
+
 function safeDisplayName(user, preferredName = '') {
   const emailName = user?.email?.split('@')[0]
   return preferredName.trim() || user?.displayName?.trim() || emailName || 'Player'
