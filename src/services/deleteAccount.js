@@ -17,7 +17,10 @@ export async function deleteAccount(userId) {
   } catch (e) { errors.push(`username: ${e.message}`) }
 
   try {
-    const userSubs = await getCollection('submissions', [where('userId', '==', userId)])
+    const userSubs = await getCollection('submissions', [
+      where('userId', '==', userId),
+      where('status', '==', 'pending'),
+    ])
     for (const sub of userSubs) {
       await deleteDoc(doc(db, 'submissions', sub.id))
       results.submissions++

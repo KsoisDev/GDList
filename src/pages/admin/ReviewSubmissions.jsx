@@ -80,6 +80,7 @@ async function finalizeSubmissionReview({
   status,
   reviewData,
   notification,
+  reviewerName,
 }) {
   const submissionRef = doc(db, 'submissions', submissionId)
   const notificationRef = doc(db, 'notifications', `review_${submissionId}`)
@@ -98,6 +99,7 @@ async function finalizeSubmissionReview({
       reviewClaimedBy: null,
       reviewClaimedAt: null,
       reviewedBy: reviewerId,
+      reviewerName,
       reviewedAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     })
@@ -518,6 +520,7 @@ export default function ReviewSubmissions() {
           submissionId: subId,
           read: false,
         },
+        reviewerName: getDisplayName(userData),
       })
       claimed = false
 
@@ -857,6 +860,7 @@ export default function ReviewSubmissions() {
           ))}
         </div>
       )}
+
     </PageShell>
   )
 }

@@ -31,6 +31,7 @@ const VerifyEmail = lazy(() => import('./pages/VerifyEmail'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const ManageLevels = lazy(() => import('./pages/admin/ManageLevels'))
 const ReviewSubmissions = lazy(() => import('./pages/admin/ReviewSubmissions'))
+const ApprovalHistory = lazy(() => import('./pages/admin/ApprovalHistory'))
 const ManageUsers = lazy(() => import('./pages/admin/ManageUsers'))
 const ManageReports = lazy(() => import('./pages/admin/ManageReports'))
 const ManageTags = lazy(() => import('./pages/admin/ManageTags'))
@@ -85,6 +86,7 @@ export default function App() {
                   <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                   <Route path="/admin/levels" element={<AdminRoute><ManageLevels /></AdminRoute>} />
                   <Route path="/admin/submissions" element={<AdminRoute><ReviewSubmissions /></AdminRoute>} />
+                  <Route path="/admin/approval-history" element={<AdminRoute><ApprovalHistory /></AdminRoute>} />
                   <Route path="/admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
                   <Route path="/admin/reports" element={<AdminRoute minRole="owner"><ManageReports /></AdminRoute>} />
                   <Route path="/admin/tags" element={<AdminRoute><ManageTags /></AdminRoute>} />
