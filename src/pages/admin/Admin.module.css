@@ -788,6 +788,30 @@
   overflow: hidden;
 }
 
+.historyFilters {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) 1fr;
+  align-items: end;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.historyFilterSummary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-height: 44px;
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 0.8125rem;
+  text-align: right;
+}
+
+.historyFilterSummary strong {
+  color: var(--text-primary);
+}
+
 .historyList {
   display: flex;
   flex-direction: column;
@@ -803,6 +827,8 @@
   gap: 14px;
   padding: 12px 10px;
   border-bottom: 1px solid var(--border-glass);
+  content-visibility: auto;
+  contain-intrinsic-size: 68px;
 }
 
 .historyRow:last-child {
@@ -836,6 +862,26 @@
 .historyReview strong {
   color: var(--text-secondary);
   font-weight: 700;
+}
+
+.historyReviewer {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.historyReviewer:hover {
+  color: var(--accent-blue);
+}
+
+.historyReviewer:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
 }
 
 .historyEmpty,
@@ -879,6 +925,18 @@
   .historyActions {
     width: 100%;
     flex-wrap: wrap;
+  }
+
+  .historyFilters {
+    grid-template-columns: 1fr;
+  }
+
+  .historyFilterSummary {
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+    min-height: 0;
+    text-align: left;
   }
 
   .historyRow {
