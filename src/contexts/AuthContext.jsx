@@ -7,7 +7,6 @@ import { createUserDoc, getRegistrationBootstrapPromise } from '../services/auth
 
 export const AuthContext = createContext(null)
 const AUTH_INIT_TIMEOUT_MS = 8000
-const PROFILE_LOAD_TIMEOUT_MS = 10000
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
@@ -33,7 +32,7 @@ export function AuthProvider({ children }) {
         await createUserDoc(firebaseUser)
         data = await getDocument('users', firebaseUser.uid)
       } catch (err) {
-        console.warn('createUserDoc fallback failed, waiting for snapshot:', err)
+        console.warn('createUserDoc fallback failed:', err)
       }
     }
     return data
@@ -63,22 +62,15 @@ export function AuthProvider({ children }) {
     setProfileError(null)
     if (showLoading) setLoading(true)
 
-    const safetyTimeout = setTimeout(() => {
-      if (!isCurrentRequest()) return
-      setLoading(false)
-    }, PROFILE_LOAD_TIMEOUT_MS)
-
     try {
       const data = await readUserData(firebaseUser)
-      clearTimeout(safetyTimeout)
       if (!isCurrentRequest()) return null
       if (data) {
-        setUserData(data)
         hadDataRef.current = true
+        setUserData(data)
       }
       return data
     } catch (error) {
-      clearTimeout(safetyTimeout)
       if (!isCurrentRequest()) return null
       console.error('Failed to load user profile:', error)
       if (hadDataRef.current) {
@@ -144,8 +136,12 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!userId) return undefined
 
-    return onSnapshot(doc(db, 'users', userId), (snapshot) => {
+    let docMissingTimeout = null
+
+    const unsubscribe = onSnapshot(doc(db, 'users', userId), (snapshot) => {
       if (!mountedRef.current || auth.currentUser?.uid !== userId) return
+
+      clearTimeout(docMissingTimeout)
 
       if (snapshot.exists()) {
         hadDataRef.current = true
@@ -156,13 +152,26 @@ export function AuthProvider({ children }) {
         setUserData(null)
         setProfileError(new Error('Your account profile is no longer available.'))
         setLoading(false)
+      } else {
+        docMissingTimeout = setTimeout(() => {
+          if (!mountedRef.current || auth.currentUser?.uid !== userId) return
+          if (!hadDataRef.current && !document.hidden) {
+            setLoading(false)
+          }
+        }, 8000)
       }
     }, (error) => {
       if (!mountedRef.current || auth.currentUser?.uid !== userId) return
+      clearTimeout(docMissingTimeout)
       console.error('User profile listener failed:', error)
       setProfileError(error instanceof Error ? error : new Error('Your account profile could not be updated.'))
       setLoading(false)
     })
+
+    return () => {
+      clearTimeout(docMissingTimeout)
+      unsubscribe()
+    }
   }, [userId])
 
   const refreshUserData = useCallback(
