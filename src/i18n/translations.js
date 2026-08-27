@@ -236,4 +236,40 @@ Object.assign(ru, {
   'submitLevel.eyebrow': 'ДОБАВИТЬ В СПИСОК СООБЩЕСТВА', 'submitLevel.description': 'Поделитесь новым испытанием Geometry Dash с Basement и отправьте его на проверку.', 'submitLevel.showcase': 'Видео уровня', 'submitLevel.showcaseHint': 'Прикрепите поддерживаемое видео', 'submitLevel.details': 'Данные уровня', 'submitLevel.detailsHint': 'Автор, ID и теги сохраняются', 'submitLevel.queue': 'Очередь проверки', 'submitLevel.queueHint': 'Администраторы проверяют каждую заявку', 'submitLevel.new': 'НОВЫЙ УРОВЕНЬ СООБЩЕСТВА', 'submitLevel.creator': 'Создатель', 'submitLevel.video': 'URL видео уровня', 'submitLevel.note': 'Заметка для администратора', 'submitLevel.notePlaceholder': 'Дополнительная информация...', 'submitLevel.verified': 'Уровень уже верифицирован', 'submitLevel.verifiedHint': ' (отправленное видео является верификацией)', 'submitLevel.tags': 'Теги', 'submitLevel.chooseTags': 'Выберите теги', 'submitLevel.sent': 'Уровень отправлен!', 'submitLevel.sentText': 'Уровень отправлен и ожидает проверки администратора.', 'submitLevel.enterCreator': 'Введите имя создателя', 'submitLevel.duplicate': 'Уровень с таким названием уже есть в списке.', 'submitLevel.pendingDuplicate': 'У вас уже есть ожидающая заявка с таким названием.',
 })
 
+Object.assign(en, {
+  'effects.on': 'Effects on',
+  'effects.off': 'Effects off',
+  'effects.enable': 'Turn motion effects on',
+  'effects.disable': 'Turn motion effects off',
+  'effects.reduced': 'Reduced motion',
+  'effects.systemReduced': 'Motion effects are disabled by your device setting',
+})
+
+Object.assign(fr, {
+  'effects.on': 'Effets activés',
+  'effects.off': 'Effets désactivés',
+  'effects.enable': 'Activer les effets animés',
+  'effects.disable': 'Désactiver les effets animés',
+  'effects.reduced': 'Mouvement réduit',
+  'effects.systemReduced': 'Les effets animés sont désactivés par votre appareil',
+})
+
+Object.assign(es, {
+  'effects.on': 'Efectos activados',
+  'effects.off': 'Efectos desactivados',
+  'effects.enable': 'Activar los efectos animados',
+  'effects.disable': 'Desactivar los efectos animados',
+  'effects.reduced': 'Movimiento reducido',
+  'effects.systemReduced': 'Los efectos animados están desactivados por tu dispositivo',
+})
+
+Object.assign(ru, {
+  'effects.on': 'Эффекты включены',
+  'effects.off': 'Эффекты выключены',
+  'effects.enable': 'Включить эффекты движения',
+  'effects.disable': 'Выключить эффекты движения',
+  'effects.reduced': 'Меньше движения',
+  'effects.systemReduced': 'Эффекты движения отключены в настройках устройства',
+})
+
 export const TRANSLATIONS = { en, fr, ru, es }

@@ -166,6 +166,8 @@
 }
 
 .heroContent {
+  position: relative;
+  z-index: 1;
   width: 100%;
   text-align: left;
 }
@@ -308,15 +310,21 @@
   transform: translateY(-2px);
 }
 
+.utilityRow,
 .socialLinks {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 8px;
+}
+
+.utilityRow {
+  align-items: center;
   margin-top: 15px;
 }
 
-.socialLinks a {
+.socialLinks a,
+.effectsToggle {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -325,13 +333,33 @@
   border-radius: 8px;
   color: #909db0;
   background: rgba(21, 31, 47, 0.7);
+  font-family: inherit;
   font-size: 0.72rem;
+  font-weight: 500;
   text-decoration: none;
+  transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
 }
 
-.socialLinks a:hover {
+.socialLinks a:hover,
+.effectsToggle:hover {
   color: #fff;
   border-color: rgba(111, 165, 255, 0.4);
+}
+
+.effectsToggle[data-active='true'] {
+  color: #9fc3ff;
+  border-color: rgba(111, 165, 255, 0.32);
+  background: rgba(38, 86, 158, 0.22);
+}
+
+.effectsToggle[data-active='true'] svg {
+  color: #69a6ff;
+  filter: drop-shadow(0 0 5px rgba(77, 146, 255, 0.72));
+}
+
+.effectsToggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
 }
 
 .dataNotice {
@@ -359,6 +387,7 @@
 
 .listSpotlight {
   position: relative;
+  z-index: 1;
   overflow: hidden;
   width: 100%;
   border: 1px solid rgba(105, 151, 222, 0.23);
@@ -952,6 +981,7 @@
   }
 
   .heroActions,
+  .utilityRow,
   .socialLinks {
     justify-content: center;
   }
@@ -1027,7 +1057,8 @@
     width: 100%;
   }
 
-  .socialLinks a {
+  .socialLinks a,
+  .effectsToggle {
     padding: 7px 9px;
   }
 

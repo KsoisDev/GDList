@@ -1,13 +1,15 @@
 .picker {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   min-height: 36px;
   padding: 0 8px;
   border: 1px solid var(--border-glass);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.025);
   color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .picker:focus-within {
@@ -16,15 +18,25 @@
 }
 
 .picker select {
-  width: 34px;
+  width: 2.4ch;
+  min-width: 2.4ch;
+  padding: 0;
   border: 0;
   outline: 0;
+  appearance: none;
+  -webkit-appearance: none;
   background: transparent;
   color: var(--text-primary);
   cursor: pointer;
   font: inherit;
   font-size: 0.75rem;
   font-weight: 700;
+  line-height: 1;
+}
+
+.chevron {
+  flex: 0 0 auto;
+  pointer-events: none;
 }
 
 .picker option {
@@ -46,15 +58,11 @@
 
 @media (max-width: 480px) {
   .picker {
-    padding: 0 6px;
+    padding: 0 7px;
   }
 
-  .picker svg {
+  .languageIcon {
     display: none;
-  }
-
-  .picker select {
-    width: 32px;
   }
 }
 
@@ -62,11 +70,13 @@
   .picker {
     flex: 0 0 auto;
     min-height: 34px;
-    padding-inline: 4px;
+    gap: 3px;
+    padding-inline: 6px;
   }
 
   .picker select {
-    width: 30px;
+    width: 2.4ch;
+    min-width: 2.4ch;
     font-size: 0.7rem;
   }
 }

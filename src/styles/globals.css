@@ -142,3 +142,17 @@ input, textarea, select {
     transition-delay: 0ms !important;
   }
 }
+
+html[data-motion='off'] {
+  scroll-behavior: auto;
+}
+
+html[data-motion='off'] *,
+html[data-motion='off'] *::before,
+html[data-motion='off'] *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+}

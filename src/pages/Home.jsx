@@ -19,9 +19,11 @@ import {
   Users,
   Youtube,
 } from 'lucide-react'
+import GeometryRunner from '../components/home/GeometryRunner'
 import Avatar from '../components/ui/Avatar'
 import { useAuth } from '../hooks/useAuth'
 import { useLanguage } from '../hooks/useLanguage'
+import { useMotionEffects } from '../hooks/useMotionEffects'
 import { loadUsers, loadCommunityLevels } from '../services/readCache'
 import { getCollection, where } from '../services/firestore'
 import { formatDateRelative, formatNumber, getDisplayName } from '../utils/format'
@@ -58,6 +60,12 @@ const emptyHighlights = {
 export default function Home() {
   const { user } = useAuth()
   const { t } = useLanguage()
+  const {
+    animationsEnabled,
+    preferenceEnabled,
+    systemPrefersReducedMotion,
+    toggleAnimations,
+  } = useMotionEffects()
   const [highlights, setHighlights] = useState(emptyHighlights)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -186,6 +194,8 @@ export default function Home() {
       </div>
 
       <section className={styles.hero}>
+        {animationsEnabled && <GeometryRunner />}
+
         <motion.div
           className={styles.heroContent}
           initial={{ opacity: 0, y: 24 }}
@@ -230,16 +240,37 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className={styles.socialLinks} aria-label={t('home.socialLinks')}>
-            <a href="https://discord.gg/75FaX3gmM2" target="_blank" rel="noopener noreferrer">
-              <Users size={14} /> Discord
-            </a>
-            <a href="https://www.tiktok.com/@tnaillzgd" target="_blank" rel="noopener noreferrer">
-              <Music size={14} /> TikTok
-            </a>
-            <a href="https://www.youtube.com/@tNaiLLzxGd" target="_blank" rel="noopener noreferrer">
-              <Youtube size={14} /> YouTube
-            </a>
+          <div className={styles.utilityRow}>
+            <div className={styles.socialLinks} aria-label={t('home.socialLinks')}>
+              <a href="https://discord.gg/75FaX3gmM2" target="_blank" rel="noopener noreferrer">
+                <Users size={14} /> Discord
+              </a>
+              <a href="https://www.tiktok.com/@tnaillzgd" target="_blank" rel="noopener noreferrer">
+                <Music size={14} /> TikTok
+              </a>
+              <a href="https://www.youtube.com/@tNaiLLzxGd" target="_blank" rel="noopener noreferrer">
+                <Youtube size={14} /> YouTube
+              </a>
+            </div>
+            <button
+              className={styles.effectsToggle}
+              type="button"
+              data-active={animationsEnabled}
+              aria-pressed={animationsEnabled}
+              aria-label={systemPrefersReducedMotion
+                ? t('effects.systemReduced')
+                : preferenceEnabled ? t('effects.disable') : t('effects.enable')}
+              title={systemPrefersReducedMotion
+                ? t('effects.systemReduced')
+                : preferenceEnabled ? t('effects.disable') : t('effects.enable')}
+              disabled={systemPrefersReducedMotion}
+              onClick={toggleAnimations}
+            >
+              <Sparkles size={14} aria-hidden="true" />
+              {systemPrefersReducedMotion
+                ? t('effects.reduced')
+                : preferenceEnabled ? t('effects.on') : t('effects.off')}
+            </button>
           </div>
           {loadError && (
             <div className={styles.dataNotice} role="alert">
