@@ -104,24 +104,26 @@ export async function updateUserRole(userId, nextRole) {
 }
 
 export async function updateUserDeveloperFlag(userId, isDeveloper, displayName = '') {
-  const batch = writeBatch(db)
-  const now = serverTimestamp()
-  batch.update(doc(db, 'users', userId), { isDeveloper: Boolean(isDeveloper), updatedAt: now })
+  return withRetry(async () => {
+    const batch = writeBatch(db)
+    const now = serverTimestamp()
+    batch.update(doc(db, 'users', userId), { isDeveloper: Boolean(isDeveloper), updatedAt: now })
 
-  const staffRef = doc(db, 'staff', userId)
-  if (isDeveloper) {
-    batch.set(staffRef, {
-      userId,
-      title: 'List Developer',
-      displayName,
-      updatedAt: now,
-    }, { merge: true })
-  } else {
-    batch.delete(staffRef)
-  }
+    const staffRef = doc(db, 'staff', userId)
+    if (isDeveloper) {
+      batch.set(staffRef, {
+        userId,
+        title: 'List Developer',
+        displayName,
+        updatedAt: now,
+      }, { merge: true })
+    } else {
+      batch.delete(staffRef)
+    }
 
-  await batch.commit()
-  return userId
+    await batch.commit()
+    return userId
+  })
 }
 
 export async function deleteDocument(collectionName, id) {

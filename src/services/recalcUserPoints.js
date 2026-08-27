@@ -156,9 +156,7 @@ export async function recalcAllUsersPoints() {
       pushOp()
     }
   })
-  commitQueue.push(batch)
-
-  if (ops % BATCH_LIMIT > 0) {
+  if (ops > 0) {
     commitQueue.push(batch)
   }
 
