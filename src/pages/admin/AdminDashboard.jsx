@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ListCheck, Users, Layers, FileText, Flag, Wrench, Tag, RefreshCw, UserCog } from 'lucide-react'
+import { ListCheck, Users, Layers, FileText, Flag, Wrench, Tag, RefreshCw, UserCog, History } from 'lucide-react'
 import PageShell from '../../components/layout/PageShell'
 import Card from '../../components/ui/Card'
 import Spinner from '../../components/ui/Spinner'
@@ -150,6 +150,9 @@ export default function AdminDashboard() {
           </Link>
           <Link to="/admin/submissions" className={styles.quickLink}>
             Level Acceptance
+          </Link>
+          <Link to="/admin/approval-history" className={styles.quickLink}>
+            <History size={16} /> Approval History
           </Link>
           <Link to="/admin/levels" className={styles.quickLink}>
             Manage Community Levels

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { doc, runTransaction, serverTimestamp, query, where, getDocs, collection, documentId } from 'firebase/firestore'
-import { Check, X, RefreshCw, ExternalLink, UserCheck, ChevronDown } from 'lucide-react'
+import { Check, X, RefreshCw, ExternalLink } from 'lucide-react'
 import PageShell from '../../components/layout/PageShell'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
@@ -116,8 +116,6 @@ export default function ReviewSubmissions() {
   const navigate = useNavigate()
   const [tab, setTab] = useState('main')
   const [submissions, setSubmissions] = useState([])
-  const [approvalHistory, setApprovalHistory] = useState([])
-  const [approvalCounts, setApprovalCounts] = useState({ main: 0, community: 0 })
   const [loading, setLoading] = useState(true)
   const [note, setNote] = useState({})
   const [config, setConfig] = useState({})
@@ -142,29 +140,11 @@ export default function ReviewSubmissions() {
           return tb - ta
         })
 
-      const allAccepted = all
-        .filter(s => s.status === 'approved' && (s.requestType || 'completion') === 'completion')
-        .sort((a, b) => {
-          const ta = a.reviewedAt?.toMillis?.() || a.updatedAt?.toMillis?.() || 0
-          const tb = b.reviewedAt?.toMillis?.() || b.updatedAt?.toMillis?.() || 0
-          return tb - ta
-        })
-
-      const nextApprovalCounts = {
-        main: allAccepted.filter(s => (s.levelType || 'main') === 'main').length,
-        community: allAccepted.filter(s => s.levelType === 'community').length,
-      }
-      const accepted = ['main', 'community'].flatMap(levelType =>
-        allAccepted.filter(s => (s.levelType || 'main') === levelType).slice(0, 20)
-      )
-
       const levelIds = new Set()
       const userIds = new Set()
-      const relevantSubmissions = [...data, ...accepted]
-      relevantSubmissions.forEach(sub => {
+      data.forEach(sub => {
         if (sub.levelId) levelIds.add(sub.levelId)
         if (sub.userId) userIds.add(sub.userId)
-        if (sub.reviewedBy) userIds.add(sub.reviewedBy)
       })
 
       const [levelDocs, userDocs] = await Promise.all([
@@ -208,22 +188,6 @@ export default function ReviewSubmissions() {
         }
       })
       setSubmissions(enriched)
-      setApprovalCounts(nextApprovalCounts)
-      setApprovalHistory(accepted.map(sub => {
-        let levelName = sub.demonName || sub.manualLevelName || sub.levelName || 'Unknown'
-        if ((!levelName || levelName === 'Unknown') && sub.levelId) {
-          levelName = levelDocs.get(sub.levelId)?.name || 'Unknown'
-        }
-
-        return {
-          ...sub,
-          levelName,
-          levelType: sub.levelType || 'main',
-          submitterName: getDisplayName(userDocs.get(sub.userId)),
-          reviewerName: sub.reviewerName
-            || (userDocs.has(sub.reviewedBy) ? getDisplayName(userDocs.get(sub.reviewedBy)) : 'Unknown admin'),
-        }
-      }))
       const initial = {}
       enriched.forEach(sub => { initial[sub.id] = { ...sub._initialConfig } })
       setConfig(initial)
@@ -240,8 +204,6 @@ export default function ReviewSubmissions() {
     if (tab === 'levels') return s.requestType === 'level'
     return (s.requestType || 'completion') === 'completion' && (s.levelType || 'main') === tab
   })
-
-  const historyForTab = approvalHistory.filter(s => s.levelType === tab)
 
   const isValidDemonlistUrl = (url) => {
     if (!url) return true
@@ -899,69 +861,6 @@ export default function ReviewSubmissions() {
         </div>
       )}
 
-      {tab !== 'levels' && (
-        <details className={styles.historySection} open>
-          <summary className={styles.historySummary}>
-            <span className={styles.historyTitle}>
-              <UserCheck size={18} aria-hidden="true" />
-              Recently accepted completions
-            </span>
-            <span className={styles.historyCount}>{approvalCounts[tab] || 0}</span>
-            <span className={styles.historyPrivacy}>Admins only</span>
-            <ChevronDown className={styles.historyChevron} size={18} aria-hidden="true" />
-          </summary>
-
-          <Card padding="sm" className={styles.historyCard}>
-            {historyForTab.length === 0 ? (
-              <p className={styles.historyEmpty}>No accepted completions have been recorded for this list yet.</p>
-            ) : (
-              <ul className={styles.historyList}>
-                {historyForTab.map(item => {
-                  const reviewedAt = item.reviewedAt || item.updatedAt
-                  const reviewedDate = reviewedAt?.toDate?.() || (reviewedAt ? new Date(reviewedAt) : null)
-                  const dateTime = reviewedDate && !Number.isNaN(reviewedDate.getTime())
-                    ? reviewedDate.toISOString()
-                    : undefined
-
-                  return (
-                    <li key={item.id} className={styles.historyRow}>
-                      <div className={styles.historyCompletion}>
-                        <span className={styles.historyLevel}>{item.levelName}</span>
-                        <span className={styles.historyPlayer}>Completed by {item.submitterName}</span>
-                      </div>
-                      <Badge variant={item.levelType === 'main' ? 'green' : 'blue'} size="sm">
-                        {item.levelType}
-                      </Badge>
-                      <div className={styles.historyReview}>
-                        <span>Accepted by <strong>{item.reviewerName}</strong></span>
-                        <time dateTime={dateTime} title={reviewedDate?.toLocaleString()}>
-                          {reviewedAt ? (formatDateRelative(reviewedAt) || 'Date unavailable') : 'Date unavailable'}
-                        </time>
-                      </div>
-                      {item.videoURL && (
-                        <Button
-                          href={item.videoURL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          variant="ghost"
-                          size="sm"
-                          icon={ExternalLink}
-                          aria-label={`Watch ${item.submitterName}'s proof for ${item.levelName}`}
-                        >
-                          Proof
-                        </Button>
-                      )}
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-            {(approvalCounts[tab] || 0) > historyForTab.length && (
-              <p className={styles.historyLimit}>Showing the 20 most recent approvals.</p>
-            )}
-          </Card>
-        </details>
-      )}
     </PageShell>
   )
 }
