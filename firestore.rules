@@ -30,6 +30,31 @@ service cloud.firestore {
       return activeAccount() && request.auth.token.email_verified == true;
     }
 
+    function reviewIdentityUnchanged(before, after) {
+      return after.get('reviewedBy', null) == before.get('reviewedBy', null)
+        && after.get('reviewedAt', null) == before.get('reviewedAt', null)
+        && after.get('reviewerName', null) == before.get('reviewerName', null);
+    }
+
+    function claimIdentityUnchanged(before, after) {
+      return after.get('reviewClaimedBy', null) == before.get('reviewClaimedBy', null)
+        && after.get('reviewClaimedAt', null) == before.get('reviewClaimedAt', null);
+    }
+
+    function reviewerNameMatchesAccount(name) {
+      return name in [
+        account().get('displayName', ''),
+        account().get('username', '')
+      ];
+    }
+
+    function hasNoReviewerIdentity(data) {
+      return !data.keys().hasAny([
+        'reviewedBy', 'reviewerId', 'reviewerName', 'reviewerEmail',
+        'reviewClaimedBy', 'acceptedBy', 'acceptedByName'
+      ]);
+    }
+
     match /users/{userId} {
       allow read: if true;
 
@@ -50,11 +75,32 @@ service cloud.firestore {
         && existsAfter(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower))
         && getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower)).data.uid == userId;
 
-      allow update: if signedIn()
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['role', 'banned', 'isDeveloper', 'stats', 'displayName', 'avatarURL', 'bio', 'country', 'updatedAt']);
+      allow update: if (isOwner()
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['role', 'updatedAt'])
+          && request.resource.data.role in ['user', 'admin', 'owner'])
+        || (isOwner()
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['banned', 'updatedAt'])
+          && request.resource.data.banned is bool)
+        || (isOwner()
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['isDeveloper', 'updatedAt'])
+          && request.resource.data.isDeveloper is bool)
+        || (isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['stats', 'updatedAt']))
+        // Community score recalculation currently runs from the signed-in
+        // client. Keep that legacy stats-only path without exposing roles.
+        || (activeAccount()
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['stats', 'updatedAt']))
+        || (isSelf(userId) && activeAccount()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'displayName', 'avatarURL', 'bio', 'country', 'updatedAt'
+          ]));
 
-      allow delete: if signedIn();
+      allow delete: if isSelf(userId) || isOwner();
     }
 
     match /usernames/{username} {
@@ -80,17 +126,71 @@ service cloud.firestore {
 
     match /completions/{completionId} {
       allow read: if true;
-      allow create, update: if signedIn();
+      allow create, update: if signedIn()
+        && hasNoReviewerIdentity(request.resource.data);
       allow delete: if signedIn();
     }
 
     match /submissions/{submissionId} {
-      allow create: if signedIn()
+      allow create: if verifiedAccount()
         && request.resource.data.userId == request.auth.uid
-        && request.resource.data.status == 'pending';
-      allow read: if true;
-      allow update: if signedIn();
-      allow delete: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+        && request.resource.data.status == 'pending'
+        && request.resource.data.reviewedBy == null
+        && request.resource.data.reviewedAt == null
+        && !request.resource.data.keys().hasAny([
+          'reviewerName', 'reviewClaimedBy', 'reviewClaimedAt'
+        ]);
+
+      // Players may inspect only their pending submission. Reviewer identity is
+      // stored on reviewing/resolved submissions and remains admin-only.
+      allow read: if isAdmin()
+        || (isSelf(resource.data.userId) && resource.data.status == 'pending');
+
+      // Enforce the review state machine. Claims and final attribution must
+      // always belong to the authenticated admin performing the transition.
+      allow update: if isAdmin()
+        && request.resource.data.userId == resource.data.userId
+        && (
+          (resource.data.status == 'pending'
+            && request.resource.data.status == 'pending'
+            && reviewIdentityUnchanged(resource.data, request.resource.data)
+            && claimIdentityUnchanged(resource.data, request.resource.data))
+          ||
+          (resource.data.status == 'pending'
+            && request.resource.data.status == 'reviewing'
+            && request.resource.data.reviewClaimedBy == request.auth.uid
+            && request.resource.data.reviewClaimedAt == request.time
+            && reviewIdentityUnchanged(resource.data, request.resource.data))
+          ||
+          (resource.data.status == 'reviewing'
+            && resource.data.reviewClaimedBy == request.auth.uid
+            && (
+              (request.resource.data.status == 'reviewing'
+                && request.resource.data.reviewClaimedBy == request.auth.uid
+                && request.resource.data.reviewClaimedAt == resource.data.reviewClaimedAt
+                && reviewIdentityUnchanged(resource.data, request.resource.data))
+              ||
+              (request.resource.data.status == 'pending'
+                && request.resource.data.reviewClaimedBy == null
+                && request.resource.data.reviewClaimedAt == null
+                && reviewIdentityUnchanged(resource.data, request.resource.data))
+              ||
+              (request.resource.data.status in ['approved', 'rejected']
+                && request.resource.data.reviewClaimedBy == null
+                && request.resource.data.reviewClaimedAt == null
+                && request.resource.data.reviewedBy == request.auth.uid
+                && request.resource.data.reviewedAt == request.time
+                && reviewerNameMatchesAccount(request.resource.data.reviewerName))
+            ))
+          ||
+          (resource.data.status in ['approved', 'rejected']
+            && request.resource.data.status == resource.data.status
+            && reviewIdentityUnchanged(resource.data, request.resource.data)
+            && claimIdentityUnchanged(resource.data, request.resource.data))
+        );
+
+      allow delete: if isAdmin()
+        || (isSelf(resource.data.userId) && resource.data.status == 'pending');
     }
 
     match /notifications/{notificationId} {

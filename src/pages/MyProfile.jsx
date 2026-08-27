@@ -445,10 +445,11 @@ export default function MyProfile() {
             </p>
             <ul className={styles.deleteList}>
               <li>Your profile and stats</li>
-              <li>All submissions and completions</li>
+              <li>Pending submissions and verified completions</li>
               <li>Your entries in level victor lists</li>
               <li>Your Firebase Auth account</li>
             </ul>
+            <p className={styles.deleteNote}>Resolved moderation records are retained for list integrity, without access to your deleted profile.</p>
             <p className={styles.deleteNote}>This action cannot be undone.</p>
             {deleteError && <p className={styles.deleteError} role="alert">{deleteError}</p>}
             <p className={styles.deletePrompt}>Type <strong>deleteaccount</strong> to confirm:</p>
