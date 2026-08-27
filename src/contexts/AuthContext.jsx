@@ -7,6 +7,7 @@ import { createUserDoc, getRegistrationBootstrapPromise } from '../services/auth
 
 export const AuthContext = createContext(null)
 const AUTH_INIT_TIMEOUT_MS = 8000
+const PROFILE_LOAD_TIMEOUT_MS = 10000
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
@@ -17,8 +18,8 @@ export function AuthProvider({ children }) {
   const requestIdRef = useRef(0)
   const mountedRef = useRef(false)
   const listenerFailedRef = useRef(false)
+  const hadDataRef = useRef(false)
   const userId = user?.uid
-  const hasUserData = Boolean(userData)
 
   const readUserData = useCallback(async (firebaseUser) => {
     const bootstrap = getRegistrationBootstrapPromise()
@@ -28,11 +29,12 @@ export function AuthProvider({ children }) {
 
     let data = await getDocument('users', firebaseUser.uid)
     if (!data) {
-      await createUserDoc(firebaseUser)
-      data = await getDocument('users', firebaseUser.uid)
-    }
-    if (!data) {
-      throw new Error('Your account profile could not be loaded.')
+      try {
+        await createUserDoc(firebaseUser)
+        data = await getDocument('users', firebaseUser.uid)
+      } catch (err) {
+        console.warn('createUserDoc fallback failed, waiting for snapshot:', err)
+      }
     }
     return data
   }, [])
@@ -61,22 +63,31 @@ export function AuthProvider({ children }) {
     setProfileError(null)
     if (showLoading) setLoading(true)
 
+    const safetyTimeout = setTimeout(() => {
+      if (!isCurrentRequest()) return
+      setLoading(false)
+    }, PROFILE_LOAD_TIMEOUT_MS)
+
     try {
       const data = await readUserData(firebaseUser)
+      clearTimeout(safetyTimeout)
       if (!isCurrentRequest()) return null
-      setUserData(data)
+      if (data) {
+        setUserData(data)
+        hadDataRef.current = true
+      }
       return data
     } catch (error) {
+      clearTimeout(safetyTimeout)
       if (!isCurrentRequest()) return null
-      const normalizedError = error instanceof Error
-        ? error
-        : new Error('Your account profile could not be loaded.')
-      console.error('Failed to load user profile:', normalizedError)
-      setUserData(null)
-      setProfileError(normalizedError)
-      throw normalizedError
-    } finally {
-      if (showLoading && isCurrentRequest()) setLoading(false)
+      console.error('Failed to load user profile:', error)
+      if (hadDataRef.current) {
+        setUserData(null)
+        setProfileError(error instanceof Error
+          ? error
+          : new Error('Your account profile could not be loaded.'))
+      }
+      return null
     }
   }, [readUserData])
 
@@ -89,10 +100,6 @@ export function AuthProvider({ children }) {
     }
     const initialAuthTimeout = setTimeout(() => {
       if (!mountedRef.current || initialAuthSettled) return
-      // Firebase can leave the first observer callback waiting indefinitely
-      // when the network or project configuration is unavailable. Public and
-      // sign-in routes should remain usable while a later callback can still
-      // restore a cached session.
       setLoading(false)
     }, AUTH_INIT_TIMEOUT_MS)
 
@@ -103,14 +110,13 @@ export function AuthProvider({ children }) {
       setUser(firebaseUser)
       setUserData(null)
       setProfileError(null)
+      hadDataRef.current = false
 
       if (!firebaseUser) {
         setLoading(false)
         return
       }
 
-      // The request id and current-user checks inside this helper prevent an
-      // older profile request from winning after logout or an account switch.
       loadCurrentUserData({ showLoading: true }).catch(() => {})
     }, (error) => {
       settleInitialAuth()
@@ -135,26 +141,29 @@ export function AuthProvider({ children }) {
     }
   }, [loadCurrentUserData, listenerRevision])
 
-  // Keep access-sensitive profile fields such as role and banned in sync for
-  // active sessions. Firestore rules remain the real authorization boundary.
   useEffect(() => {
-    if (!userId || !hasUserData) return undefined
+    if (!userId) return undefined
 
     return onSnapshot(doc(db, 'users', userId), (snapshot) => {
       if (!mountedRef.current || auth.currentUser?.uid !== userId) return
-      if (!snapshot.exists()) {
+
+      if (snapshot.exists()) {
+        hadDataRef.current = true
+        setUserData({ id: snapshot.id, ...snapshot.data() })
+        setProfileError(null)
+        setLoading(false)
+      } else if (hadDataRef.current) {
         setUserData(null)
         setProfileError(new Error('Your account profile is no longer available.'))
-        return
+        setLoading(false)
       }
-      setUserData({ id: snapshot.id, ...snapshot.data() })
-      setProfileError(null)
     }, (error) => {
       if (!mountedRef.current || auth.currentUser?.uid !== userId) return
       console.error('User profile listener failed:', error)
       setProfileError(error instanceof Error ? error : new Error('Your account profile could not be updated.'))
+      setLoading(false)
     })
-  }, [userId, hasUserData])
+  }, [userId])
 
   const refreshUserData = useCallback(
     () => loadCurrentUserData({ showLoading: false }),
