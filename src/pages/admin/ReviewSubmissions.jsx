@@ -123,12 +123,14 @@ export default function ReviewSubmissions() {
   const [autoFill, setAutoFill] = useState({})
   const [error, setError] = useState('')
   const inFlightRef = useRef(new Set())
+  const processedAutoFillRef = useRef(new Set())
 
   useEffect(() => {
     if (!authLoading && (!user || !hasAccess(userData?.role || 'user', 'admin'))) navigate('/')
   }, [user, userData, authLoading, navigate])
 
   const loadSubmissions = async () => {
+    processedAutoFillRef.current = new Set()
     setLoading(true)
     try {
       const all = await getCollection('submissions')
@@ -203,7 +205,14 @@ export default function ReviewSubmissions() {
   useEffect(() => {
     if (loading || !submissions.length) return
     submissions.forEach(sub => {
-      if (sub.levelType === 'main' && sub.requestType !== 'level' && sub.demonApiId && !autoFill[sub.id] && !processing[sub.id]) {
+      if (
+        sub.levelType === 'main'
+        && sub.requestType !== 'level'
+        && sub.demonApiId
+        && !processedAutoFillRef.current.has(sub.id)
+        && !processing[sub.id]
+      ) {
+        processedAutoFillRef.current.add(sub.id)
         handleAutoFill(sub.id)
       }
     })
