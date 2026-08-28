@@ -123,16 +123,16 @@
   top: calc(100% + 8px);
   right: 0;
   min-width: 220px;
-  padding: 7px;
+  padding: 8px;
   overflow: visible;
-  border: 1px solid rgba(111, 163, 240, 0.28);
+  border: 1px solid rgba(100, 155, 235, 0.2);
   border-radius: 14px;
   background:
-    radial-gradient(circle at 100% 0, rgba(70, 139, 241, 0.17), transparent 42%),
-    rgba(8, 17, 31, 0.98);
+    radial-gradient(circle at 90% 10%, rgba(55, 126, 237, 0.12), transparent 38%),
+    rgba(8, 15, 28, 0.97);
   box-shadow:
-    0 28px 72px rgba(0, 0, 0, 0.58),
-    0 0 0 1px rgba(255, 255, 255, 0.025) inset;
+    0 32px 80px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
   backdrop-filter: blur(24px);
   isolation: isolate;
 }
@@ -145,9 +145,9 @@
   right: 20px;
   width: 10px;
   height: 10px;
-  border-top: 1px solid rgba(111, 163, 240, 0.28);
-  border-left: 1px solid rgba(111, 163, 240, 0.28);
-  background: #0c192b;
+  border-top: 1px solid rgba(100, 155, 235, 0.2);
+  border-left: 1px solid rgba(100, 155, 235, 0.2);
+  background: #0a1420;
   transform: rotate(45deg);
 }
 
@@ -156,17 +156,17 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  min-height: 42px;
-  padding: 10px 12px;
+  min-height: 40px;
+  padding: 9px 12px;
   border-radius: 9px;
   font-size: 0.84rem;
-  font-weight: 650;
-  color: #aebbd0;
+  font-weight: 600;
+  color: #9bacc4;
   background: none;
   border: none;
   text-align: left;
   text-decoration: none;
-  transition: all var(--transition-fast);
+  transition: all 150ms ease;
 }
 
 .dropdownItem + .dropdownItem {
@@ -175,12 +175,17 @@
 
 .dropdownItem svg {
   flex-shrink: 0;
-  color: #6ba7ff;
+  color: #5e96e0;
+  transition: color 150ms ease;
 }
 
 .dropdownItem:hover {
-  background: rgba(79, 143, 239, 0.12);
-  color: #f4f7fc;
+  background: rgba(68, 136, 255, 0.12);
+  color: #e8eef8;
+}
+
+.dropdownItem:hover svg {
+  color: #7db4ff;
 }
 
 .dropdownItem:focus-visible {
@@ -194,19 +199,20 @@
 }
 
 .signOutItem {
-  margin-top: 7px !important;
-  border-top: 1px solid rgba(126, 157, 203, 0.13);
+  margin-top: 6px !important;
+  border-top: 1px solid rgba(126, 157, 203, 0.1);
+  padding-top: 10px;
   border-radius: 0 0 9px 9px;
-  color: #d4a4aa;
+  color: #c8929a;
 }
 
 .signOutItem svg {
-  color: #f17f8a;
+  color: #e0737e;
 }
 
 .signOutItem:hover {
-  background: rgba(231, 86, 103, 0.1);
-  color: #ffb6bd;
+  background: rgba(255, 68, 102, 0.08);
+  color: #f0a8b0;
 }
 
 .authButtons {
