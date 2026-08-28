@@ -75,3 +75,122 @@
   text-align: center;
   border-bottom: 1px solid var(--border-glass);
 }
+
+.bannedPage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: calc(100vh - var(--navbar-height));
+  display: grid;
+  place-items: center;
+  padding: var(--navbar-height) 24px 80px;
+  background:
+    linear-gradient(180deg, rgba(10, 18, 31, 0.28), rgba(6, 12, 23, 0.96) 82%),
+    #080f1c;
+}
+
+.bannedGlow {
+  position: absolute;
+  z-index: -4;
+  top: -240px;
+  left: 50%;
+  width: 900px;
+  height: 700px;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(circle at 50% 36%, rgba(255, 68, 102, 0.1), transparent 42%),
+    radial-gradient(circle at 30% 62%, rgba(200, 50, 80, 0.05), transparent 34%);
+  filter: blur(5px);
+  pointer-events: none;
+}
+
+.bannedLines {
+  position: absolute;
+  z-index: -3;
+  inset: 0;
+  opacity: 0.36;
+  pointer-events: none;
+  background:
+    linear-gradient(118deg, transparent 13%, rgba(126, 157, 204, 0.035) 13.2%, transparent 13.5%),
+    linear-gradient(68deg, transparent 28%, rgba(126, 157, 204, 0.04) 28.2%, transparent 28.5%),
+    linear-gradient(104deg, transparent 67%, rgba(126, 157, 204, 0.035) 67.2%, transparent 67.5%),
+    linear-gradient(25deg, transparent 80%, rgba(126, 157, 204, 0.03) 80.2%, transparent 80.5%);
+}
+
+.bannedContent {
+  position: relative;
+  text-align: center;
+  max-width: 560px;
+  padding: 48px 32px;
+  border: 1px solid rgba(255, 68, 102, 0.18);
+  border-radius: 20px;
+  background:
+    linear-gradient(160deg, rgba(22, 14, 22, 0.96), rgba(10, 8, 18, 0.98) 64%),
+    #0a0814;
+  box-shadow:
+    0 38px 85px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.bannedIcon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  color: #ff4466;
+  background: rgba(255, 68, 102, 0.1);
+  box-shadow: 0 0 40px rgba(255, 68, 102, 0.12);
+}
+
+.bannedTitle {
+  margin: 0 0 16px;
+  color: #f5f8fc;
+  font-size: clamp(2.2rem, 5.5vw, 3.8rem);
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 0.94;
+}
+
+.bannedTitle span {
+  display: inline-block;
+  color: #ff4466;
+  text-shadow: 0 0 34px rgba(255, 68, 102, 0.2);
+}
+
+.bannedMessage {
+  max-width: 420px;
+  margin: 0 auto 28px;
+  color: #aeb9ca;
+  font-size: clamp(0.9rem, 1.8vw, 1.05rem);
+  font-weight: 500;
+  line-height: 1.65;
+}
+
+.bannedActions {
+  display: flex;
+  justify-content: center;
+}
+
+.bannedButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 28px;
+  border-radius: 9px;
+  color: #fff;
+  background: linear-gradient(135deg, #377eed, #4d92ff);
+  box-shadow: 0 12px 28px rgba(32, 94, 194, 0.22);
+  font-size: 0.875rem;
+  font-weight: 750;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.bannedButton:hover {
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 36px rgba(32, 94, 194, 0.3);
+}

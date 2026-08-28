@@ -1,4 +1,5 @@
 import { Link, Navigate, useLocation } from 'react-router-dom'
+import { ShieldOff } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import Spinner from '../ui/Spinner'
 import styles from './Guards.module.css'
@@ -19,6 +20,30 @@ function AccountState({ title, message, action }) {
         <p className={styles.stateMessage}>{message}</p>
         {action}
       </section>
+    </main>
+  )
+}
+
+function BannedScreen() {
+  return (
+    <main className={styles.bannedPage} role="alert">
+      <div className={styles.bannedGlow} aria-hidden="true" />
+      <div className={styles.bannedLines} aria-hidden="true" />
+      <div className={styles.bannedContent}>
+        <div className={styles.bannedIcon}>
+          <ShieldOff size={40} />
+        </div>
+        <h1 className={styles.bannedTitle}>Account<br /><span>Suspended</span></h1>
+        <p className={styles.bannedMessage}>
+          This account cannot use member-only features.
+          If you believe this is a mistake, contact a site administrator.
+        </p>
+        <div className={styles.bannedActions}>
+          <Link className={styles.bannedButton} to="/">
+            Return home
+          </Link>
+        </div>
+      </div>
     </main>
   )
 }
@@ -55,13 +80,7 @@ export default function RequireAuth({ children }) {
   }
 
   if (userData.banned) {
-    return (
-      <AccountState
-        title="Account suspended"
-        message="This account cannot use member-only features. If you believe this is a mistake, contact a site administrator."
-        action={<Link className={styles.stateButton} to="/">Return home</Link>}
-      />
-    )
+    return <BannedScreen />
   }
 
   return children
