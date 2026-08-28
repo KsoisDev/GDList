@@ -200,6 +200,15 @@ export default function ReviewSubmissions() {
 
   useEffect(() => { if (hasAccess(userData?.role || 'user', 'admin')) loadSubmissions() }, [userData])
 
+  useEffect(() => {
+    if (loading || !submissions.length) return
+    submissions.forEach(sub => {
+      if (sub.levelType === 'main' && sub.requestType !== 'level' && sub.demonApiId && !autoFill[sub.id] && !processing[sub.id]) {
+        handleAutoFill(sub.id)
+      }
+    })
+  }, [loading, submissions])
+
   const filtered = submissions.filter(s => {
     if (tab === 'levels') return s.requestType === 'level'
     return (s.requestType || 'completion') === 'completion' && (s.levelType || 'main') === tab
@@ -807,7 +816,7 @@ export default function ReviewSubmissions() {
                       </>
                     )}
                   </div>
-                  {(sub.requestType !== 'level' && sub.levelType === 'main' && sub.dataSource === 'aredl') && (
+                  {(sub.requestType !== 'level' && sub.levelType === 'main' && sub.demonApiId) && (
                   <div className={styles.autoFillRow}>
                     <Button
                       variant="secondary"
