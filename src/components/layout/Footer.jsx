@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
+import { Youtube, Music, Users, ArrowUpRight } from 'lucide-react'
 import styles from './Footer.module.css'
 
 export default function Footer() {
   return (
     <footer className={styles.footer}>
+      <div className={styles.glow} aria-hidden="true" />
       <div className={styles.container}>
         <div className={styles.brand}>
           <Link to="/" className={styles.logo}>
@@ -13,23 +15,48 @@ export default function Footer() {
           <p className={styles.description}>
             Geometry Dash demon list for the tnaillzxgd Discord community.
           </p>
+          <div className={styles.socials}>
+            <a href="https://discord.gg/75FaX3gmM2" target="_blank" rel="noopener noreferrer" className={styles.socialLink} aria-label="Discord">
+              <Users size={16} />
+            </a>
+            <a href="https://www.tiktok.com/@tnaillzgd" target="_blank" rel="noopener noreferrer" className={styles.socialLink} aria-label="TikTok">
+              <Music size={16} />
+            </a>
+            <a href="https://www.youtube.com/@tNaiLLzxGd" target="_blank" rel="noopener noreferrer" className={styles.socialLink} aria-label="YouTube">
+              <Youtube size={16} />
+            </a>
+          </div>
         </div>
         <div className={styles.links}>
           <div className={styles.column}>
             <h4 className={styles.columnTitle}>Lists</h4>
-            <Link to="/list/main" className={styles.link}>Main List</Link>
-            <Link to="/list/community" className={styles.link}>Community List</Link>
+            <Link to="/list/main" className={styles.link}>
+              Main List <ArrowUpRight size={13} />
+            </Link>
+            <Link to="/list/community" className={styles.link}>
+              Community List <ArrowUpRight size={13} />
+            </Link>
           </div>
           <div className={styles.column}>
             <h4 className={styles.columnTitle}>Rankings</h4>
-            <Link to="/leaderboard/main" className={styles.link}>Main Rankings</Link>
-            <Link to="/leaderboard/community" className={styles.link}>Community Rankings</Link>
+            <Link to="/leaderboard/main" className={styles.link}>
+              Main Rankings <ArrowUpRight size={13} />
+            </Link>
+            <Link to="/leaderboard/community" className={styles.link}>
+              Community Rankings <ArrowUpRight size={13} />
+            </Link>
           </div>
           <div className={styles.column}>
             <h4 className={styles.columnTitle}>Community</h4>
-            <a href="https://discord.gg/75FaX3gmM2" target="_blank" rel="noopener noreferrer" className={styles.link}>Discord</a>
-            <a href="https://www.tiktok.com/@tnaillzgd" target="_blank" rel="noopener noreferrer" className={styles.link}>TikTok</a>
-            <a href="https://www.youtube.com/@tNaiLLzxGd" target="_blank" rel="noopener noreferrer" className={styles.link}>YouTube</a>
+            <a href="https://discord.gg/75FaX3gmM2" target="_blank" rel="noopener noreferrer" className={styles.link}>
+              Discord <ArrowUpRight size={13} />
+            </a>
+            <a href="https://www.tiktok.com/@tnaillzgd" target="_blank" rel="noopener noreferrer" className={styles.link}>
+              TikTok <ArrowUpRight size={13} />
+            </a>
+            <a href="https://www.youtube.com/@tNaiLLzxGd" target="_blank" rel="noopener noreferrer" className={styles.link}>
+              YouTube <ArrowUpRight size={13} />
+            </a>
           </div>
         </div>
       </div>
