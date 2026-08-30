@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig(({ mode }) => ({
-  base: mode === 'github' ? '/GDList/' : '/',
+  base: '/',
   plugins: [react()],
   build: {
     // Firebase is a cohesive dependency graph. Keeping it in one cached vendor
