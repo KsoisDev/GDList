@@ -4,16 +4,13 @@
   <meta charset="UTF-8" />
   <title>Basement List</title>
   <script>
-    const appRoot = '/GDList/'
-    try {
-      sessionStorage.setItem('gdlist.redirect', location.href)
-    } catch {
-      // The redirect still reaches the app root when storage is unavailable.
+    const host = location.hostname
+    if (host.includes('ksois.github.io')) {
+      location.replace('https://blist.ksois.com/')
+    } else {
+      location.replace('/')
     }
-    // A timestamp prevents a just-deployed site from reusing a stale index file.
-    location.replace(`${appRoot}?redirect=${Date.now()}`)
   </script>
-  <noscript><meta http-equiv="refresh" content="0;URL='/GDList/'"></noscript>
 </head>
 <body></body>
 </html>
