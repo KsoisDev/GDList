@@ -17,27 +17,28 @@ export function getDisplayName(user) {
   return user?.displayName || user?.username || 'Unknown'
 }
 
-export function formatDate(timestamp) {
+export function formatDate(timestamp, locale = 'en-US') {
   if (!timestamp) return 'N/A'
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   })
 }
 
-export function formatDateRelative(timestamp) {
+export function formatDateRelative(timestamp, locale = 'en-US') {
   if (!timestamp) return ''
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
   const now = new Date()
   const diff = now - date
   const minutes = Math.floor(diff / 60000)
-  if (minutes < 1) return 'Just now'
-  if (minutes < 60) return `${minutes}m ago`
+  const relative = new Intl.RelativeTimeFormat(locale, { numeric: 'auto', style: 'short' })
+  if (minutes < 1) return relative.format(0, 'second')
+  if (minutes < 60) return relative.format(-minutes, 'minute')
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
+  if (hours < 24) return relative.format(-hours, 'hour')
   const days = Math.floor(hours / 24)
-  if (days < 30) return `${days}d ago`
-  return formatDate(timestamp)
+  if (days < 30) return relative.format(-days, 'day')
+  return formatDate(timestamp, locale)
 }

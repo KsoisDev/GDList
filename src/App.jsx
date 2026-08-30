@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './contexts/AuthContext'
 import { SiteConfigProvider } from './contexts/SiteConfigContext'
+import { LanguageProvider } from './contexts/LanguageContext'
 import AppErrorBoundary from './components/layout/AppErrorBoundary'
 import Footer from './components/layout/Footer'
 import Navbar from './components/layout/Navbar'
@@ -60,9 +61,10 @@ function AdminRoute({ children, minRole = 'admin' }) {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename={routerBase}>
-        <AuthProvider>
-          <SiteConfigProvider>
+      <LanguageProvider>
+        <BrowserRouter basename={routerBase}>
+          <AuthProvider>
+            <SiteConfigProvider>
             <ScrollToTop />
             <Navbar />
             <MaintenanceBanner />
@@ -97,9 +99,10 @@ export default function App() {
               </Suspense>
             </AppErrorBoundary>
             <Footer />
-          </SiteConfigProvider>
-        </AuthProvider>
-      </BrowserRouter>
+            </SiteConfigProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </LanguageProvider>
     </QueryClientProvider>
   )
 }

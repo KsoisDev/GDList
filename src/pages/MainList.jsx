@@ -8,6 +8,7 @@ import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
+import { useLanguage } from '../hooks/useLanguage'
 import { loadMainLevels } from '../services/readCache'
 import { formatNumber } from '../utils/format'
 import { DIFFICULTY_COLORS } from '../utils/constants'
@@ -15,6 +16,7 @@ import styles from './List.module.css'
 
 export default function MainList() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [levels, setLevels] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -33,7 +35,7 @@ export default function MainList() {
         setLevels(withWins.map((level, index) => ({ ...level, _webRank: index + 1 })))
       } catch (err) {
         console.error('Failed to load levels:', err)
-        setLoadError('The main list could not be loaded. Check your connection and try again.')
+        setLoadError('list.mainLoadError')
       } finally {
         setLoading(false)
       }
@@ -62,16 +64,16 @@ export default function MainList() {
       <div className={styles.mainListGlow} aria-hidden="true" />
       <section className={styles.mainListHero} aria-labelledby="main-list-title">
         <div className={styles.mainHeroCopy}>
-          <span className={styles.mainEyebrow}><Radio size={14} aria-hidden="true" /> LIVE COMMUNITY RANKING</span>
-          <h1 id="main-list-title" className={styles.mainTitle}>Main <span>Demon List</span></h1>
+          <span className={styles.mainEyebrow}><Radio size={14} aria-hidden="true" /> {t('list.mainEyebrow')}</span>
+          <h1 id="main-list-title" className={styles.mainTitle}>{t('list.mainTitle')} <span>{t('list.mainAccent')}</span></h1>
           <p className={styles.mainDescription}>
-            The official demons completed by Basement players, ranked by difficulty and backed by verified community records.
+            {t('list.mainDescription')}
           </p>
           <div className={styles.mainActions}>
             <Link to="/submit" className={styles.mainPrimaryAction}>
-              Submit a record <ArrowRight size={16} aria-hidden="true" />
+              {t('home.submitRecord')} <ArrowRight size={16} aria-hidden="true" />
             </Link>
-            <Link to="/list/community" className={styles.mainSecondaryAction}>Community list</Link>
+            <Link to="/list/community" className={styles.mainSecondaryAction}>{t('nav.communityList')}</Link>
           </div>
         </div>
 
@@ -104,11 +106,11 @@ export default function MainList() {
         </div>
 
         <div className={`${styles.toolbar} ${styles.mainToolbar}`}>
-          <span className={styles.count}>Search the ranking by level or creator</span>
+          <span className={styles.count}>{t('list.searchLevel')}</span>
           <SearchBar
             value={search}
             onChange={setSearch}
-            placeholder="Search level or creator..."
+            placeholder={t('list.searchLevel')}
             className={styles.searchBar}
           />
         </div>
@@ -117,25 +119,25 @@ export default function MainList() {
           <div className={styles.loading}><Spinner size="lg" /></div>
         ) : loadError ? (
           <div className={styles.errorState} role="alert">
-            <p>{loadError}</p>
-            <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>Try Again</Button>
+            <p>{t(loadError)}</p>
+            <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>{t('leaderboard.tryAgain')}</Button>
           </div>
         ) : filtered.length === 0 ? (
           <div className={styles.empty}>
             {search
-              ? <p>No levels match "{search}".</p>
+              ? <p>{t('list.empty')}</p>
               : <p>No levels completed yet. Submit your first record!</p>}
           </div>
         ) : (
           <div className={`${styles.table} ${styles.mainThemedTable}`}>
           <div className={styles.headerMain}>
-            <span className={styles.colWeb}>#Web</span>
-            <span className={styles.colOff}>#Official</span>
-            <span className={styles.colName}>Level</span>
-            <span className={styles.colDiff}>Difficulty</span>
-            <span className={styles.colPoints}>Points</span>
-            <span className={styles.colCreator}>Creator</span>
-            <span className={styles.colVictories}>Victories</span>
+            <span className={styles.colWeb}>#{t('list.webRank')}</span>
+            <span className={styles.colOff}>#{t('list.officialRank')}</span>
+            <span className={styles.colName}>{t('list.level')}</span>
+            <span className={styles.colDiff}>{t('list.difficulty')}</span>
+            <span className={styles.colPoints}>{t('list.points')}</span>
+            <span className={styles.colCreator}>{t('list.creator')}</span>
+            <span className={styles.colVictories}>{t('list.victories')}</span>
           </div>
 
           {filtered.map((level, i) => {
@@ -161,7 +163,7 @@ export default function MainList() {
                         <span className={styles.levelName}>{level.name}</span>
                         {completed && <Trophy size={14} className={styles.completedTrophy} />}
                       </span>
-                      <span className={styles.creator}>by {level.creator}</span>
+                      <span className={styles.creator}>{t('home.by')} {level.creator}</span>
                     </div>
                   </div>
                 </span>

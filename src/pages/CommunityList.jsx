@@ -9,6 +9,7 @@ import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
+import { useLanguage } from '../hooks/useLanguage'
 import { loadCommunityLevels, loadTags, invalidateCache } from '../services/readCache'
 import { deleteCommunityLevel } from '../services/communityList'
 import { hasAccess } from '../utils/constants'
@@ -23,6 +24,7 @@ const TABS = [
 
 export default function CommunityList() {
   const { user, userData } = useAuth()
+  const { t } = useLanguage()
   const isAdmin = hasAccess(userData?.role || 'user', 'admin')
   const [levels, setLevels] = useState([])
   const [tags, setTags] = useState([])
@@ -47,7 +49,7 @@ export default function CommunityList() {
       setLevels(data)
     } catch (err) {
       console.error('Failed to load community levels:', err)
-      setLoadError('The community list could not be loaded. Check your connection and try again.')
+      setLoadError('list.communityLoadError')
     } finally {
       setLoading(false)
     }
@@ -106,12 +108,12 @@ export default function CommunityList() {
       <div className={theme.glow} aria-hidden="true" />
       <ThemedPageHero
         eyebrow="BUILT BY BASEMENT PLAYERS"
-        title="Community"
-        accentTitle="Demon List"
+        title={t('list.communityTitle')}
+        accentTitle={t('list.communityAccent')}
         description="Discover original challenges created, submitted, and completed by members of the Basement community."
         actions={[
-          { to: '/submit-level', label: 'Submit a level' },
-          { to: '/list/main', label: 'Main list' },
+          { to: '/submit-level', label: t('home.submitLevel') },
+          { to: '/list/main', label: t('nav.mainList') },
         ]}
         stats={[
           { icon: ListChecks, value: loading ? '—' : active.length, label: 'Ranked levels' },
@@ -143,7 +145,7 @@ export default function CommunityList() {
         <SearchBar
           value={search}
           onChange={setSearch}
-          placeholder="Search level, creator or ID..."
+          placeholder={t('list.searchLevel')}
           className={styles.searchBar}
         />
       </div>
@@ -189,8 +191,8 @@ export default function CommunityList() {
         </div>
       ) : loadError ? (
         <Card padding="lg" className={styles.errorState}>
-          <p>{loadError}</p>
-          <Button variant="secondary" size="sm" onClick={load}>Try Again</Button>
+          <p>{t(loadError)}</p>
+          <Button variant="secondary" size="sm" onClick={load}>{t('leaderboard.tryAgain')}</Button>
         </Card>
       ) : tab === 'active' && visible.length === 0 ? (
         <Card padding="lg" className={styles.empty}>
