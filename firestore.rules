@@ -88,7 +88,7 @@ service cloud.firestore {
             .hasOnly(['isDeveloper', 'updatedAt'])
           && request.resource.data.isDeveloper is bool)
         || (isAdmin()
-          && request.resource.data.diff(resource.data).affectedKeys()
+           && request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly(['stats', 'updatedAt']))
         // Community score recalculation currently runs from the signed-in
         // client. Keep that legacy stats-only path without exposing roles.
