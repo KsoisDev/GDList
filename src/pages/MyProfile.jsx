@@ -502,7 +502,11 @@ export default function MyProfile() {
                         className={styles.gdlBadge}
                         title="View Global Demon List Profile"
                       >
-                        <span className={styles.gdlIcon}>🌐</span>
+                       <img
+                          src="https://discord.do/wp-content/uploads/2023/09/Global-Demonlist.jpg"
+                          alt="GDL"
+                          className={styles.gdlLogo}
+                        />
                         <span className={styles.gdlUser}>
                           {userData.gdlSync.playerName}
                         </span>
