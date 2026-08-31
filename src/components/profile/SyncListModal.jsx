@@ -6,7 +6,7 @@ import Spinner from '../ui/Spinner'
 import { fetchAredlProfile, computeSyncPlan } from '../../services/syncAredl'
 import { searchGdlPlayers, fetchGdlPlayer, getGdlProfileUrl } from '../../services/syncGdl'
 import { loadMainLevels } from '../../services/readCache'
-import { createDocument, updateDocument } from '../../services/firestore'
+import { createDocument, updateDocument, getDocument } from '../../services/firestore'
 import { startDiscordLogin, getStoredDiscordUser, clearDiscordUser } from '../../services/discordAuth'
 import styles from './SyncListModal.module.css'
 
@@ -116,7 +116,10 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
     setSyncing(true)
     try {
       let added = 0
+      let victorErrors = 0
       const existingLevelIds = new Set(existingCompletions.map(c => c.levelId))
+      // Load the user's public profile so the victor snapshot has real data.
+      const userDoc = await getDocument('users', userId)
 
       for (const { aredlRecord, gdLevel } of syncPlan.matched) {
         if (existingLevelIds.has(gdLevel.id)) continue
@@ -132,6 +135,30 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
           source: 'aredl_sync',
         })
         added++
+
+        try {
+          const levelDoc = await getDocument('levels', gdLevel.id)
+          const existingVictors = levelDoc?.victors || []
+          if (!existingVictors.some(v => v.userId === userId)) {
+            const now = new Date()
+            await updateDocument('levels', gdLevel.id, {
+              victoryCount: (levelDoc?.victoryCount || 0) + 1,
+              victors: [...existingVictors, {
+                userId,
+                username: userDoc?.username || userDoc?.displayName || userId.slice(0, 6),
+                displayName: userDoc?.displayName || userDoc?.username || 'Player',
+                country: userDoc?.country || '',
+                avatarURL: userDoc?.avatarURL || '',
+                completionId,
+                completedAt: now,
+                videoURL: aredlRecord.video_url || '',
+              }],
+            })
+          }
+        } catch (victorErr) {
+          victorErrors++
+          console.error('[aredl-sync] victor update failed:', victorErr)
+        }
       }
 
       await updateDocument('users', userId, {
@@ -144,7 +171,12 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
         },
       })
 
-      setSyncResult({ added, skipped: syncPlan.matched.length - added })
+      setSyncResult({
+        added,
+        skipped: syncPlan.matched.length - added,
+        victorErrors,
+        unmatched: syncPlan.unmatched.length,
+      })
       setStep('done')
       if (onComplete) onComplete()
     } catch (err) {
@@ -532,8 +564,9 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 16 }}>
             {syncResult?.linked
               ? 'Your Global Demon List profile is now linked.'
-              : `${syncResult?.added} records added, ${syncResult?.skipped} skipped.`
-            }
+              : `${syncResult?.added} record${syncResult?.added === 1 ? '' : 's'} added, ${syncResult?.skipped} skipped.`}
+            {syncResult?.unmatched > 0 && ` ${syncResult.unmatched} not on the main list.`}
+            {syncResult?.victorErrors > 0 && ` ${syncResult.victorErrors} victor update${syncResult.victorErrors === 1 ? '' : 's'} deferred.`}
           </p>
           <Button variant="primary" size="sm" onClick={handleClose}>Done</Button>
         </div>

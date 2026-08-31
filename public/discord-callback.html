@@ -7,8 +7,9 @@
     (function () {
       var hash = location.hash.substring(1)
       if (hash) {
-        var isProd = location.hostname === 'blist.ksois.com'
-        var base = isProd ? 'https://blist.ksois.com' : 'http://localhost:4173'
+        // Resolve the app origin from this file's own location so the redirect
+        // works on every host (Netlify, GitHub Pages, preview URLs, localhost).
+        var base = location.origin
         location.replace(base + '/profile?discord_token=' + encodeURIComponent(hash))
       } else {
         document.body.textContent = 'No token received. You can close this tab.'

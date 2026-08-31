@@ -13,7 +13,7 @@ import Input from '../components/ui/Input'
 import Select from '../components/ui/Select'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
-import { updateDocument, getCollection, getDocument, where } from '../services/firestore'
+import { createDocument, updateDocument, getCollection, getDocument, where } from '../services/firestore'
 import { loadCommunityLevels, invalidateCache } from '../services/readCache'
 import { communityPoints } from '../utils/communityPoints'
 import { computeBadges } from '../utils/badges'
@@ -96,7 +96,9 @@ export default function MyProfile() {
 
   useEffect(() => {
     const tokenHash = searchParams.get('discord_token')
-    if (!tokenHash || !user) return
+    // Wait for both the auth session and the profile document to be ready,
+    // otherwise userData can be null while we build the victor snapshot.
+    if (!tokenHash || !user || !userData) return
 
     const finishDiscord = async () => {
       setSyncingAredl(true)
@@ -116,10 +118,11 @@ export default function MyProfile() {
         const existingComps = await getCollection('completions', [where('userId', '==', user.uid)])
         const existingLevelIds = new Set(existingComps.map(c => c.levelId))
         let added = 0
+        let victorErrors = 0
         for (const { aredlRecord, gdLevel } of plan.matched) {
           if (existingLevelIds.has(gdLevel.id)) continue
-          const { createDocument: createDoc } = await import('../services/firestore')
-          await createDoc('completions', `aredl_sync_${user.uid}_${gdLevel.id}`, {
+          const completionId = `aredl_sync_${user.uid}_${gdLevel.id}`
+          await createDocument('completions', completionId, {
             userId: user.uid,
             levelId: gdLevel.id,
             levelType: 'main',
@@ -129,6 +132,7 @@ export default function MyProfile() {
             completedAt: new Date(),
             source: 'aredl_sync',
           })
+          added++
 
           try {
             const levelDoc = await getDocument('levels', gdLevel.id)
@@ -139,19 +143,20 @@ export default function MyProfile() {
                 victoryCount: (levelDoc?.victoryCount || 0) + 1,
                 victors: [...existingVictors, {
                   userId: user.uid,
-                  username: userData.username || '',
-                  displayName: userData.displayName || '',
+                  username: userData.username || userData.displayName || user.uid.slice(0, 6),
+                  displayName: userData.displayName || userData.username || 'Player',
                   country: userData.country || '',
                   avatarURL: userData.avatarURL || '',
-                  completionId: `aredl_sync_${user.uid}_${gdLevel.id}`,
+                  completionId,
                   completedAt: now,
                   videoURL: aredlRecord.video_url || '',
                 }],
               })
             }
-          } catch {}
-
-          added++
+          } catch (victorErr) {
+            victorErrors++
+            console.error('AREDL sync: could not update victors for', gdLevel.id, victorErr)
+          }
         }
 
         await updateDocument('users', user.uid, {
@@ -164,7 +169,17 @@ export default function MyProfile() {
           },
         })
 
-        setProfileMessage(`AREDL sync complete! ${added} records imported.`)
+        const importedNote = added > 0
+          ? `${added} record${added === 1 ? '' : 's'} imported`
+          : 'No new records to import'
+        const unmatchedNote = plan.unmatched.length > 0
+          ? ` · ${plan.unmatched.length} not found on the main list`
+          : ''
+        const victorNote = victorErrors > 0
+          ? ` · ${victorErrors} victor update${victorErrors === 1 ? '' : 's'} deferred`
+          : ''
+        setProfileError('')
+        setProfileMessage(`AREDL sync complete! ${importedNote}${unmatchedNote}${victorNote}.`)
         await loadCompletions()
         await refreshUserData()
       } catch (err) {
@@ -175,7 +190,8 @@ export default function MyProfile() {
       }
     }
     finishDiscord()
-  }, [searchParams, user, completions])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, user, userData])
 
   const handleUnsyncAredl = async () => {
     if (!user) return

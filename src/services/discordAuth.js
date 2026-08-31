@@ -1,7 +1,14 @@
 const DISCORD_CLIENT_ID = import.meta.env.VITE_DISCORD_CLIENT_ID
-const DISCORD_REDIRECT_URI = (location.hostname === 'blist.ksois.com')
-  ? 'https://blist.ksois.com/discord-callback.html'
-  : 'http://localhost:4173/discord-callback.html'
+
+function resolveRedirectUri() {
+  // Derive from the running origin so logins keep working on any host
+  // (Netlify, GitHub Pages, preview URLs, or localhost).
+  const base = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '')
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
+  return `${origin}${base}/discord-callback.html`
+}
+
+const DISCORD_REDIRECT_URI = resolveRedirectUri()
 const DISCORD_API = 'https://discord.com/api/v10'
 
 const STORAGE_KEY = 'gdlist_discord_user'

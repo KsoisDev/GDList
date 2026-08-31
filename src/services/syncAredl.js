@@ -25,16 +25,36 @@ export async function fetchAredlLevels() {
   return res.json()
 }
 
+// Normalize a GD level name so we can match between AREDL and our Firestore
+// list. AREDL appends qualifiers like "(2P)", "(Solo)" and, for duplicate
+// names, the creator's name between parentheses. We strip those trailing
+// groups (plus any "REMAKE"/"OLD"-style clones) and collapse case/spaces.
+function normalizeLevelName(name) {
+  return String(name || '')
+    .toLowerCase()
+    .replace(/\s*\([^)]*\)\s*$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 function matchLevel(aredlRecord, mainLevelsById, mainLevelsByName) {
   const level = aredlRecord.level
   if (!level) return null
+
+  // Prefer the in-game level id when the AREDL record carries it and our list
+  // stores a matching gameId/levelId on the Firestore document.
   const gdId = String(level.level_id || '')
   if (gdId && mainLevelsById.has(gdId)) {
     return mainLevelsById.get(gdId)
   }
-  const name = (level.name || '').toLowerCase()
-  if (name && mainLevelsByName.has(name)) {
-    return mainLevelsByName.get(name)
+
+  // Fall back to a tolerant name match (strips "(2P)", creator suffixes, etc).
+  const name = normalizeLevelName(level.name)
+  if (name) {
+    if (mainLevelsByName.has(name)) return mainLevelsByName.get(name)
+    // Last resort: also try the raw lower-cased name as-is.
+    const raw = String(level.name || '').toLowerCase()
+    if (raw && mainLevelsByName.has(raw)) return mainLevelsByName.get(raw)
   }
   return null
 }
@@ -44,7 +64,8 @@ export function computeSyncPlan(aredlProfile, mainLevels) {
   const mainLevelsByName = new Map()
   for (const l of mainLevels) {
     if (l.gameId) mainLevelsById.set(String(l.gameId), l)
-    if (l.name) mainLevelsByName.set(l.name.toLowerCase(), l)
+    if (l.levelId) mainLevelsById.set(String(l.levelId), l)
+    if (l.name) mainLevelsByName.set(normalizeLevelName(l.name), l)
   }
 
   const records = aredlProfile.records || []
@@ -81,6 +102,13 @@ export async function applySync(userId, matched, existingCompletions, { addCompl
       source: 'aredl_sync',
     })
     added++
+    if (updateLevelVictors) {
+      try {
+        await updateLevelVictors(completionId, gdLevel, aredlRecord)
+      } catch (err) {
+        console.error('[aredl-sync] victor update failed:', err)
+      }
+    }
   }
 
   return { added, skipped: matched.length - added }
