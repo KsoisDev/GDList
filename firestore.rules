@@ -103,6 +103,7 @@ service cloud.firestore {
       allow delete: if isSelf(userId) || isOwner();
     }
 
+
     match /usernames/{username} {
       allow read: if signedIn();
       allow create: if signedIn()
