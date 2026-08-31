@@ -112,6 +112,110 @@
   color: var(--text-tertiary);
 }
 
+.aredlBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 6px;
+  background: rgba(107, 167, 255, 0.08);
+  border: 1px solid rgba(107, 167, 255, 0.2);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  text-decoration: none;
+  color: inherit;
+}
+
+.aredlBadge:hover {
+  background: rgba(107, 167, 255, 0.14);
+  border-color: rgba(107, 167, 255, 0.35);
+}
+
+.aredlLogo {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: contain;
+}
+
+.aredlUser {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.aredlUnsync {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.aredlUnsync:hover {
+  background: rgba(248, 113, 113, 0.2);
+  color: #f87171;
+}
+
+.gdlBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 8px;
+  background: rgba(134, 239, 172, 0.08);
+  border: 1px solid rgba(134, 239, 172, 0.2);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  text-decoration: none;
+  color: inherit;
+}
+
+.gdlBadge:hover {
+  background: rgba(134, 239, 172, 0.14);
+  border-color: rgba(134, 239, 172, 0.35);
+}
+
+.gdlIcon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.gdlUser {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.gdlUnsync {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.gdlUnsync:hover {
+  background: rgba(248, 113, 113, 0.2);
+  color: #f87171;
+}
+
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

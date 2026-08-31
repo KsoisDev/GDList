@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Edit3, Save, X, Send, Shield, Youtube, Trash2, AlertTriangle, Crown, KeyRound, MailCheck, Share2 } from 'lucide-react'
+import { Edit3, Save, X, Send, Shield, Youtube, Trash2, AlertTriangle, Crown, KeyRound, MailCheck, Share2, RefreshCw } from 'lucide-react'
 import PageShell from '../components/layout/PageShell'
 import ProfileProgress from '../components/profile/ProfileProgress'
 import RoleBadge from '../components/profile/RoleBadge'
@@ -13,7 +13,7 @@ import Input from '../components/ui/Input'
 import Select from '../components/ui/Select'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
-import { updateDocument, getCollection, where } from '../services/firestore'
+import { updateDocument, getCollection, getDocument, where } from '../services/firestore'
 import { loadCommunityLevels, invalidateCache } from '../services/readCache'
 import { communityPoints } from '../utils/communityPoints'
 import { computeBadges } from '../utils/badges'
@@ -31,6 +31,11 @@ import {
   usesPasswordProvider,
 } from '../services/auth'
 import Modal from '../components/ui/Modal'
+import SyncListModal from '../components/profile/SyncListModal'
+import { completeDiscordLogin, hasPendingDiscordLogin, clearPendingDiscordLogin, getStoredDiscordUser } from '../services/discordAuth'
+import { fetchAredlProfileByDiscordId, computeSyncPlan } from '../services/syncAredl'
+import { getGdlProfileUrl } from '../services/syncGdl'
+import { loadMainLevels } from '../services/readCache'
 import { hasAccess } from '../utils/constants'
 import styles from './Profile.module.css'
 import theme from '../components/layout/ThemedPage.module.css'
@@ -64,6 +69,7 @@ export default function MyProfile() {
   const [passwordError, setPasswordError] = useState('')
   const [passwordMessage, setPasswordMessage] = useState('')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showSyncModal, setShowSyncModal] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [deletePassword, setDeletePassword] = useState('')
   const [deleting, setDeleting] = useState(false)
@@ -71,6 +77,9 @@ export default function MyProfile() {
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [completionDeleting, setCompletionDeleting] = useState(false)
   const [completionDeleteError, setCompletionDeleteError] = useState('')
+  const [syncingAredl, setSyncingAredl] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+
   const { shareProfile, shareStatus } = useShareProfile(
     getDisplayName(userData),
     user ? `/profile/${user.uid}` : '/profile',
@@ -84,6 +93,123 @@ export default function MyProfile() {
       setCountry(userData.country || '')
     }
   }, [userData])
+
+  useEffect(() => {
+    const tokenHash = searchParams.get('discord_token')
+    if (!tokenHash || !user) return
+
+    const finishDiscord = async () => {
+      setSyncingAredl(true)
+      try {
+        const discordUser = await completeDiscordLogin(tokenHash)
+        setSearchParams({}, { replace: true })
+
+        const aredlProfile = await fetchAredlProfileByDiscordId(discordUser.id)
+        if (!aredlProfile) {
+          setProfileError('No AREDL account found linked to this Discord account.')
+          return
+        }
+
+        const mainLevels = await loadMainLevels()
+        const plan = computeSyncPlan(aredlProfile, mainLevels)
+
+        const existingComps = await getCollection('completions', [where('userId', '==', user.uid)])
+        const existingLevelIds = new Set(existingComps.map(c => c.levelId))
+        let added = 0
+        for (const { aredlRecord, gdLevel } of plan.matched) {
+          if (existingLevelIds.has(gdLevel.id)) continue
+          const { createDocument: createDoc } = await import('../services/firestore')
+          await createDoc('completions', `aredl_sync_${user.uid}_${gdLevel.id}`, {
+            userId: user.uid,
+            levelId: gdLevel.id,
+            levelType: 'main',
+            levelName: gdLevel.name,
+            points: gdLevel.points || 0,
+            videoURL: aredlRecord.video_url || '',
+            completedAt: new Date(),
+            source: 'aredl_sync',
+          })
+
+          try {
+            const levelDoc = await getDocument('levels', gdLevel.id)
+            const existingVictors = levelDoc?.victors || []
+            if (!existingVictors.some(v => v.userId === user.uid)) {
+              const now = new Date()
+              await updateDocument('levels', gdLevel.id, {
+                victoryCount: (levelDoc?.victoryCount || 0) + 1,
+                victors: [...existingVictors, {
+                  userId: user.uid,
+                  username: userData.username || '',
+                  displayName: userData.displayName || '',
+                  country: userData.country || '',
+                  avatarURL: userData.avatarURL || '',
+                  completionId: `aredl_sync_${user.uid}_${gdLevel.id}`,
+                  completedAt: now,
+                  videoURL: aredlRecord.video_url || '',
+                }],
+              })
+            }
+          } catch {}
+
+          added++
+        }
+
+        await updateDocument('users', user.uid, {
+          aredlSync: {
+            discordId: discordUser.id,
+            username: aredlProfile.username || '',
+            globalName: aredlProfile.global_name || aredlProfile.username || '',
+            avatar: discordUser.avatar || '',
+            syncedAt: new Date(),
+          },
+        })
+
+        setProfileMessage(`AREDL sync complete! ${added} records imported.`)
+        await loadCompletions()
+        await refreshUserData()
+      } catch (err) {
+        console.error('AREDL discord sync failed:', err)
+        setProfileError(err.message || 'AREDL sync failed.')
+      } finally {
+        setSyncingAredl(false)
+      }
+    }
+    finishDiscord()
+  }, [searchParams, user, completions])
+
+  const handleUnsyncAredl = async () => {
+    if (!user) return
+    try {
+      const comps = await getCollection('completions', [where('userId', '==', user.uid)])
+      const synced = comps.filter(c => c.source === 'aredl_sync')
+
+      for (const c of synced) {
+        try {
+          await deleteCompletionRecord(c.id)
+        } catch {}
+      }
+
+      await updateDocument('users', user.uid, { aredlSync: null })
+      clearPendingDiscordLogin()
+      await refreshUserData()
+      await loadCompletions()
+      setProfileMessage(`AREDL sync removed. ${synced.length} imported records deleted.`)
+    } catch (err) {
+      setProfileError('Failed to unsync.')
+    }
+  }
+
+  const handleUnlinkGdl = async () => {
+    if (!user) return
+    try {
+      await updateDocument('users', user.uid, { gdlSync: null })
+      await refreshUserData()
+      setProfileMessage('Global Demon List profile unlinked.')
+    } catch (err) {
+      setProfileError('Failed to unlink.')
+    }
+  }
+
 
   const loadCompletions = async () => {
     if (!user) return
@@ -326,6 +452,54 @@ export default function MyProfile() {
                     <span className={styles.joinDate}>
                       Joined {formatDate(userData.createdAt)}
                     </span>
+                    {userData.aredlSync && (
+                      <a
+                        href={`https://aredl.net/profile/user/${encodeURIComponent(userData.aredlSync.username)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.aredlBadge}
+                        title="View AREDL Profile"
+                      >
+                        <img
+                          src="https://aredl.net/assets/logo.webp"
+                          alt="ARED"
+                          className={styles.aredlLogo}
+                        />
+                        <span className={styles.aredlUser}>
+                          {userData.aredlSync.globalName || userData.aredlSync.username}
+                        </span>
+                        <button
+                          type="button"
+                          className={styles.aredlUnsync}
+                          onClick={(e) => { e.stopPropagation(); handleUnsyncAredl() }}
+                          title="Unsync AREDL"
+                        >
+                          <X size={12} />
+                        </button>
+                      </a>
+                    )}
+                    {userData.gdlSync && (
+                      <a
+                        href={getGdlProfileUrl(userData.gdlSync.playerId, userData.gdlSync.playerName)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.gdlBadge}
+                        title="View Global Demon List Profile"
+                      >
+                        <span className={styles.gdlIcon}>🌐</span>
+                        <span className={styles.gdlUser}>
+                          {userData.gdlSync.playerName}
+                        </span>
+                        <button
+                          type="button"
+                          className={styles.gdlUnsync}
+                          onClick={(e) => { e.stopPropagation(); handleUnlinkGdl() }}
+                          title="Unlink Global DL"
+                        >
+                          <X size={12} />
+                        </button>
+                      </a>
+                    )}
                     <div className={styles.editBtn}>
                       <Button variant="ghost" size="sm" icon={Edit3} onClick={() => setEditing(true)}>
                         Edit Profile
@@ -370,6 +544,7 @@ export default function MyProfile() {
         <div className={styles.actions}>
           <Button to="/submit" variant="primary" icon={Send}>Submit Record</Button>
           <Button variant="secondary" icon={Share2} onClick={shareProfile}>{shareStatus || 'Share Profile'}</Button>
+          <Button variant="secondary" icon={RefreshCw} onClick={() => setShowSyncModal(true)}>Sync List</Button>
           {hasAccess(userData.role, 'admin') && (
             <Button to="/admin" variant="secondary" icon={Shield}>Admin Panel</Button>
           )}
@@ -508,6 +683,14 @@ export default function MyProfile() {
             </div>
           </div>
         </Modal>
+
+        <SyncListModal
+          isOpen={showSyncModal}
+          onClose={() => setShowSyncModal(false)}
+          userId={user.uid}
+          existingCompletions={completions}
+          onComplete={async () => { await loadCompletions(); await refreshUserData() }}
+        />
 
         {(() => {
           return (
