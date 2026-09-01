@@ -38,6 +38,7 @@ export const NAV_LINKS = [
   { path: '/list/community', labelKey: 'nav.communityList' },
   { path: '/leaderboard/main', labelKey: 'nav.mainRankings' },
   { path: '/leaderboard/community', labelKey: 'nav.communityRankings' },
+  { path: '/leaderboard/countries', labelKey: 'nav.countryRankings' },
 ]
 
 export const DIFFICULTY_COLORS = {

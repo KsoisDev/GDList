@@ -10,7 +10,7 @@ const en = {
   language: { label: 'Language', select: 'Choose language' },
   nav: {
     primary: 'Primary navigation', home: 'Home', mainList: 'Main List', communityList: 'Community List',
-    mainRankings: 'Main Rankings', communityRankings: 'Community Rankings', record: 'Record', level: 'Level',
+    mainRankings: 'Main Rankings', communityRankings: 'Community Rankings', countryRankings: 'Country Rankings', record: 'Record', level: 'Level',
     submitRecord: 'Submit Record', submitLevel: 'Submit Level', notifications: 'Notifications',
     notificationsUnread: 'Notifications, {{count}} unread', notificationsUnavailable: 'Notifications are temporarily unavailable.',
     markAllRead: 'Mark all read', noNotifications: 'No notifications yet', approved: 'Approved', rejected: 'Rejected',
@@ -61,13 +61,23 @@ const en = {
     communityDescription: 'Every verified community completion counts. See who is leading the Basement and which players are climbing fastest.',
     mainLoadError: 'The main leaderboard could not be loaded.', communityLoadError: 'The community leaderboard could not be loaded.',
   },
+  country: {
+    eyebrow: 'GLOBAL BASEMENT STANDINGS', title: 'Country', accent: 'Rankings',
+    description: 'See which countries lead Basement across verified main-list and community completions.',
+    chooseList: 'Choose ranking list', main: 'Main List', community: 'Community List', summary: 'Country ranking summary',
+    rankedCountries: 'Ranked countries', representedPlayers: 'Represented players', leadingCountry: 'Leading country',
+    workspace: 'Country standings and players', live: 'LIVE COUNTRY TABLE', countries: 'Countries',
+    search: 'Search country or player…', noCountries: 'No countries match this ranking yet.',
+    loadError: 'The country rankings could not be loaded.', totalPoints: 'Total points', players: 'Players',
+    completions: 'Completions', topPlayers: 'Top players', clears: 'clears',
+  },
 }
 
 const es = {
   language: { label: 'Idioma', select: 'Elegir idioma' },
   nav: {
     primary: 'Navegación principal', home: 'Inicio', mainList: 'Lista principal', communityList: 'Lista de la comunidad',
-    mainRankings: 'Ranking principal', communityRankings: 'Ranking de la comunidad', record: 'Récord', level: 'Nivel',
+    mainRankings: 'Ranking principal', communityRankings: 'Ranking de la comunidad', countryRankings: 'Ranking por países', record: 'Récord', level: 'Nivel',
     submitRecord: 'Enviar récord', submitLevel: 'Enviar nivel', notifications: 'Notificaciones',
     notificationsUnread: 'Notificaciones, {{count}} sin leer', notificationsUnavailable: 'Las notificaciones no están disponibles temporalmente.',
     markAllRead: 'Marcar todo como leído', noNotifications: 'Aún no hay notificaciones', approved: 'Aprobado', rejected: 'Rechazado',
@@ -109,13 +119,23 @@ const es = {
     rank: 'Puesto', empty: 'Ningún nivel coincide con tu búsqueda.', mainLoadError: 'No se pudo cargar la lista principal. Comprueba tu conexión e inténtalo de nuevo.', communityLoadError: 'No se pudo cargar la lista de la comunidad. Comprueba tu conexión e inténtalo de nuevo.',
   },
   leaderboard: { mainTitle: 'Ranking principal', communityTitle: 'Ranking de la comunidad', mainWord: 'Ranking', mainAccent: 'principal', communityWord: 'Ranking', communityAccent: 'de la comunidad', player: 'Jugador', rank: 'Puesto', points: 'Puntos', completions: 'Completados', players: 'jugadores', searchPlayer: 'Buscar jugador…', tryAgain: 'Intentar de nuevo', live: 'RANKING EN DIRECTO', standings: 'Clasificación de jugadores', rankedPlayers: 'Jugadores clasificados', countedClears: 'Logros contados', currentLeader: 'Líder actual', loading: 'Cargando', unranked: 'Sin clasificar', mainEyebrow: 'CLASIFICACIÓN OFICIAL DE DEMONS', communityEyebrow: 'CLASIFICACIÓN DE LA COMUNIDAD', mainDescription: 'La clasificación oficial de demons de Basement, calculada con cada logro verificado de la lista principal.', communityDescription: 'Cada logro comunitario verificado cuenta. Mira quién lidera Basement y quién está subiendo más rápido.', mainLoadError: 'No se pudo cargar el ranking principal.', communityLoadError: 'No se pudo cargar el ranking de la comunidad.' },
+  country: {
+    eyebrow: 'CLASIFICACIÓN GLOBAL DE BASEMENT', title: 'Ranking', accent: 'por países',
+    description: 'Descubre qué países lideran Basement con los logros verificados de las listas principal y comunitaria.',
+    chooseList: 'Elegir lista del ranking', main: 'Lista principal', community: 'Lista de la comunidad', summary: 'Resumen del ranking por países',
+    rankedCountries: 'Países clasificados', representedPlayers: 'Jugadores representados', leadingCountry: 'País líder',
+    workspace: 'Clasificación por países y jugadores', live: 'RANKING DE PAÍSES EN DIRECTO', countries: 'Países',
+    search: 'Buscar país o jugador…', noCountries: 'Todavía no hay países que coincidan con este ranking.',
+    loadError: 'No se pudo cargar el ranking por países.', totalPoints: 'Puntos totales', players: 'Jugadores',
+    completions: 'Logros', topPlayers: 'Mejores jugadores', clears: 'logros',
+  },
 }
 
 const ru = {
   language: { label: 'Язык', select: 'Выбрать язык' },
   nav: {
     primary: 'Основная навигация', home: 'Главная', mainList: 'Основной список', communityList: 'Список сообщества',
-    mainRankings: 'Основной рейтинг', communityRankings: 'Рейтинг сообщества', record: 'Рекорд', level: 'Уровень',
+    mainRankings: 'Основной рейтинг', communityRankings: 'Рейтинг сообщества', countryRankings: 'Рейтинг стран', record: 'Рекорд', level: 'Уровень',
     submitRecord: 'Отправить рекорд', submitLevel: 'Отправить уровень', notifications: 'Уведомления',
     notificationsUnread: 'Уведомления: {{count}} непрочитанных', notificationsUnavailable: 'Уведомления временно недоступны.',
     markAllRead: 'Прочитать все', noNotifications: 'Уведомлений пока нет', approved: 'Принято', rejected: 'Отклонено',
@@ -154,12 +174,22 @@ const ru = {
     empty: 'Уровни не найдены.', mainLoadError: 'Не удалось загрузить основной список. Проверьте подключение и повторите попытку.', communityLoadError: 'Не удалось загрузить список сообщества. Проверьте подключение и повторите попытку.',
   },
   leaderboard: { mainTitle: 'Основной рейтинг', communityTitle: 'Рейтинг сообщества', mainWord: 'Основной', mainAccent: 'рейтинг', communityWord: 'Рейтинг', communityAccent: 'сообщества', player: 'Игрок', rank: 'Место', points: 'Очки', completions: 'Прохождения', players: 'игроков', searchPlayer: 'Поиск игрока…', tryAgain: 'Повторить', live: 'РЕЙТИНГ В РЕАЛЬНОМ ВРЕМЕНИ', standings: 'Рейтинг игроков', rankedPlayers: 'Игроков в рейтинге', countedClears: 'Учтённых прохождений', currentLeader: 'Текущий лидер', loading: 'Загрузка', unranked: 'Без рейтинга', mainEyebrow: 'ОФИЦИАЛЬНЫЙ РЕЙТИНГ ДЕМОНОВ', communityEyebrow: 'РЕЙТИНГ ИГРОКОВ СООБЩЕСТВА', mainDescription: 'Официальный рейтинг демонов Basement на основе всех подтверждённых прохождений основного списка.', communityDescription: 'Каждое подтверждённое прохождение сообщества учитывается. Узнайте, кто лидирует и кто быстрее всех поднимается.', mainLoadError: 'Не удалось загрузить основной рейтинг.', communityLoadError: 'Не удалось загрузить рейтинг сообщества.' },
+  country: {
+    eyebrow: 'МИРОВОЙ РЕЙТИНГ BASEMENT', title: 'Рейтинг', accent: 'стран',
+    description: 'Узнайте, какие страны лидируют в Basement по подтверждённым прохождениям основного списка и списка сообщества.',
+    chooseList: 'Выбрать список рейтинга', main: 'Основной список', community: 'Список сообщества', summary: 'Сводка рейтинга стран',
+    rankedCountries: 'Стран в рейтинге', representedPlayers: 'Игроков представлено', leadingCountry: 'Страна-лидер',
+    workspace: 'Рейтинг стран и игроков', live: 'РЕЙТИНГ СТРАН В РЕАЛЬНОМ ВРЕМЕНИ', countries: 'Страны',
+    search: 'Поиск страны или игрока…', noCountries: 'В этом рейтинге пока нет подходящих стран.',
+    loadError: 'Не удалось загрузить рейтинг стран.', totalPoints: 'Всего очков', players: 'Игроки',
+    completions: 'Прохождения', topPlayers: 'Лучшие игроки', clears: 'прохождений',
+  },
 }
 
 const zhCN = {
   language: { label: '语言', select: '选择语言' },
   nav: {
-    primary: '主导航', home: '首页', mainList: '主榜单', communityList: '社区榜单', mainRankings: '主榜排名', communityRankings: '社区排名',
+    primary: '主导航', home: '首页', mainList: '主榜单', communityList: '社区榜单', mainRankings: '主榜排名', communityRankings: '社区排名', countryRankings: '国家排名',
     record: '记录', level: '关卡', submitRecord: '提交记录', submitLevel: '提交关卡', notifications: '通知',
     notificationsUnread: '通知，{{count}} 条未读', notificationsUnavailable: '通知暂时不可用。', markAllRead: '全部标为已读', noNotifications: '暂无通知',
     approved: '已通过', rejected: '已拒绝', myProfile: '我的资料', adminPanel: '管理面板', reports: '举报', signOut: '退出登录',
@@ -189,13 +219,22 @@ const zhCN = {
     points: '分数', creator: '作者', victories: '通关', rank: '排名', empty: '没有符合搜索的关卡。', mainLoadError: '无法加载主榜单。请检查网络后重试。', communityLoadError: '无法加载社区榜单。请检查网络后重试。',
   },
   leaderboard: { mainTitle: '主榜排名', communityTitle: '社区排名', mainWord: '主榜', mainAccent: '排名', communityWord: '社区', communityAccent: '排名', player: '玩家', rank: '排名', points: '分数', completions: '通关', players: '名玩家', searchPlayer: '搜索玩家…', tryAgain: '重试', live: '实时排名', standings: '玩家排名', rankedPlayers: '排名玩家', countedClears: '计入通关', currentLeader: '当前领先', loading: '加载中', unranked: '未排名', mainEyebrow: '官方恶魔排名', communityEyebrow: '社区玩家排名', mainDescription: 'Basement 官方恶魔排名，根据所有已验证的主榜通关计算。', communityDescription: '每次已验证的社区通关都会计入。查看谁领先 Basement，以及谁进步最快。', mainLoadError: '无法加载主榜排名。', communityLoadError: '无法加载社区排名。' },
+  country: {
+    eyebrow: 'BASEMENT 全球排名', title: '国家', accent: '排名',
+    description: '查看哪些国家凭借已验证的主榜和社区榜通关领先 Basement。',
+    chooseList: '选择排名榜单', main: '主榜单', community: '社区榜单', summary: '国家排名概览',
+    rankedCountries: '排名国家', representedPlayers: '参赛玩家', leadingCountry: '领先国家',
+    workspace: '国家和玩家排名', live: '实时国家排名', countries: '国家', search: '搜索国家或玩家…',
+    noCountries: '此排名暂无符合条件的国家。', loadError: '无法加载国家排名。', totalPoints: '总分',
+    players: '玩家', completions: '通关', topPlayers: '顶尖玩家', clears: '次通关',
+  },
 }
 
 const fr = {
   language: { label: 'Langue', select: 'Choisir la langue' },
   nav: {
     primary: 'Navigation principale', home: 'Accueil', mainList: 'Liste principale', communityList: 'Liste communautaire',
-    mainRankings: 'Classement principal', communityRankings: 'Classement communautaire', record: 'Record', level: 'Niveau',
+    mainRankings: 'Classement principal', communityRankings: 'Classement communautaire', countryRankings: 'Classement des pays', record: 'Record', level: 'Niveau',
     submitRecord: 'Envoyer un record', submitLevel: 'Envoyer un niveau', notifications: 'Notifications',
     notificationsUnread: 'Notifications, {{count}} non lues', notificationsUnavailable: 'Les notifications sont temporairement indisponibles.',
     markAllRead: 'Tout marquer comme lu', noNotifications: 'Aucune notification', approved: 'Accepté', rejected: 'Refusé',
@@ -233,6 +272,16 @@ const fr = {
     mainLoadError: "La liste principale n'a pas pu être chargée. Vérifiez votre connexion et réessayez.", communityLoadError: "La liste communautaire n'a pas pu être chargée. Vérifiez votre connexion et réessayez.",
   },
   leaderboard: { mainTitle: 'Classement principal', communityTitle: 'Classement communautaire', mainWord: 'Classement', mainAccent: 'principal', communityWord: 'Classement', communityAccent: 'communautaire', player: 'Joueur', rank: 'Rang', points: 'Points', completions: 'Niveaux terminés', players: 'joueurs', searchPlayer: 'Rechercher un joueur…', tryAgain: 'Réessayer', live: 'CLASSEMENT EN DIRECT', standings: 'Classement des joueurs', rankedPlayers: 'Joueurs classés', countedClears: 'Victoires comptées', currentLeader: 'Leader actuel', loading: 'Chargement', unranked: 'Non classé', mainEyebrow: 'CLASSEMENT OFFICIEL DES DEMONS', communityEyebrow: 'CLASSEMENT DES JOUEURS DE LA COMMUNAUTÉ', mainDescription: 'Le classement officiel des demons de Basement, calculé à partir de chaque victoire vérifiée de la liste principale.', communityDescription: 'Chaque victoire communautaire vérifiée compte. Découvrez qui mène Basement et qui progresse le plus vite.', mainLoadError: "Le classement principal n'a pas pu être chargé.", communityLoadError: "Le classement communautaire n'a pas pu être chargé." },
+  country: {
+    eyebrow: 'CLASSEMENT MONDIAL DE BASEMENT', title: 'Classement', accent: 'des pays',
+    description: 'Découvrez quels pays dominent Basement grâce aux victoires vérifiées des listes principale et communautaire.',
+    chooseList: 'Choisir la liste du classement', main: 'Liste principale', community: 'Liste communautaire', summary: 'Résumé du classement des pays',
+    rankedCountries: 'Pays classés', representedPlayers: 'Joueurs représentés', leadingCountry: 'Pays en tête',
+    workspace: 'Classement des pays et des joueurs', live: 'CLASSEMENT DES PAYS EN DIRECT', countries: 'Pays',
+    search: 'Rechercher un pays ou un joueur…', noCountries: 'Aucun pays ne correspond encore à ce classement.',
+    loadError: "Le classement des pays n'a pas pu être chargé.", totalPoints: 'Points totaux', players: 'Joueurs',
+    completions: 'Victoires', topPlayers: 'Meilleurs joueurs', clears: 'victoires',
+  },
 }
 
 export const TRANSLATIONS = { en, es, ru, 'zh-CN': zhCN, fr }

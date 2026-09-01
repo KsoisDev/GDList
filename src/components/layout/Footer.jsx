@@ -47,6 +47,9 @@ export default function Footer() {
             <Link to="/leaderboard/community" className={styles.link}>
               {t('nav.communityRankings')} <ArrowUpRight size={13} />
             </Link>
+            <Link to="/leaderboard/countries" className={styles.link}>
+              {t('nav.countryRankings')} <ArrowUpRight size={13} />
+            </Link>
           </div>
           <div className={styles.column}>
             <h4 className={styles.columnTitle}>{t('footer.community')}</h4>

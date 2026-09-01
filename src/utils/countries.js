@@ -83,9 +83,12 @@ export const COUNTRIES = [
   { code: 'KW', name: 'Kuwait' },
 ]
 
-export function getFlagUrl(code) {
+const FLAG_WIDTHS = new Set([20, 40, 80, 160, 320, 640])
+
+export function getFlagUrl(code, width = 20) {
   const c = String(code || '').trim().toUpperCase()
+  const flagWidth = FLAG_WIDTHS.has(Number(width)) ? Number(width) : 20
   return c && COUNTRIES.some(x => x.code === c)
-    ? `https://flagcdn.com/w20/${c.toLowerCase()}.png`
+    ? `https://flagcdn.com/w${flagWidth}/${c.toLowerCase()}.png`
     : ''
 }
