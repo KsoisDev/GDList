@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, LogOut, User, Shield, ChevronDown, Plus, Bell, Check, X as XIcon, Clock, Flag } from 'lucide-react'
+import { LogOut, User, Shield, ChevronDown, Plus, Bell, Check, X as XIcon, Clock, Flag } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useSiteConfig } from '../../hooks/useSiteConfig'
 import { useLanguage } from '../../hooks/useLanguage'
@@ -21,7 +21,6 @@ export default function Navbar() {
   const { t, locale } = useLanguage()
   const location = useLocation()
   const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifications, setNotifications] = useState([])
@@ -81,14 +80,12 @@ export default function Navbar() {
       if (event.key !== 'Escape') return
       setProfileOpen(false)
       setNotifOpen(false)
-      setOpen(false)
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
 
   useEffect(() => {
-    setOpen(false)
     setProfileOpen(false)
     setNotifOpen(false)
   }, [location.pathname])
@@ -127,7 +124,6 @@ export default function Navbar() {
     try {
       await logout()
       setProfileOpen(false)
-      setOpen(false)
       navigate('/', { replace: true })
     } catch (error) {
       console.error('Sign out failed:', error)
@@ -301,73 +297,8 @@ export default function Navbar() {
               <Button to="/register" variant="primary" size="sm">{t('nav.join')}</Button>
             </div>
           )}
-          <button
-            type="button"
-            className={styles.menuBtn}
-            onClick={() => setOpen(value => !value)}
-            aria-label={open ? t('nav.closeMenu') : t('nav.openMenu')}
-            aria-expanded={open}
-            aria-controls="mobile-navigation"
-          >
-            {open ? <X size={24} /> : <Menu size={24} />}
-          </button>
         </div>
       </div>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className={styles.mobileNav}
-            id="mobile-navigation"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-          >
-            {NAV_LINKS.map(link => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`${styles.mobileLink} ${isActive(link.path) ? styles.active : ''}`}
-                onClick={() => setOpen(false)}
-              >
-                {t(link.labelKey)}
-              </Link>
-            ))}
-            {canSubmit && (
-              <>
-                <Link to="/submit" className={styles.mobileSubmitBtn} onClick={() => setOpen(false)}>
-                  <Plus size={16} />
-                  {t('nav.submitRecord')}
-                </Link>
-                <Link to="/submit-level" className={styles.mobileSubmitBtn} onClick={() => setOpen(false)}>
-                  <Plus size={16} />
-                  {t('nav.submitLevel')}
-                </Link>
-              </>
-            )}
-            {user ? (
-              <>
-                <Link to="/profile" className={styles.mobileLink} onClick={() => setOpen(false)}>
-                  <User size={16} /> {t('nav.myProfile')}
-                </Link>
-                {!accountSuspended && hasAccess(userData?.role || 'user', 'admin') && (
-                  <Link to="/admin" className={styles.mobileLink} onClick={() => setOpen(false)}>
-                    <Shield size={16} /> {t('nav.adminPanel')}
-                  </Link>
-                )}
-                <button className={styles.mobileLink} onClick={handleLogout} disabled={signingOut}>
-                  <LogOut size={16} /> {signingOut ? t('nav.signingOut') : t('nav.signOut')}
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className={styles.mobileLink} onClick={() => setOpen(false)}>{t('nav.signIn')}</Link>
-                <Link to="/register" className={styles.mobileLink} onClick={() => setOpen(false)}>{t('nav.createAccount')}</Link>
-              </>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </nav>
   )
 }

@@ -52,6 +52,12 @@
   --navbar-height: 64px;
 }
 
+@media (max-width: 1320px) {
+  :root {
+    --navbar-height: 112px;
+  }
+}
+
 html {
   scroll-behavior: smooth;
 }

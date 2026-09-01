@@ -8,8 +8,9 @@
   "scripts": {
     "dev": "npm run build:aredl && vite",
     "build:aredl": "node scripts/fetch-aredl.mjs",
-    "build": "npm run build:aredl && vite build",
-    "build:github": "npm run build:aredl && vite build --mode github",
+    "build:gdl": "node scripts/fetch-gdl.mjs",
+    "build": "npm run build:aredl && npm run build:gdl && vite build",
+    "build:github": "npm run build:aredl && npm run build:gdl && vite build --mode github",
     "preview": "vite preview",
     "predeploy": "npm run build:github",
     "deploy": "gh-pages -d dist"

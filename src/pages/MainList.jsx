@@ -10,6 +10,7 @@ import Button from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
 import { useLanguage } from '../hooks/useLanguage'
 import { loadMainLevels } from '../services/readCache'
+import { getGlobalLevelArtworkIndex } from '../services/globalDemonList'
 import { formatNumber } from '../utils/format'
 import { DIFFICULTY_COLORS } from '../utils/constants'
 import styles from './List.module.css'
@@ -28,11 +29,21 @@ export default function MainList() {
       setLoading(true)
       setLoadError('')
       try {
-        const data = await loadMainLevels()
+        const [data, artworkIndex] = await Promise.all([
+          loadMainLevels(),
+          getGlobalLevelArtworkIndex().catch(error => {
+            console.warn('Global Demonlist artwork is unavailable:', error)
+            return null
+          }),
+        ])
         const withWins = data
           .filter(l => (l.victoryCount || 0) > 0)
           .sort((a, b) => a.position - b.position)
-        setLevels(withWins.map((level, index) => ({ ...level, _webRank: index + 1 })))
+        setLevels(withWins.map((level, index) => ({
+          ...level,
+          _webRank: index + 1,
+          _gdlArtwork: artworkIndex?.match(level) || null,
+        })))
       } catch (err) {
         console.error('Failed to load levels:', err)
         setLoadError('list.mainLoadError')
@@ -129,61 +140,55 @@ export default function MainList() {
               : <p>No levels completed yet. Submit your first record!</p>}
           </div>
         ) : (
-          <div className={`${styles.table} ${styles.mainThemedTable}`}>
-          <div className={styles.headerMain}>
-            <span className={styles.colWeb}>#{t('list.webRank')}</span>
-            <span className={styles.colOff}>#{t('list.officialRank')}</span>
-            <span className={styles.colName}>{t('list.level')}</span>
-            <span className={styles.colDiff}>{t('list.difficulty')}</span>
-            <span className={styles.colPoints}>{t('list.points')}</span>
-            <span className={styles.colCreator}>{t('list.creator')}</span>
-            <span className={styles.colVictories}>{t('list.victories')}</span>
-          </div>
-
+          <div className={styles.mainLevelCards}>
           {filtered.map((level, i) => {
             const completed = !!user && (level.victors || []).some(v => v.userId === user.uid)
             return (
             <motion.div
               key={level.id}
+              className={styles.mainLevelCardMotion}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: Math.min(i, 12) * 0.02 }}
             >
-              <Link to={`/levels/${level.id}`} className={`${styles.rowMain} ${completed ? styles.completed : ''}`}>
-                <span className={styles.colWeb}>
-                  <span className={styles.webPos}>#{level._webRank}</span>
-                </span>
-                <span className={styles.colOff}>
-                  <span className={styles.position}>#{level.position}</span>
-                </span>
-                <span className={styles.colName}>
-                  <div className={styles.levelInfo}>
-                    <div className={styles.levelInfoText}>
-                      <span className={styles.levelNameWrap}>
-                        <span className={styles.levelName}>{level.name}</span>
-                        {completed && <Trophy size={14} className={styles.completedTrophy} />}
-                      </span>
-                      <span className={styles.creator}>{t('home.by')} {level.creator}</span>
-                    </div>
+              <Link to={`/levels/${level.id}`} className={`${styles.mainLevelCard} ${completed ? styles.completed : ''}`}>
+                {level._gdlArtwork?.thumbnail && (
+                  <img
+                    src={level._gdlArtwork.thumbnail}
+                    alt=""
+                    className={styles.mainLevelThumbnail}
+                    loading="lazy"
+                  />
+                )}
+                <div className={styles.mainLevelCardBody}>
+                  <div className={styles.mainLevelCardHeading}>
+                    <span className={styles.mainCardRank}>#{level._webRank}</span>
+                    <span className={styles.mainCardName}>{level.name}</span>
+                    {completed && <Trophy size={15} className={styles.completedTrophy} aria-label="Completed" />}
                   </div>
-                </span>
-                <span className={styles.colDiff}>
-                  <Badge variant="default" size="sm" style={{ color: diffColor(level.difficulty), borderColor: diffColor(level.difficulty) }}>
-                    {level.difficulty}
-                  </Badge>
-                </span>
-                <span className={styles.colPoints}>
-                  <span className={styles.points}>{formatNumber(level.points)}</span>
-                </span>
-                <span className={styles.colCreator}>
-                  <span className={styles.creator}>{level.creator}</span>
-                </span>
-                <span className={styles.colVictories}>
-                  <span className={styles.victories}>
-                    <Trophy size={14} style={{ color: 'var(--accent-gold)' }} />
-                    {formatNumber(level.victoryCount || 0)}
-                  </span>
-                </span>
+                  <div className={styles.mainLevelMeta}>
+                    <span>{t('home.by')} <strong>{level.creator}</strong></span>
+                    <span className={styles.mainMetaDivider} aria-hidden="true" />
+                    <span>{t('list.officialRank')} <strong>#{level.position}</strong></span>
+                    {level._gdlArtwork?.placement > 0 && level._gdlArtwork.placement !== level.position && (
+                      <>
+                        <span className={styles.mainMetaDivider} aria-hidden="true" />
+                        <span>GDL <strong>#{level._gdlArtwork.placement}</strong></span>
+                      </>
+                    )}
+                  </div>
+                  <div className={styles.mainLevelFacts}>
+                    <Badge variant="default" size="sm" style={{ color: diffColor(level.difficulty), borderColor: diffColor(level.difficulty) }}>
+                      {level.difficulty}
+                    </Badge>
+                    <span className={styles.mainCardPoints}>{formatNumber(level.points)} {t('list.points').toLowerCase()}</span>
+                    <span className={styles.mainCardVictories}>
+                      <Trophy size={14} aria-hidden="true" />
+                      {formatNumber(level.victoryCount || 0)} {t('list.victories').toLowerCase()}
+                    </span>
+                  </div>
+                </div>
+                <ArrowRight size={18} className={styles.mainCardArrow} aria-hidden="true" />
               </Link>
             </motion.div>
             )

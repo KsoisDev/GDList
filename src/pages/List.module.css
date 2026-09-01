@@ -837,6 +837,145 @@
   background: rgba(12, 22, 38, 0.68);
 }
 
+.mainLevelCards {
+  display: grid;
+  gap: 14px;
+}
+
+.mainLevelCardMotion {
+  min-width: 0;
+}
+
+.mainLevelCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 3vw, 28px);
+  min-height: 154px;
+  padding: 14px 58px 14px 14px;
+  overflow: hidden;
+  border: 1px solid rgba(124, 161, 215, 0.24);
+  border-radius: 18px;
+  color: inherit;
+  background:
+    radial-gradient(circle at 96% 10%, rgba(74, 137, 230, 0.12), transparent 29%),
+    linear-gradient(135deg, rgba(27, 42, 65, 0.94), rgba(19, 32, 51, 0.92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  text-decoration: none;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.mainLevelCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(117, 173, 255, 0.52);
+  color: inherit;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.mainLevelCard.completed {
+  border-left: 3px solid rgba(255, 209, 102, 0.72);
+  background:
+    radial-gradient(circle at 96% 10%, rgba(255, 209, 102, 0.09), transparent 29%),
+    linear-gradient(135deg, rgba(40, 46, 60, 0.96), rgba(21, 33, 50, 0.94));
+}
+
+.mainLevelThumbnail {
+  width: clamp(170px, 22vw, 224px);
+  height: 126px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(147, 179, 226, 0.2);
+  border-radius: 13px;
+  background: rgba(8, 16, 29, 0.72);
+  object-fit: cover;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+.mainLevelCardBody {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+
+.mainLevelCardHeading {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 9px;
+}
+
+.mainCardRank {
+  flex: 0 0 auto;
+  color: #69a7ff;
+  font-size: 0.88rem;
+  font-weight: 850;
+}
+
+.mainCardName {
+  overflow: hidden;
+  color: #f6f8fc;
+  font-size: clamp(1rem, 1.8vw, 1.18rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mainLevelMeta,
+.mainLevelFacts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #93a5bf;
+  font-size: 0.82rem;
+}
+
+.mainLevelMeta strong {
+  color: #c7d4e8;
+  font-weight: 700;
+}
+
+.mainMetaDivider {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #536984;
+}
+
+.mainLevelFacts {
+  margin-top: 2px;
+}
+
+.mainCardPoints {
+  color: #65dcb5;
+  font-weight: 750;
+}
+
+.mainCardVictories {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #d5b75d;
+  font-weight: 700;
+}
+
+.mainCardArrow {
+  position: absolute;
+  top: 50%;
+  right: 22px;
+  color: #66809f;
+  transform: translateY(-50%);
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.mainLevelCard:hover .mainCardArrow {
+  color: #7eb2ff;
+  transform: translate(3px, -50%);
+}
+
 .mainThemedTable {
   border-color: rgba(111, 149, 205, 0.14);
   border-radius: 15px;
@@ -946,5 +1085,28 @@
 
   .mainToolbar .count {
     display: none;
+  }
+
+  .mainLevelCard {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+    padding: 12px 42px 16px 12px;
+  }
+
+  .mainLevelThumbnail {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  .mainCardArrow {
+    top: 25px;
+    right: 16px;
+    transform: none;
+  }
+
+  .mainLevelCard:hover .mainCardArrow {
+    transform: translateX(3px);
   }
 }
