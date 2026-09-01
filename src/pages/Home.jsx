@@ -21,6 +21,7 @@ import {
   Youtube,
 } from 'lucide-react'
 import Avatar from '../components/ui/Avatar'
+import LanguageSelector from '../components/layout/LanguageSelector'
 import { useAuth } from '../hooks/useAuth'
 import { useLanguage } from '../hooks/useLanguage'
 import { loadUsers, loadCommunityLevels } from '../services/readCache'
@@ -244,6 +245,11 @@ export default function Home() {
             <a href="https://github.com/ksois/GDList" target="_blank" rel="noopener noreferrer">
               <Github size={14} /> GitHub
             </a>
+          </div>
+
+          <div className={styles.languageControl}>
+            <span>{t('language.label')}</span>
+            <LanguageSelector />
           </div>
           {loadError && (
             <div className={styles.dataNotice} role="alert">
