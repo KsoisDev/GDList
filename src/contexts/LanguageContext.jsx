@@ -15,7 +15,6 @@ function browserLanguage() {
     if (SUPPORTED.has(locale)) return locale
     const base = locale?.split('-')[0]
     if (SUPPORTED.has(base)) return base
-    if (base === 'zh') return 'zh-CN'
   }
   return 'en'
 }
@@ -50,4 +49,3 @@ export function LanguageProvider({ children }) {
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>
 }
-
