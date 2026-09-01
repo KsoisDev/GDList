@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Crown,
   Flame,
+  Github,
   Layers3,
   List,
   Music,
@@ -239,6 +240,9 @@ export default function Home() {
             </a>
             <a href="https://www.youtube.com/@tNaiLLzxGd" target="_blank" rel="noopener noreferrer">
               <Youtube size={14} /> YouTube
+            </a>
+            <a href="https://github.com/ksois/GDList" target="_blank" rel="noopener noreferrer">
+              <Github size={14} /> GitHub
             </a>
           </div>
           {loadError && (

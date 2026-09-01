@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "author": "ntyu2 and Ksois",
   "type": "module",
-  "homepage": "https://ksois.github.io/GDList",
+  "homepage": "https://blist.ksois.com",
   "scripts": {
     "dev": "npm run build:aredl && vite",
     "build:aredl": "node scripts/fetch-aredl.mjs",

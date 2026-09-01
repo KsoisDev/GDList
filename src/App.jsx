@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { lazy, Suspense, useEffect } from 'react'
+import { BrowserRouter, Route, Routes, useSearchParams, useNavigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './contexts/AuthContext'
 import { SiteConfigProvider } from './contexts/SiteConfigContext'
@@ -59,6 +59,18 @@ function AdminRoute({ children, minRole = 'admin' }) {
   return <RequireRole minRole={minRole}>{children}</RequireRole>
 }
 
+function DiscordTokenRedirect() {
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  useEffect(() => {
+    const token = searchParams.get('discord_token')
+    if (token) {
+      navigate('/profile' + window.location.search, { replace: true })
+    }
+  }, [searchParams, navigate])
+  return null
+}
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -66,6 +78,7 @@ export default function App() {
         <BrowserRouter basename={routerBase}>
           <AuthProvider>
             <SiteConfigProvider>
+              <DiscordTokenRedirect />
             <ScrollToTop />
             <Navbar />
             <MaintenanceBanner />
