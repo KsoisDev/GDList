@@ -6,6 +6,14 @@ let levelsPromise = null
 
 const normalizeName = name => String(name || '').trim().toLowerCase()
 
+function getLookupNames(name) {
+  const exact = normalizeName(name)
+  const withoutCreatorSuffix = exact.replace(/\s*\([^()]+\)\s*$/, '').trim()
+  return withoutCreatorSuffix && withoutCreatorSuffix !== exact
+    ? [exact, withoutCreatorSuffix]
+    : [exact]
+}
+
 async function loadGlobalLevels() {
   if (!levelsPromise) {
     levelsPromise = fetch(DATA_URL, { headers: { Accept: 'application/json' } })
@@ -41,7 +49,10 @@ export async function getGlobalLevelArtworkIndex() {
   return {
     match(level) {
       const gameIdMatch = level.gameId ? byGameId.get(String(level.gameId)) : null
-      return gameIdMatch || byName.get(normalizeName(level.name)) || null
+      const nameMatch = getLookupNames(level.name)
+        .map(name => byName.get(name))
+        .find(Boolean)
+      return gameIdMatch || nameMatch || null
     },
   }
 }
