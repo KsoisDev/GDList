@@ -8,7 +8,7 @@
     if (host.includes('ksois.github.io')) {
       location.replace('https://blist.ksois.com/')
     } else {
-      location.replace('/')
+      location.replace('/' + location.search + location.hash)
     }
   </script>
 </head>
