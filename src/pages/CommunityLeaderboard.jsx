@@ -8,6 +8,7 @@ import Avatar from '../components/ui/Avatar'
 import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
+import { useLanguage } from '../hooks/useLanguage'
 import { loadUsers } from '../services/readCache'
 import { formatNumber, getDisplayName } from '../utils/format'
 import { getFlagUrl } from '../utils/countries'
@@ -15,6 +16,7 @@ import styles from './Leaderboard.module.css'
 import theme from '../components/layout/ThemedPage.module.css'
 
 export default function CommunityLeaderboard() {
+  const { t } = useLanguage()
   const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -40,7 +42,7 @@ export default function CommunityLeaderboard() {
         setPlayers(sorted)
       } catch (err) {
         console.error('Failed to load community leaderboard:', err)
-        setLoadError('The community leaderboard could not be loaded.')
+        setLoadError('leaderboard.communityLoadError')
       } finally {
         setLoading(false)
       }
@@ -68,36 +70,36 @@ export default function CommunityLeaderboard() {
     <PageShell className={theme.pageShell}>
       <div className={theme.glow} aria-hidden="true" />
       <ThemedPageHero
-        eyebrow="COMMUNITY PLAYER STANDINGS"
-        title="Community"
-        accentTitle="Rankings"
-        description="Every verified community completion counts. See who is leading the Basement and which players are climbing fastest."
+        eyebrow={t('leaderboard.communityEyebrow')}
+        title={t('leaderboard.communityWord')}
+        accentTitle={t('leaderboard.communityAccent')}
+        description={t('leaderboard.communityDescription')}
         actions={[
-          { to: '/submit', label: 'Submit a record' },
-          { to: '/leaderboard/main', label: 'Main rankings' },
+          { to: '/submit', label: t('home.submitRecord') },
+          { to: '/leaderboard/main', label: t('nav.mainRankings') },
         ]}
         stats={[
-          { icon: Users, value: loading ? '—' : players.length, label: 'Ranked players' },
-          { icon: CheckCircle2, value: loading ? '—' : players.reduce((sum, player) => sum + player.liveCount, 0), label: 'Counted clears' },
-          { icon: Crown, value: loading ? 'Loading' : players[0] ? getDisplayName(players[0]) : 'Unranked', label: 'Current leader', featured: true },
+          { icon: Users, value: loading ? '—' : players.length, label: t('leaderboard.rankedPlayers') },
+          { icon: CheckCircle2, value: loading ? '—' : players.reduce((sum, player) => sum + player.liveCount, 0), label: t('leaderboard.countedClears') },
+          { icon: Crown, value: loading ? t('leaderboard.loading') : players[0] ? getDisplayName(players[0]) : t('leaderboard.unranked'), label: t('leaderboard.currentLeader'), featured: true },
         ]}
       />
 
       <section className={theme.surface} aria-label="Community player standings">
         <div className={theme.surfaceHeading}>
           <div>
-            <span className={theme.sectionLabel}>LIVE LEADERBOARD</span>
-            <h2>Player standings</h2>
+            <span className={theme.sectionLabel}>{t('leaderboard.live')}</span>
+            <h2>{t('leaderboard.standings')}</h2>
           </div>
-          <span className={theme.count}>{filtered.length} {filtered.length === 1 ? 'player' : 'players'}</span>
+          <span className={theme.count}>{filtered.length} {t('leaderboard.players')}</span>
         </div>
 
       <div className={styles.toolbar}>
-        <span className={styles.count}>{filtered.length} players</span>
+        <span className={styles.count}>{filtered.length} {t('leaderboard.players')}</span>
         <SearchBar
           value={search}
           onChange={setSearch}
-          placeholder="Search player..."
+          placeholder={t('leaderboard.searchPlayer')}
           className={styles.searchBar}
         />
       </div>
@@ -108,16 +110,16 @@ export default function CommunityLeaderboard() {
         </div>
       ) : loadError ? (
         <div className={styles.errorState} role="alert">
-          <p>{loadError}</p>
-          <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>Try Again</Button>
+          <p>{t(loadError)}</p>
+          <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>{t('leaderboard.tryAgain')}</Button>
         </div>
       ) : (
         <div className={styles.table}>
           <div className={styles.tableHeader}>
-            <span className={styles.colRank}>Rank</span>
-            <span className={styles.colPlayer}>Player</span>
-            <span className={styles.colPoints}>Points</span>
-            <span className={styles.colCompletions}>Completions</span>
+            <span className={styles.colRank}>{t('leaderboard.rank')}</span>
+            <span className={styles.colPlayer}>{t('leaderboard.player')}</span>
+            <span className={styles.colPoints}>{t('leaderboard.points')}</span>
+            <span className={styles.colCompletions}>{t('leaderboard.completions')}</span>
           </div>
 
           {filtered.map((player, i) => (

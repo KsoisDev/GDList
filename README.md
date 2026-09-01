@@ -14,6 +14,10 @@ The interface was designed for this project and is maintained with contributions
 
 The app shows a setup screen when required Firebase values are missing instead of failing with a blank page.
 
+## Languages
+
+The public interface supports English, Russian, and Simplified Chinese. The language selector is available in the header and saves the visitor's choice on their device. Player names, level names, and other community-created content are kept exactly as submitted.
+
 ## Preserving existing data
 
 Deploy the app with the existing Basement List `VITE_FIREBASE_*` project values. The frontend does not seed, migrate, replace, or clear Firestore or Storage on startup, so existing levels, completions, submissions, profiles, victors, and leaderboard history remain in place. Pointing production at a new Firebase project will make the site appear empty even though the original data still exists.

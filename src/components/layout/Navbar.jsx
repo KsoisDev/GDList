@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, LogOut, User, Shield, ChevronDown, Plus, Bell, Check, X as XIcon, Clock, Flag } from 'lucide-react'
+import { LogOut, User, Shield, ChevronDown, Plus, Bell, Check, X as XIcon, Clock, Flag } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useSiteConfig } from '../../hooks/useSiteConfig'
+import { useLanguage } from '../../hooks/useLanguage'
 import { logout } from '../../services/auth'
 import { getCollection, updateDocument, where } from '../../services/firestore'
 import { NAV_LINKS, hasAccess } from '../../utils/constants'
@@ -16,9 +17,9 @@ import styles from './Navbar.module.css'
 export default function Navbar() {
   const { user, userData } = useAuth()
   const { maintenance } = useSiteConfig()
+  const { t, locale } = useLanguage()
   const location = useLocation()
   const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifications, setNotifications] = useState([])
@@ -52,13 +53,13 @@ export default function Navbar() {
       } catch (error) {
         if (!mounted) return
         console.error('Failed to load notifications:', error)
-        setNotificationError('Notifications are temporarily unavailable.')
+        setNotificationError(t('nav.notificationsUnavailable'))
       }
     }
     load()
     const interval = setInterval(load, 15000)
     return () => { mounted = false; clearInterval(interval) }
-  }, [user, userData?.id, accountSuspended])
+  }, [user, userData?.id, accountSuspended, t])
 
   useEffect(() => {
     function handleClick(e) {
@@ -78,14 +79,12 @@ export default function Navbar() {
       if (event.key !== 'Escape') return
       setProfileOpen(false)
       setNotifOpen(false)
-      setOpen(false)
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
 
   useEffect(() => {
-    setOpen(false)
     setProfileOpen(false)
     setNotifOpen(false)
   }, [location.pathname])
@@ -124,7 +123,6 @@ export default function Navbar() {
     try {
       await logout()
       setProfileOpen(false)
-      setOpen(false)
       navigate('/', { replace: true })
     } catch (error) {
       console.error('Sign out failed:', error)
@@ -134,7 +132,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className={styles.navbar} aria-label="Primary navigation">
+    <nav className={styles.navbar} aria-label={t('nav.primary')}>
       <div className={styles.container}>
         <Link to="/" className={styles.logo} aria-label="Basement List home">
           <span className={styles.logoText}>Basement List</span>
@@ -148,7 +146,7 @@ export default function Navbar() {
               to={link.path}
               className={`${styles.navLink} ${isActive(link.path) ? styles.active : ''}`}
             >
-              {link.label}
+              {t(link.labelKey)}
             </Link>
           ))}
           <div className={styles.navDivider} />
@@ -156,11 +154,11 @@ export default function Navbar() {
             <>
               <Link to="/submit" className={styles.submitBtn}>
                 <Plus size={15} />
-                Record
+                {t('nav.record')}
               </Link>
               <Link to="/submit-level" className={styles.submitBtn}>
                 <Plus size={15} />
-                Level
+                {t('nav.level')}
               </Link>
             </>
           )}
@@ -174,7 +172,7 @@ export default function Navbar() {
                   type="button"
                   className={styles.bellBtn}
                   onClick={() => { setNotifOpen(value => !value); setProfileOpen(false) }}
-                  aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+                  aria-label={unreadCount ? t('nav.notificationsUnread', { count: unreadCount }) : t('nav.notifications')}
                   aria-expanded={notifOpen}
                   aria-controls="notification-menu"
                 >
@@ -193,10 +191,10 @@ export default function Navbar() {
                       exit={{ opacity: 0, y: -8 }}
                     >
                       <div className={styles.notifHeader}>
-                        <span className={styles.notifTitle}>Notifications</span>
+                        <span className={styles.notifTitle}>{t('nav.notifications')}</span>
                         {unreadCount > 0 && (
                           <button className={styles.notifMarkAll} onClick={markAllAsRead}>
-                            Mark all read
+                            {t('nav.markAllRead')}
                           </button>
                         )}
                       </div>
@@ -204,7 +202,7 @@ export default function Navbar() {
                         {notificationError ? (
                           <div className={styles.notifEmpty} role="status">{notificationError}</div>
                         ) : notifications.length === 0 ? (
-                          <div className={styles.notifEmpty}>No notifications yet</div>
+                          <div className={styles.notifEmpty}>{t('nav.noNotifications')}</div>
                         ) : (
                           notifications.map(n => (
                             <button
@@ -222,7 +220,7 @@ export default function Navbar() {
                               </span>
                               <div className={styles.notifBody}>
                                 <span className={styles.notifType}>
-                                  {n.type === 'approved' ? 'Approved' : 'Rejected'}
+                                  {n.type === 'approved' ? t('nav.approved') : t('nav.rejected')}
                                 </span>
                                 <span className={styles.notifLevel}>{n.levelName}</span>
                                 {n.reviewNote && (
@@ -230,7 +228,7 @@ export default function Navbar() {
                                 )}
                                 <span className={styles.notifTime}>
                                   <Clock size={12} />
-                                  {formatDateRelative(n.createdAt)}
+                                  {formatDateRelative(n.createdAt, locale)}
                                 </span>
                               </div>
                             </button>
@@ -246,7 +244,7 @@ export default function Navbar() {
                   type="button"
                   className={styles.profileBtn}
                   onClick={() => { setProfileOpen(value => !value); setNotifOpen(false) }}
-                  aria-label="Open account menu"
+                  aria-label={t('nav.openAccount')}
                   aria-expanded={profileOpen}
                   aria-controls="profile-menu"
                 >
@@ -267,16 +265,16 @@ export default function Navbar() {
                       exit={{ opacity: 0, y: -8 }}
                     >
                       <Link to="/profile" className={styles.dropdownItem}>
-                        <User size={16} /> My Profile
+                        <User size={16} /> {t('nav.myProfile')}
                       </Link>
                       {!accountSuspended && hasAccess(userData?.role || 'user', 'admin') && (
                         <Link to="/admin" className={styles.dropdownItem}>
-                          <Shield size={16} /> Admin Panel
+                          <Shield size={16} /> {t('nav.adminPanel')}
                         </Link>
                       )}
                       {!accountSuspended && hasAccess(userData?.role || 'user', 'owner') && (
                         <Link to="/admin/reports" className={styles.dropdownItem}>
-                          <Flag size={16} /> Reports
+                          <Flag size={16} /> {t('nav.reports')}
                         </Link>
                       )}
                       <button
@@ -284,7 +282,7 @@ export default function Navbar() {
                         onClick={handleLogout}
                         disabled={signingOut}
                       >
-                        <LogOut size={16} /> {signingOut ? 'Signing Out…' : 'Sign Out'}
+                        <LogOut size={16} /> {signingOut ? t('nav.signingOut') : t('nav.signOut')}
                       </button>
                     </motion.div>
                   )}
@@ -293,77 +291,12 @@ export default function Navbar() {
             </>
           ) : (
             <div className={styles.authButtons}>
-              <Button to="/login" variant="ghost" size="sm">Sign In</Button>
-              <Button to="/register" variant="primary" size="sm">Join</Button>
+              <Button to="/login" variant="ghost" size="sm">{t('nav.signIn')}</Button>
+              <Button to="/register" variant="primary" size="sm">{t('nav.join')}</Button>
             </div>
           )}
-          <button
-            type="button"
-            className={styles.menuBtn}
-            onClick={() => setOpen(value => !value)}
-            aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
-            aria-expanded={open}
-            aria-controls="mobile-navigation"
-          >
-            {open ? <X size={24} /> : <Menu size={24} />}
-          </button>
         </div>
       </div>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className={styles.mobileNav}
-            id="mobile-navigation"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-          >
-            {NAV_LINKS.map(link => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`${styles.mobileLink} ${isActive(link.path) ? styles.active : ''}`}
-                onClick={() => setOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ))}
-            {canSubmit && (
-              <>
-                <Link to="/submit" className={styles.mobileSubmitBtn} onClick={() => setOpen(false)}>
-                  <Plus size={16} />
-                  Submit Record
-                </Link>
-                <Link to="/submit-level" className={styles.mobileSubmitBtn} onClick={() => setOpen(false)}>
-                  <Plus size={16} />
-                  Submit Level
-                </Link>
-              </>
-            )}
-            {user ? (
-              <>
-                <Link to="/profile" className={styles.mobileLink} onClick={() => setOpen(false)}>
-                  <User size={16} /> My Profile
-                </Link>
-                {!accountSuspended && hasAccess(userData?.role || 'user', 'admin') && (
-                  <Link to="/admin" className={styles.mobileLink} onClick={() => setOpen(false)}>
-                    <Shield size={16} /> Admin Panel
-                  </Link>
-                )}
-                <button className={styles.mobileLink} onClick={handleLogout} disabled={signingOut}>
-                  <LogOut size={16} /> {signingOut ? 'Signing Out…' : 'Sign Out'}
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className={styles.mobileLink} onClick={() => setOpen(false)}>Sign In</Link>
-                <Link to="/register" className={styles.mobileLink} onClick={() => setOpen(false)}>Create Account</Link>
-              </>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </nav>
   )
 }

@@ -1,4 +1,4 @@
-const YT_WATCH = /(?:youtube\.com\/watch\?v=|\/shorts\/)([\w-]{11})/
+const YT_WATCH = /(?:youtube\.com\/watch\?(?:[^#]*&)?v=|\/shorts\/)([\w-]{11})/
 const YT_BE = /youtu\.be\/([\w-]{11})/
 const YT_EMBED = /youtube\.com\/embed\/([\w-]{11})/
 

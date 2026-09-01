@@ -334,6 +334,28 @@
   border-color: rgba(111, 165, 255, 0.4);
 }
 
+.languageControl {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 15px;
+  padding: 8px 8px 8px 12px;
+  border: 1px solid rgba(132, 158, 199, 0.14);
+  border-radius: 12px;
+  background: rgba(12, 22, 38, 0.58);
+}
+
+.languageControl > span {
+  color: #8291a7;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .dataNotice {
   width: fit-content;
   margin-top: 14px;
@@ -952,8 +974,14 @@
   }
 
   .heroActions,
-  .socialLinks {
+  .socialLinks,
+  .languageControl {
     justify-content: center;
+  }
+
+  .languageControl {
+    margin-right: auto;
+    margin-left: auto;
   }
 
   .listSpotlight {
@@ -1029,6 +1057,13 @@
 
   .socialLinks a {
     padding: 7px 9px;
+  }
+
+  .languageControl {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+    padding: 12px;
   }
 
   .panelHeader {

@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 import { Youtube, Music, Users, ArrowUpRight } from 'lucide-react'
+import { useLanguage } from '../../hooks/useLanguage'
 import styles from './Footer.module.css'
 
 export default function Footer() {
+  const { t } = useLanguage()
   return (
     <footer className={styles.footer}>
       <div className={styles.glow} aria-hidden="true" />
@@ -13,7 +15,7 @@ export default function Footer() {
             <span className={styles.logoAccent}>GD</span>
           </Link>
           <p className={styles.description}>
-            Geometry Dash demon list for the tnaillzxgd Discord community.
+            {t('footer.description')}
           </p>
           <div className={styles.socials}>
             <a href="https://discord.gg/75FaX3gmM2" target="_blank" rel="noopener noreferrer" className={styles.socialLink} aria-label="Discord">
@@ -29,25 +31,28 @@ export default function Footer() {
         </div>
         <div className={styles.links}>
           <div className={styles.column}>
-            <h4 className={styles.columnTitle}>Lists</h4>
+            <h4 className={styles.columnTitle}>{t('footer.lists')}</h4>
             <Link to="/list/main" className={styles.link}>
-              Main List <ArrowUpRight size={13} />
+              {t('nav.mainList')} <ArrowUpRight size={13} />
             </Link>
             <Link to="/list/community" className={styles.link}>
-              Community List <ArrowUpRight size={13} />
+              {t('nav.communityList')} <ArrowUpRight size={13} />
             </Link>
           </div>
           <div className={styles.column}>
-            <h4 className={styles.columnTitle}>Rankings</h4>
+            <h4 className={styles.columnTitle}>{t('footer.rankings')}</h4>
             <Link to="/leaderboard/main" className={styles.link}>
-              Main Rankings <ArrowUpRight size={13} />
+              {t('nav.mainRankings')} <ArrowUpRight size={13} />
             </Link>
             <Link to="/leaderboard/community" className={styles.link}>
-              Community Rankings <ArrowUpRight size={13} />
+              {t('nav.communityRankings')} <ArrowUpRight size={13} />
+            </Link>
+            <Link to="/leaderboard/countries" className={styles.link}>
+              {t('nav.countryRankings')} <ArrowUpRight size={13} />
             </Link>
           </div>
           <div className={styles.column}>
-            <h4 className={styles.columnTitle}>Community</h4>
+            <h4 className={styles.columnTitle}>{t('footer.community')}</h4>
             <a href="https://discord.gg/75FaX3gmM2" target="_blank" rel="noopener noreferrer" className={styles.link}>
               Discord <ArrowUpRight size={13} />
             </a>
@@ -62,14 +67,14 @@ export default function Footer() {
       </div>
       <div className={styles.bottom}>
         <p className={styles.copyright}>
-          &copy; {new Date().getFullYear()} ntyu2 and Ksois. All rights reserved. Basement List is not affiliated with RobTop Games.
+          &copy; {new Date().getFullYear()} ntyu2 and Ksois. {t('footer.rights')}
         </p>
         <p className={styles.credit}>
-          Created by{' '}
+          {t('footer.createdBy')}{' '}
           <a href="https://github.com/ntyu2" target="_blank" rel="noopener noreferrer">
             ntyu2
           </a>
-          {' and '}
+          {` ${t('footer.and')} `}
           <a href="https://github.com/KsoisDev" target="_blank" rel="noopener noreferrer">
             Ksois
           </a>

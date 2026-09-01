@@ -9,6 +9,7 @@ import SearchBar from '../components/ui/SearchBar'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
+import { useLanguage } from '../hooks/useLanguage'
 import { loadUsers } from '../services/readCache'
 import { formatNumber, getDisplayName } from '../utils/format'
 import { getFlagUrl } from '../utils/countries'
@@ -16,6 +17,7 @@ import styles from './Leaderboard.module.css'
 import theme from '../components/layout/ThemedPage.module.css'
 
 export default function MainLeaderboard() {
+  const { t } = useLanguage()
   const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -43,7 +45,7 @@ export default function MainLeaderboard() {
         setPlayers(sorted)
       } catch (err) {
         console.error('Failed to load leaderboard:', err)
-        setLoadError('The main leaderboard could not be loaded.')
+        setLoadError('leaderboard.mainLoadError')
       } finally {
         setLoading(false)
       }
@@ -71,36 +73,36 @@ export default function MainLeaderboard() {
     <PageShell className={theme.pageShell}>
       <div className={theme.glow} aria-hidden="true" />
       <ThemedPageHero
-        eyebrow="OFFICIAL DEMON STANDINGS"
-        title="Main"
-        accentTitle="Rankings"
-        description="The Basement's official demon standings, calculated from every verified main-list completion."
+        eyebrow={t('leaderboard.mainEyebrow')}
+        title={t('leaderboard.mainWord')}
+        accentTitle={t('leaderboard.mainAccent')}
+        description={t('leaderboard.mainDescription')}
         actions={[
-          { to: '/submit', label: 'Submit a record' },
-          { to: '/leaderboard/community', label: 'Community rankings' },
+          { to: '/submit', label: t('home.submitRecord') },
+          { to: '/leaderboard/community', label: t('nav.communityRankings') },
         ]}
         stats={[
-          { icon: Users, value: loading ? '—' : players.length, label: 'Ranked players' },
-          { icon: CheckCircle2, value: loading ? '—' : players.reduce((sum, player) => sum + (player.stats?.mainCompletions || 0), 0), label: 'Counted clears' },
-          { icon: Crown, value: loading ? 'Loading' : players[0] ? getDisplayName(players[0]) : 'Unranked', label: 'Current leader', featured: true },
+          { icon: Users, value: loading ? '—' : players.length, label: t('leaderboard.rankedPlayers') },
+          { icon: CheckCircle2, value: loading ? '—' : players.reduce((sum, player) => sum + (player.stats?.mainCompletions || 0), 0), label: t('leaderboard.countedClears') },
+          { icon: Crown, value: loading ? t('leaderboard.loading') : players[0] ? getDisplayName(players[0]) : t('leaderboard.unranked'), label: t('leaderboard.currentLeader'), featured: true },
         ]}
       />
 
       <section className={theme.surface} aria-label="Main-list player standings">
         <div className={theme.surfaceHeading}>
           <div>
-            <span className={theme.sectionLabel}>LIVE LEADERBOARD</span>
-            <h2>Player standings</h2>
+            <span className={theme.sectionLabel}>{t('leaderboard.live')}</span>
+            <h2>{t('leaderboard.standings')}</h2>
           </div>
-          <span className={theme.count}>{filtered.length} {filtered.length === 1 ? 'player' : 'players'}</span>
+          <span className={theme.count}>{filtered.length} {t('leaderboard.players')}</span>
         </div>
 
       <div className={styles.toolbar}>
-        <span className={styles.count}>{filtered.length} players</span>
+        <span className={styles.count}>{filtered.length} {t('leaderboard.players')}</span>
         <SearchBar
           value={search}
           onChange={setSearch}
-          placeholder="Search player..."
+          placeholder={t('leaderboard.searchPlayer')}
           className={styles.searchBar}
         />
       </div>
@@ -111,16 +113,16 @@ export default function MainLeaderboard() {
         </div>
       ) : loadError ? (
         <div className={styles.errorState} role="alert">
-          <p>{loadError}</p>
-          <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>Try Again</Button>
+          <p>{t(loadError)}</p>
+          <Button variant="secondary" size="sm" onClick={() => setRetryKey(key => key + 1)}>{t('leaderboard.tryAgain')}</Button>
         </div>
       ) : (
         <div className={styles.table}>
           <div className={styles.tableHeader}>
-            <span className={styles.colRank}>Rank</span>
-            <span className={styles.colPlayer}>Player</span>
-            <span className={styles.colPoints}>Points</span>
-            <span className={styles.colCompletions}>Completions</span>
+            <span className={styles.colRank}>{t('leaderboard.rank')}</span>
+            <span className={styles.colPlayer}>{t('leaderboard.player')}</span>
+            <span className={styles.colPoints}>{t('leaderboard.points')}</span>
+            <span className={styles.colCompletions}>{t('leaderboard.completions')}</span>
           </div>
 
           {filtered.map((player, i) => (

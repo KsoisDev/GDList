@@ -37,6 +37,7 @@ import { fetchAredlProfileByDiscordId, computeSyncPlan } from '../services/syncA
 import { getGdlProfileUrl } from '../services/syncGdl'
 import { loadMainLevels } from '../services/readCache'
 import { hasAccess } from '../utils/constants'
+import { saveRepresentedCountry } from '../utils/preferences'
 import styles from './Profile.module.css'
 import theme from '../components/layout/ThemedPage.module.css'
 import { useShareProfile } from '../hooks/useShareProfile'
@@ -273,6 +274,10 @@ export default function MyProfile() {
 
   const handleSave = async () => {
     if (!user || !displayName.trim()) return
+    if (!country) {
+      setProfileError('Choose the country you represent before saving your profile.')
+      return
+    }
     setSaving(true)
     setProfileError('')
     setProfileMessage('')
@@ -284,6 +289,7 @@ export default function MyProfile() {
         bio: bio.trim() || '',
         country: country,
       })
+      saveRepresentedCountry(country)
       try {
         await syncVictorsSnapshot(user.uid, { username: displayName.trim(), displayName: displayName.trim(), country, avatarURL: avatarURL.trim() || '' })
       } catch (syncErr) {

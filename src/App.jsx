@@ -3,12 +3,14 @@ import { BrowserRouter, Route, Routes, useSearchParams, useNavigate } from 'reac
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './contexts/AuthContext'
 import { SiteConfigProvider } from './contexts/SiteConfigContext'
+import { LanguageProvider } from './contexts/LanguageContext'
 import AppErrorBoundary from './components/layout/AppErrorBoundary'
 import Footer from './components/layout/Footer'
 import Navbar from './components/layout/Navbar'
 import RouteLoader from './components/layout/RouteLoader'
 import ScrollToTop from './components/layout/ScrollToTop'
 import MaintenanceBanner from './components/guards/MaintenanceBanner'
+import CountryOnboarding from './components/guards/CountryOnboarding'
 import RequireAuth from './components/guards/RequireAuth'
 import RequireMaintenanceAccess from './components/guards/RequireMaintenanceAccess'
 import RequireRole from './components/guards/RequireRole'
@@ -20,6 +22,7 @@ const CommunityList = lazy(() => import('./pages/CommunityList'))
 const LevelDetail = lazy(() => import('./pages/LevelDetail'))
 const MainLeaderboard = lazy(() => import('./pages/MainLeaderboard'))
 const CommunityLeaderboard = lazy(() => import('./pages/CommunityLeaderboard'))
+const CountryLeaderboard = lazy(() => import('./pages/CountryLeaderboard'))
 const Profile = lazy(() => import('./pages/Profile'))
 const MyProfile = lazy(() => import('./pages/MyProfile'))
 const SubmitRecord = lazy(() => import('./pages/SubmitRecord'))
@@ -72,13 +75,15 @@ function DiscordTokenRedirect() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename={routerBase}>
-        <AuthProvider>
-          <SiteConfigProvider>
-            <DiscordTokenRedirect />
+      <LanguageProvider>
+        <BrowserRouter basename={routerBase}>
+          <AuthProvider>
+            <SiteConfigProvider>
+              <DiscordTokenRedirect />
             <ScrollToTop />
             <Navbar />
             <MaintenanceBanner />
+            <CountryOnboarding />
             <AppErrorBoundary>
               <Suspense fallback={<RouteLoader />}>
                 <Routes>
@@ -88,6 +93,7 @@ export default function App() {
                   <Route path="/levels/:levelId" element={<RequireMaintenanceAccess><LevelDetail /></RequireMaintenanceAccess>} />
                   <Route path="/leaderboard/main" element={<RequireMaintenanceAccess><MainLeaderboard /></RequireMaintenanceAccess>} />
                   <Route path="/leaderboard/community" element={<RequireMaintenanceAccess><CommunityLeaderboard /></RequireMaintenanceAccess>} />
+                  <Route path="/leaderboard/countries" element={<RequireMaintenanceAccess><CountryLeaderboard /></RequireMaintenanceAccess>} />
                   <Route path="/profile" element={<RequireAuth><MyProfile /></RequireAuth>} />
                   <Route path="/profile/:userId" element={<Profile />} />
                   <Route path="/submit" element={<RequireMaintenanceAccess><RequireVerifiedEmail><SubmitRecord /></RequireVerifiedEmail></RequireMaintenanceAccess>} />
@@ -110,9 +116,10 @@ export default function App() {
               </Suspense>
             </AppErrorBoundary>
             <Footer />
-          </SiteConfigProvider>
-        </AuthProvider>
-      </BrowserRouter>
+            </SiteConfigProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </LanguageProvider>
     </QueryClientProvider>
   )
 }
