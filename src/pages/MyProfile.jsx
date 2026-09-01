@@ -226,6 +226,17 @@ export default function MyProfile() {
     }
   }
 
+  const handleUnlinkPt = async () => {
+    if (!user) return
+    try {
+      await updateDocument('users', user.uid, { pointercrateSync: null })
+      await refreshUserData()
+      setProfileMessage('Pointercrate profile unlinked.')
+    } catch (err) {
+      setProfileError('Failed to unlink.')
+    }
+  }
+
 
   const loadCompletions = async () => {
     if (!user) return
@@ -515,6 +526,32 @@ export default function MyProfile() {
                           className={styles.gdlUnsync}
                           onClick={(e) => { e.stopPropagation(); handleUnlinkGdl() }}
                           title="Unlink Global DL"
+                        >
+                          <X size={12} />
+                        </button>
+                      </a>
+                    )}
+                    {userData.pointercrateSync && (
+                      <a
+                        href={`https://www.pointercrate.com/demonlist/statsviewer/?player=${userData.pointercrateSync.playerId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.pointerBadge}
+                        title="View Pointercrate Profile"
+                      >
+                        <img
+                          src="https://www.pointercrate.com/static/images/logo.png"
+                          alt="Pointercrate"
+                          className={styles.pointerLogo}
+                        />
+                        <span className={styles.pointerUser}>
+                          Pointercrate
+                        </span>
+                        <button
+                          type="button"
+                          className={styles.pointerUnsync}
+                          onClick={(e) => { e.stopPropagation(); handleUnlinkPt() }}
+                          title="Unlink Pointercrate"
                         >
                           <X size={12} />
                         </button>

@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { ArrowLeft, Lock, Search, RefreshCw, CheckCircle2, AlertCircle, ExternalLink, Link2 } from 'lucide-react'
+import { ArrowLeft, Lock, RefreshCw, CheckCircle2, AlertCircle, Link2 } from 'lucide-react'
 import Modal from '../ui/Modal'
 import Button from '../ui/Button'
 import Spinner from '../ui/Spinner'
 import { fetchAredlProfile, computeSyncPlan } from '../../services/syncAredl'
-import { searchGdlPlayers, fetchGdlPlayer, getGdlProfileUrl } from '../../services/syncGdl'
+import { fetchGdlPlayer } from '../../services/syncGdl'
 import { loadMainLevels } from '../../services/readCache'
-import { createDocument, updateDocument, getDocument } from '../../services/firestore'
+import { createDocument, updateDocument } from '../../services/firestore'
 import { startDiscordLogin, getStoredDiscordUser, clearDiscordUser } from '../../services/discordAuth'
 import styles from './SyncListModal.module.css'
 
@@ -21,7 +21,14 @@ const LISTS = [
   {
     id: 'gdl',
     name: 'Global DL',
-    logo: null,
+    logo: 'https://discord.do/wp-content/uploads/2023/09/Global-Demonlist.jpg',
+    active: true,
+    type: 'badge',
+  },
+  {
+    id: 'pointercrate',
+    name: 'Pointer',
+    logo: 'https://www.pointercrate.com/static/images/logo.png',
     active: true,
     type: 'badge',
   },
@@ -29,9 +36,6 @@ const LISTS = [
 
 export default function SyncListModal({ isOpen, onClose, userId, existingCompletions, onComplete }) {
   const [selectedList, setSelectedList] = useState(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searching, setSearching] = useState(false)
-  const [results, setResults] = useState(null)
   const [searchError, setSearchError] = useState('')
   const [selectedUser, setSelectedUser] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -45,13 +49,12 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
 
   const reset = () => {
     setSelectedList(null)
-    setSearchQuery('')
-    setResults(null)
     setSearchError('')
     setSelectedUser(null)
     setProfile(null)
     setSyncPlan(null)
     setSyncResult(null)
+    setManualUrl('')
     setStep('list')
   }
 
@@ -66,7 +69,9 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
     if (list.id === 'aredl') {
       setStep('auth')
     } else if (list.id === 'gdl') {
-      setStep('search')
+      setStep('gdlLink')
+    } else if (list.id === 'pointercrate') {
+      setStep('ptLink')
     }
   }
 
@@ -186,65 +191,6 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
     }
   }
 
-  const handleGdlSearch = async () => {
-    if (!searchQuery.trim()) return
-    setSearching(true)
-    setSearchError('')
-    setResults(null)
-    try {
-      const data = await searchGdlPlayers(searchQuery.trim())
-      const players = Array.isArray(data) ? data : data.items || data.data || []
-      setResults(players)
-      if (players.length === 0) setSearchError('No players found.')
-    } catch (err) {
-      setSearchError('Search failed. Try again.')
-    } finally {
-      setSearching(false)
-    }
-  }
-
-  const handleGdlKeyDown = (e) => {
-    if (e.key === 'Enter') handleGdlSearch()
-  }
-
-  const handleGdlSelectPlayer = async (player) => {
-    setSelectedUser(player)
-    setStep('gdlProfile')
-    setLoadingProfile(true)
-    try {
-      const fullProfile = await fetchGdlPlayer(player.id)
-      setProfile(fullProfile)
-    } catch (err) {
-      setSearchError('Failed to load player profile.')
-      setStep('search')
-    } finally {
-      setLoadingProfile(false)
-    }
-  }
-
-  const handleGdlLink = async () => {
-    if (!profile) return
-    setSyncing(true)
-    try {
-      await updateDocument('users', userId, {
-        gdlSync: {
-          playerId: profile.id,
-          playerName: profile.name,
-          score: profile.score || 0,
-          rank: profile.rank || null,
-          syncedAt: new Date(),
-        },
-      })
-      setSyncResult({ linked: true })
-      setStep('done')
-      if (onComplete) onComplete()
-    } catch (err) {
-      setSearchError('Failed to link profile. Try again.')
-    } finally {
-      setSyncing(false)
-    }
-  }
-
   const handleGdlManualLink = async () => {
     const url = manualUrl.trim()
     if (!url) return
@@ -286,6 +232,34 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
     }
   }
 
+  const handlePtManualLink = async () => {
+    const url = manualUrl.trim()
+    if (!url) return
+    const idMatch = url.match(/player=(\d+)/)
+    if (!idMatch) {
+      setSearchError('Invalid URL. Paste your Pointercrate stats viewer URL (e.g. https://www.pointercrate.com/demonlist/statsviewer/?player=12345).')
+      return
+    }
+    const playerId = parseInt(idMatch[1])
+    setSyncing(true)
+    setSearchError('')
+    try {
+      await updateDocument('users', userId, {
+        pointercrateSync: {
+          playerId,
+          syncedAt: new Date(),
+        },
+      })
+      setSyncResult({ linked: true })
+      setStep('done')
+      if (onComplete) onComplete()
+    } catch (err) {
+      setSearchError('Failed to link profile. Try again.')
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Sync with Another List">
       {step === 'list' && (
@@ -297,7 +271,7 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
             {LISTS.map(list => (
               <div
                 key={list.id}
-                className={`${styles.listCard} ${!list.active ? styles.disabled : ''}`}
+                className={`${styles.listCard} ${!list.active ? styles.disabled : ''} ${list.id === 'pointercrate' ? styles.pointercrateCard : ''}`}
                 onClick={() => handleSelectList(list)}
                 role="button"
                 tabIndex={list.active ? 0 : -1}
@@ -348,132 +322,63 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
         </>
       )}
 
-      {step === 'search' && selectedList?.id === 'gdl' && (
+      {step === 'gdlLink' && selectedList?.id === 'gdl' && (
         <>
           <div className={styles.headerRow}>
             <button type="button" className={styles.backLink} onClick={() => { reset(); setStep('list') }}>
               <ArrowLeft size={14} /> Back
             </button>
           </div>
-          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 8 }}>
-            Search your Global Demon List profile by name.
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 4 }}>
+            Paste your Global Demon List profile URL to link it as a badge.
+          </p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 12 }}>
+            No records are imported — this only shows a link on your profile.
           </p>
           <div className={styles.searchInput}>
             <input
               type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              onKeyDown={handleGdlKeyDown}
-              placeholder="Search player name..."
+              value={manualUrl}
+              onChange={e => setManualUrl(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleGdlManualLink() }}
+              placeholder="https://demonlist.org/profile/12345"
+              style={{ color: 'var(--text-muted)' }}
             />
-            <Button variant="primary" size="sm" icon={Search} onClick={handleGdlSearch} loading={searching}>
-              Search
+            <Button variant="primary" size="sm" icon={Link2} onClick={handleGdlManualLink} loading={syncing}>
+              Link
             </Button>
           </div>
           {searchError && <p className={styles.authError}>{searchError}</p>}
-          {results && (
-            <div className={styles.results}>
-              {results.length === 0 && !searchError && (
-                <div className={styles.emptyResults}>No players found.</div>
-              )}
-              {results.map(player => (
-                <div
-                  key={player.id}
-                  className={`${styles.userResult} ${selectedUser?.id === player.id ? styles.selected : ''}`}
-                  onClick={() => handleGdlSelectPlayer(player)}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <div className={styles.userNames}>
-                    <div className={styles.userName}>{player.name}</div>
-                    {player.rank && <div className={styles.userDiscord}>Rank #{player.rank}</div>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          <div style={{ marginTop: 16, borderTop: '1px solid var(--border-glass)', paddingTop: 12 }}>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 8 }}>
-              Or link manually by pasting your demonlist.org profile URL:
-            </p>
-            <div className={styles.searchInput}>
-              <input
-                type="text"
-                value={manualUrl}
-                onChange={e => setManualUrl(e.target.value)}
-                placeholder="https://demonlist.org/profile/12345"
-              />
-              <Button variant="secondary" size="sm" icon={Link2} onClick={handleGdlManualLink} loading={syncing}>
-                Link
-              </Button>
-            </div>
-          </div>
         </>
       )}
 
-      {step === 'gdlProfile' && (
+      {step === 'ptLink' && selectedList?.id === 'pointercrate' && (
         <>
           <div className={styles.headerRow}>
-            <button type="button" className={styles.backLink} onClick={() => { setProfile(null); setSelectedUser(null); setStep('search') }}>
+            <button type="button" className={styles.backLink} onClick={() => { reset(); setStep('list') }}>
               <ArrowLeft size={14} /> Back
             </button>
           </div>
-          {loadingProfile ? (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>
-              <Spinner />
-            </div>
-          ) : profile ? (
-            <>
-              <div className={styles.profilePreview}>
-                <div className={styles.profileHeader}>
-                  <div className={styles.profileInfo}>
-                    <div className={styles.profileName}>{profile.name}</div>
-                    <div className={styles.profileStats}>
-                      Score: {profile.score?.toFixed(1) || '0'} &middot; {profile.rank ? `Rank #${profile.rank}` : 'Unranked'}
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.recordsPreview}>
-                  {(profile.records || []).slice(0, 15).map(rec => (
-                    <div key={rec.id} className={styles.recordRow}>
-                      <span className={styles.recordName}>{rec.demon?.name || 'Unknown'}</span>
-                      <span className={styles.recordPosition}>
-                        {rec.progress === 100 ? '100%' : `${rec.progress}%`}
-                        {rec.demon?.position ? ` (#${rec.demon.position})` : ''}
-                      </span>
-                    </div>
-                  ))}
-                  {(profile.records || []).length > 15 && (
-                    <div className={styles.recordRow}>
-                      <span className={styles.recordName} style={{ color: 'var(--text-muted)' }}>
-                        +{(profile.records || []).length - 15} more
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '8px 0 12px', lineHeight: 1.4 }}>
-                This only links your Global Demon List profile as a badge. No records will be imported.
-              </p>
-              <div className={styles.syncActions}>
-                <Button variant="ghost" size="sm" onClick={handleClose}>Cancel</Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={ExternalLink}
-                  onClick={handleGdlLink}
-                  loading={syncing}
-                >
-                  Link Profile
-                </Button>
-              </div>
-            </>
-          ) : (
-            <div className={styles.emptyResults}>
-              <AlertCircle size={20} style={{ marginBottom: 8 }} />
-              <p>Failed to load profile.</p>
-            </div>
-          )}
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 4 }}>
+            Paste your Pointercrate stats viewer URL to link it as a badge.
+          </p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 12 }}>
+            No records are imported — this only shows a link on your profile.
+          </p>
+          <div className={styles.searchInput}>
+            <input
+              type="text"
+              value={manualUrl}
+              onChange={e => setManualUrl(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handlePtManualLink() }}
+              placeholder="https://www.pointercrate.com/demonlist/statsviewer/?player=12345"
+              style={{ color: 'var(--text-muted)' }}
+            />
+            <Button variant="primary" size="sm" icon={Link2} onClick={handlePtManualLink} loading={syncing}>
+              Link
+            </Button>
+          </div>
+          {searchError && <p className={styles.authError}>{searchError}</p>}
         </>
       )}
 
