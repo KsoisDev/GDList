@@ -66,6 +66,12 @@
   white-space: nowrap;
 }
 
+:global(html[lang='ru']) .navLink,
+:global(html[lang='ru']) .submitBtn {
+  padding-inline: 10px;
+  font-size: 0.8rem;
+}
+
 .navLink:hover {
   color: var(--text-primary);
   background: var(--bg-glass);
@@ -531,5 +537,11 @@
 
   .actions {
     gap: 5px;
+  }
+
+  :global(html[lang='ru']) .navLink,
+  :global(html[lang='ru']) .submitBtn {
+    padding-inline: 8px;
+    font-size: 0.75rem;
   }
 }

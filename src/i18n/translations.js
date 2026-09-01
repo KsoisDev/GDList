@@ -1,3 +1,8 @@
+export const LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'ru', label: 'Русский' },
+]
+
 const en = {
   language: { label: 'Language', select: 'Choose language' },
   nav: {
@@ -70,4 +75,66 @@ const en = {
     saveError: 'Your country could not be saved. Please try again.',
   },
 }
-export const TRANSLATIONS = { en }
+
+const ru = {
+  language: { label: 'Язык', select: 'Выбрать язык' },
+  nav: {
+    primary: 'Основная навигация', home: 'Главная', mainList: 'Основной список', communityList: 'Список сообщества',
+    mainRankings: 'Основной рейтинг', communityRankings: 'Рейтинг сообщества', countryRankings: 'Рейтинг стран', record: 'Рекорд', level: 'Уровень',
+    submitRecord: 'Отправить рекорд', submitLevel: 'Отправить уровень', notifications: 'Уведомления',
+    notificationsUnread: 'Уведомления: {{count}} непрочитанных', notificationsUnavailable: 'Уведомления временно недоступны.',
+    markAllRead: 'Прочитать все', noNotifications: 'Уведомлений пока нет', approved: 'Принято', rejected: 'Отклонено',
+    myProfile: 'Мой профиль', adminPanel: 'Панель администратора', reports: 'Жалобы', signOut: 'Выйти',
+    signingOut: 'Выход…', signIn: 'Войти', join: 'Регистрация', createAccount: 'Создать аккаунт',
+    openAccount: 'Открыть меню аккаунта', openMenu: 'Открыть меню навигации', closeMenu: 'Закрыть меню навигации',
+  },
+  footer: {
+    description: 'Список демонов Geometry Dash для Discord-сообщества tnaillzxgd.', lists: 'Списки', rankings: 'Рейтинги',
+    community: 'Сообщество', rights: 'Все права защищены. Basement List не связан с RobTop Games.',
+    createdBy: 'Создано', and: 'и',
+  },
+  home: {
+    eyebrow: 'СПИСОК СООБЩЕСТВА TNAILLZXGD', titleLine1: 'The Basement', titleLine2: 'Demon List',
+    subtitle: 'Рейтинг, созданный сообществом для игроков Geometry Dash, которые хотят подтвердить свои прохождения, найти новое испытание и развиваться вместе.',
+    statsLabel: 'Статистика сообщества', players: 'Игроки', records: 'Рекорды', levels: 'Уровни',
+    explore: 'Открыть список', submitRecord: 'Отправить рекорд', submitLevel: 'Отправить уровень', socialLabel: 'Ссылки сообщества',
+    partialError: 'Не удалось загрузить часть данных сообщества.', loadError: 'Не удалось загрузить данные сообщества.', tryAgain: 'Повторить',
+    listPreview: 'Предпросмотр списка', currentRanking: 'ТЕКУЩИЙ РЕЙТИНГ', openFullList: 'Открыть весь список', by: 'от', unknown: 'Неизвестно', pointsShort: 'очк.',
+    communityList: 'Список сообщества', emptyList: 'Рейтинговые уровни появятся здесь после подключения базы данных.',
+    browseCommunity: 'Все уровни сообщества', overview: 'Обзор сообщества', recentActivity: 'Последняя активность', viewAll: 'Смотреть все',
+    communityPlayer: 'Игрок сообщества', completed: 'прошёл {{level}}', aDemon: 'демона', joinedList: 'добавлен в список сообщества · автор {{creator}}',
+    recently: 'Недавно', emptyActivity: 'Следующий подтверждённый рекорд появится здесь.', why: 'Почему Basement List?',
+    benefitOneTitle: 'Два списка, одно сообщество', benefitOneText: 'Следите за официальными демонами и уровнями, созданными сообществом Basement.',
+    benefitTwoTitle: 'Рекорды с доказательствами', benefitTwoText: 'Каждое прохождение содержит видеодоказательство и понятный статус проверки.',
+    benefitThreeTitle: 'Заслуженный рейтинг', benefitThreeText: 'Поднимайтесь отдельно в основном рейтинге и рейтинге сообщества.',
+    topRankings: 'Лучшие игроки', mainLeaders: 'Лидеры основного списка', communityLeaders: 'Лидеры списка сообщества',
+    fullLeaderboard: 'Полный рейтинг', mainUnavailable: 'Основной рейтинг временно недоступен.', communityUnavailable: 'Рейтинг сообщества временно недоступен.',
+    ready: 'ГОТОВЫ К СЛЕДУЮЩЕМУ ДЕМОНУ?', makeRun: 'Добавьте своё прохождение в список.', myProfile: 'Мой профиль',
+  },
+  list: {
+    mainEyebrow: 'РЕЙТИНГ СООБЩЕСТВА', mainTitle: 'Основной', mainAccent: 'список демонов',
+    mainDescription: 'Официальные демоны, пройденные игроками Basement, отсортированы по сложности и подтверждены рекордами сообщества.',
+    communityTitle: 'Список', communityAccent: 'сообщества', searchLevel: 'Поиск уровня или автора…', webRank: 'Сайт', officialRank: 'Официальный',
+    level: 'Уровень', difficulty: 'Сложность', points: 'Очки', creator: 'Автор', victories: 'Победы', rank: 'Место',
+    empty: 'Уровни не найдены.', mainLoadError: 'Не удалось загрузить основной список. Проверьте подключение и повторите попытку.', communityLoadError: 'Не удалось загрузить список сообщества. Проверьте подключение и повторите попытку.',
+  },
+  leaderboard: { mainTitle: 'Основной рейтинг', communityTitle: 'Рейтинг сообщества', mainWord: 'Основной', mainAccent: 'рейтинг', communityWord: 'Рейтинг', communityAccent: 'сообщества', player: 'Игрок', rank: 'Место', points: 'Очки', completions: 'Прохождения', players: 'игроков', searchPlayer: 'Поиск игрока…', tryAgain: 'Повторить', live: 'РЕЙТИНГ В РЕАЛЬНОМ ВРЕМЕНИ', standings: 'Рейтинг игроков', rankedPlayers: 'Игроков в рейтинге', countedClears: 'Учтённых прохождений', currentLeader: 'Текущий лидер', loading: 'Загрузка', unranked: 'Без рейтинга', mainEyebrow: 'ОФИЦИАЛЬНЫЙ РЕЙТИНГ ДЕМОНОВ', communityEyebrow: 'РЕЙТИНГ ИГРОКОВ СООБЩЕСТВА', mainDescription: 'Официальный рейтинг демонов Basement на основе всех подтверждённых прохождений основного списка.', communityDescription: 'Каждое подтверждённое прохождение сообщества учитывается. Узнайте, кто лидирует и кто быстрее всех поднимается.', mainLoadError: 'Не удалось загрузить основной рейтинг.', communityLoadError: 'Не удалось загрузить рейтинг сообщества.' },
+  country: {
+    eyebrow: 'МИРОВОЙ РЕЙТИНГ BASEMENT', title: 'Рейтинг', accent: 'стран',
+    description: 'Узнайте, какие страны лидируют в Basement по подтверждённым прохождениям основного списка и списка сообщества.',
+    chooseList: 'Выбрать список рейтинга', main: 'Основной список', community: 'Список сообщества', summary: 'Сводка рейтинга стран',
+    rankedCountries: 'Стран в рейтинге', representedPlayers: 'Игроков представлено', leadingCountry: 'Страна-лидер',
+    workspace: 'Рейтинг стран и игроков', live: 'РЕЙТИНГ СТРАН В РЕАЛЬНОМ ВРЕМЕНИ', countries: 'Страны',
+    search: 'Поиск страны или игрока…', noCountries: 'В этом рейтинге пока нет подходящих стран.',
+    loadError: 'Не удалось загрузить рейтинг стран.', totalPoints: 'Всего очков', players: 'Игроки',
+    completions: 'Прохождения', topPlayers: 'Лучшие игроки', clears: 'прохождений',
+  },
+  countrySetup: {
+    title: 'Выберите свою страну', description: 'Выберите страну, которую вы представляете в Basement List. Выбор сохраняется и используется в рейтинге стран после входа.',
+    label: 'Страна, которую вы представляете', placeholder: 'Выберите страну…', save: 'Сохранить страну', saving: 'Сохранение…',
+    note: 'Позже страну можно изменить в профиле.', required: 'Выберите страну, чтобы продолжить.',
+    saveError: 'Не удалось сохранить страну. Повторите попытку.',
+  },
+}
+
+export const TRANSLATIONS = { en, ru }

@@ -32,6 +32,7 @@ import {
 } from '../services/auth'
 import Modal from '../components/ui/Modal'
 import SyncListModal from '../components/profile/SyncListModal'
+import LanguageSelector from '../components/layout/LanguageSelector'
 import { completeDiscordLogin, hasPendingDiscordLogin, clearPendingDiscordLogin, getStoredDiscordUser } from '../services/discordAuth'
 import { fetchAredlProfileByDiscordId, computeSyncPlan } from '../services/syncAredl'
 import { getGdlProfileUrl } from '../services/syncGdl'
@@ -578,6 +579,15 @@ export default function MyProfile() {
 
         {profileMessage && <p className={styles.successMessage} role="status">{profileMessage}</p>}
         {profileError && <p className={styles.formError} role="alert">{profileError}</p>}
+
+        <Card className={styles.preferencesCard}>
+          <div className={styles.preferencesCopy}>
+            <span className={styles.preferencesEyebrow}>SITE PREFERENCES</span>
+            <h2>Interface language</h2>
+            <p>Choose English or Russian. This setting is saved on this device.</p>
+          </div>
+          <LanguageSelector />
+        </Card>
 
         <div className={styles.statsGrid}>
           <Card className={styles.statCard}>
