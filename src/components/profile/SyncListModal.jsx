@@ -271,7 +271,7 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
             {LISTS.map(list => (
               <div
                 key={list.id}
-                className={`${styles.listCard} ${!list.active ? styles.disabled : ''} ${list.id === 'pointercrate' ? styles.pointercrateCard : ''}`}
+                className={`${styles.listCard} ${!list.active ? styles.disabled : ''}`}
                 onClick={() => handleSelectList(list)}
                 role="button"
                 tabIndex={list.active ? 0 : -1}
