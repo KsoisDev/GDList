@@ -10,6 +10,7 @@ import Navbar from './components/layout/Navbar'
 import RouteLoader from './components/layout/RouteLoader'
 import ScrollToTop from './components/layout/ScrollToTop'
 import MaintenanceBanner from './components/guards/MaintenanceBanner'
+import CountryOnboarding from './components/guards/CountryOnboarding'
 import RequireAuth from './components/guards/RequireAuth'
 import RequireMaintenanceAccess from './components/guards/RequireMaintenanceAccess'
 import RequireRole from './components/guards/RequireRole'
@@ -82,6 +83,7 @@ export default function App() {
             <ScrollToTop />
             <Navbar />
             <MaintenanceBanner />
+            <CountryOnboarding />
             <AppErrorBoundary>
               <Suspense fallback={<RouteLoader />}>
                 <Routes>

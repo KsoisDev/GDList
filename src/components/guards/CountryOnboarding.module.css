@@ -1,0 +1,63 @@
+.content {
+  display: grid;
+  gap: 18px;
+}
+
+.icon {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto;
+  place-items: center;
+  border: 1px solid rgba(105, 165, 255, 0.3);
+  border-radius: 18px;
+  color: #72adff;
+  background: linear-gradient(145deg, rgba(64, 132, 235, 0.2), rgba(32, 74, 138, 0.08));
+  box-shadow: 0 16px 34px rgba(22, 77, 158, 0.2);
+}
+
+.description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  text-align: center;
+}
+
+.selection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 9px 12px;
+  border: 1px solid rgba(105, 165, 255, 0.18);
+  border-radius: 12px;
+  color: var(--text-primary);
+  background: rgba(70, 129, 216, 0.08);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.selection img {
+  width: 32px;
+  max-height: 23px;
+  border-radius: 3px;
+  object-fit: cover;
+}
+
+.selection svg {
+  color: #70aaff;
+}
+
+.saveButton {
+  width: 100%;
+  justify-content: center;
+}
+
+.note {
+  margin: -8px 0 0;
+  color: var(--text-tertiary);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  text-align: center;
+}

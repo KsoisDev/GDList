@@ -12,7 +12,6 @@ import { formatDateRelative, getDisplayName } from '../../utils/format'
 import { getFlagUrl } from '../../utils/countries'
 import Button from '../ui/Button'
 import Avatar from '../ui/Avatar'
-import LanguageSelector from './LanguageSelector'
 import styles from './Navbar.module.css'
 
 export default function Navbar() {
@@ -166,7 +165,6 @@ export default function Navbar() {
         </div>
 
         <div className={styles.actions}>
-          <LanguageSelector compact />
           {user ? (
             <>
               {!accountSuspended && <div className={styles.bellWrapper} ref={notifRef}>

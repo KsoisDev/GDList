@@ -69,6 +69,12 @@ const en = {
     loadError: 'The country rankings could not be loaded.', totalPoints: 'Total points', players: 'Players',
     completions: 'Completions', topPlayers: 'Top players', clears: 'clears',
   },
+  countrySetup: {
+    title: 'Choose your country', description: 'Select the country you represent on Basement List. This is saved after your first choice and used for country rankings when you sign in.',
+    label: 'Country you represent', placeholder: 'Select a country…', save: 'Save my country', saving: 'Saving…',
+    note: 'You can change this later from your profile.', required: 'Choose a country to continue.',
+    saveError: 'Your country could not be saved. Please try again.',
+  },
 }
 
 const es = {
@@ -182,6 +188,12 @@ const ru = {
     loadError: 'Не удалось загрузить рейтинг стран.', totalPoints: 'Всего очков', players: 'Игроки',
     completions: 'Прохождения', topPlayers: 'Лучшие игроки', clears: 'прохождений',
   },
+  countrySetup: {
+    title: 'Выберите свою страну', description: 'Выберите страну, которую вы представляете в Basement List. Выбор сохраняется и используется в рейтинге стран после входа.',
+    label: 'Страна, которую вы представляете', placeholder: 'Выберите страну…', save: 'Сохранить страну', saving: 'Сохранение…',
+    note: 'Позже страну можно изменить в профиле.', required: 'Выберите страну, чтобы продолжить.',
+    saveError: 'Не удалось сохранить страну. Повторите попытку.',
+  },
 }
 
 const zhCN = {
@@ -225,6 +237,12 @@ const zhCN = {
     workspace: '国家和玩家排名', live: '实时国家排名', countries: '国家', search: '搜索国家或玩家…',
     noCountries: '此排名暂无符合条件的国家。', loadError: '无法加载国家排名。', totalPoints: '总分',
     players: '玩家', completions: '通关', topPlayers: '顶尖玩家', clears: '次通关',
+  },
+  countrySetup: {
+    title: '选择你的国家', description: '选择你在 Basement List 中代表的国家。首次选择后会保存，登录后用于国家排名。',
+    label: '你代表的国家', placeholder: '选择国家…', save: '保存我的国家', saving: '正在保存…',
+    note: '之后可以在个人资料中更改。', required: '请选择一个国家以继续。',
+    saveError: '无法保存你的国家，请重试。',
   },
 }
 

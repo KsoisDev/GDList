@@ -19,6 +19,7 @@ export default function Modal({
   children,
   ariaLabel = 'Dialog',
   ariaDescribedBy,
+  dismissible = true,
 }) {
   const dialogRef = useRef(null)
   const previousFocusRef = useRef(null)
@@ -41,7 +42,7 @@ export default function Modal({
     const focusFrame = requestAnimationFrame(() => dialogRef.current?.focus())
 
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape' && dismissible) {
         event.preventDefault()
         onCloseRef.current?.()
         return
@@ -79,7 +80,7 @@ export default function Modal({
       document.body.style.overflow = previousOverflow
       previousFocusRef.current?.focus?.()
     }
-  }, [isOpen])
+  }, [dismissible, isOpen])
 
   return (
     <AnimatePresence>
@@ -89,7 +90,7 @@ export default function Modal({
           initial={reduceMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={() => onCloseRef.current?.()}
+          onClick={dismissible ? () => onCloseRef.current?.() : undefined}
         >
           <motion.div
             ref={dialogRef}
@@ -108,14 +109,16 @@ export default function Modal({
           >
             <div className={styles.header}>
               {title && <h2 id={titleId} className={styles.title}>{title}</h2>}
-              <button
-                type="button"
-                className={styles.close}
-                onClick={() => onCloseRef.current?.()}
-                aria-label="Close dialog"
-              >
-                <X size={20} aria-hidden="true" />
-              </button>
+              {dismissible && (
+                <button
+                  type="button"
+                  className={styles.close}
+                  onClick={() => onCloseRef.current?.()}
+                  aria-label="Close dialog"
+                >
+                  <X size={20} aria-hidden="true" />
+                </button>
+              )}
             </div>
             <div className={styles.body}>{children}</div>
           </motion.div>

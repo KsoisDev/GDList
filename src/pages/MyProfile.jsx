@@ -32,11 +32,13 @@ import {
 } from '../services/auth'
 import Modal from '../components/ui/Modal'
 import SyncListModal from '../components/profile/SyncListModal'
+import LanguageSelector from '../components/layout/LanguageSelector'
 import { completeDiscordLogin, hasPendingDiscordLogin, clearPendingDiscordLogin, getStoredDiscordUser } from '../services/discordAuth'
 import { fetchAredlProfileByDiscordId, computeSyncPlan } from '../services/syncAredl'
 import { getGdlProfileUrl } from '../services/syncGdl'
 import { loadMainLevels } from '../services/readCache'
 import { hasAccess } from '../utils/constants'
+import { saveRepresentedCountry } from '../utils/preferences'
 import styles from './Profile.module.css'
 import theme from '../components/layout/ThemedPage.module.css'
 import { useShareProfile } from '../hooks/useShareProfile'
@@ -273,6 +275,10 @@ export default function MyProfile() {
 
   const handleSave = async () => {
     if (!user || !displayName.trim()) return
+    if (!country) {
+      setProfileError('Choose the country you represent before saving your profile.')
+      return
+    }
     setSaving(true)
     setProfileError('')
     setProfileMessage('')
@@ -284,6 +290,7 @@ export default function MyProfile() {
         bio: bio.trim() || '',
         country: country,
       })
+      saveRepresentedCountry(country)
       try {
         await syncVictorsSnapshot(user.uid, { username: displayName.trim(), displayName: displayName.trim(), country, avatarURL: avatarURL.trim() || '' })
       } catch (syncErr) {
@@ -572,6 +579,15 @@ export default function MyProfile() {
 
         {profileMessage && <p className={styles.successMessage} role="status">{profileMessage}</p>}
         {profileError && <p className={styles.formError} role="alert">{profileError}</p>}
+
+        <Card className={styles.preferencesCard}>
+          <div>
+            <span className={styles.preferencesEyebrow}>SITE PREFERENCES</span>
+            <h2>Interface language</h2>
+            <p>Change the language used across Basement List.</p>
+          </div>
+          <LanguageSelector />
+        </Card>
 
         <div className={styles.statsGrid}>
           <Card className={styles.statCard}>
