@@ -11,7 +11,7 @@
 }
 
 .container {
-  max-width: 1600px;
+  max-width: 1760px;
   margin: 0 auto;
   padding: 0 24px;
   height: 100%;
@@ -469,7 +469,7 @@
   color: var(--text-tertiary);
 }
 
-@media (max-width: 1320px) {
+@media (max-width: 1680px) {
   .container {
     grid-template-areas:
       "logo actions"
@@ -527,5 +527,9 @@
 
   .navDivider {
     margin: 0 3px;
+  }
+
+  .actions {
+    gap: 5px;
   }
 }

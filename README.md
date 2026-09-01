@@ -16,7 +16,7 @@ The app shows a setup screen when required Firebase values are missing instead o
 
 ## Languages
 
-The public interface supports English, Spanish, Russian, Simplified Chinese, and French. The language selector is available in the header and saves the visitor's choice on their device. Player names, level names, and other community-created content are kept exactly as submitted.
+The public interface supports English, Russian, and Simplified Chinese. The language selector is available in the header and saves the visitor's choice on their device. Player names, level names, and other community-created content are kept exactly as submitted.
 
 ## Preserving existing data
 

@@ -52,7 +52,7 @@
   --navbar-height: 64px;
 }
 
-@media (max-width: 1320px) {
+@media (max-width: 1680px) {
   :root {
     --navbar-height: 112px;
   }

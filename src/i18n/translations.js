@@ -1,9 +1,7 @@
 export const LANGUAGES = [
   { code: 'en', label: 'English', short: 'EN' },
-  { code: 'es', label: 'Español', short: 'ES' },
   { code: 'ru', label: 'Русский', short: 'RU' },
   { code: 'zh-CN', label: '简体中文', short: '中文' },
-  { code: 'fr', label: 'Français', short: 'FR' },
 ]
 
 const en = {
@@ -284,4 +282,4 @@ const fr = {
   },
 }
 
-export const TRANSLATIONS = { en, es, ru, 'zh-CN': zhCN, fr }
+export const TRANSLATIONS = { en, ru, 'zh-CN': zhCN }
