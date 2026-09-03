@@ -48,6 +48,12 @@ const communityBenefits = [
   },
 ]
 
+const devLogEntries = [
+  ['home.devLogCountryTitle', 'home.devLogCountryText'],
+  ['home.devLogLanguageTitle', 'home.devLogLanguageText'],
+  ['home.devLogUiTitle', 'home.devLogUiText'],
+]
+
 const emptyHighlights = {
   topMain: [],
   topCommunity: [],
@@ -376,6 +382,41 @@ export default function Home() {
           </div>
         </motion.aside>
       </section>
+
+      <motion.section
+        className={styles.devLog}
+        aria-labelledby="latest-dev-log-title"
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-60px' }}
+      >
+        <header className={styles.devLogHeader}>
+          <div>
+            <span className={styles.devLogEyebrow}><Sparkles size={14} aria-hidden="true" /> {t('home.devLogEyebrow')}</span>
+            <h2 id="latest-dev-log-title">{t('home.devLogTitle')}</h2>
+          </div>
+          <time dateTime="2026-09-03">{t('home.devLogDate')}</time>
+        </header>
+        <div className={styles.devLogEntries}>
+          {devLogEntries.map(([titleKey, textKey]) => (
+            <article className={styles.devLogEntry} key={titleKey}>
+              <span className={styles.devLogCheck}><CheckCircle2 size={17} aria-hidden="true" /></span>
+              <div>
+                <h3>{t(titleKey)}</h3>
+                <p>{t(textKey)}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+        <a
+          className={styles.devLogLink}
+          href="https://github.com/defnotsquishy/GDList/commits/beta-site"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Github size={16} aria-hidden="true" /> {t('home.devLogLink')} <ArrowRight size={14} aria-hidden="true" />
+        </a>
+      </motion.section>
 
       {!loading && (
         <section className={styles.leaderboards} aria-label={t('home.topRankings')}>
