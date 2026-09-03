@@ -40,6 +40,11 @@ const en = {
     fullLeaderboard: 'Full leaderboard', mainUnavailable: 'Main rankings are temporarily unavailable.',
     communityUnavailable: 'Community rankings are temporarily unavailable.', ready: 'READY FOR YOUR NEXT DEMON?',
     makeRun: 'Make your run part of the list.', myProfile: 'My profile',
+    devLogEyebrow: 'LATEST UPDATE', devLogTitle: 'Developer Log', devLogDate: '3 September 2026',
+    devLogCountryTitle: 'Country rankings', devLogCountryText: 'Explore Main and Community standings by country and discover their leading players.',
+    devLogLanguageTitle: 'English and Russian', devLogLanguageText: 'Switch languages from the homepage with responsive text across screen sizes.',
+    devLogUiTitle: 'Cleaner list experience', devLogUiText: 'Improved level artwork, navigation sizing, and direct links throughout the site.',
+    devLogLink: 'View development history',
   },
   list: {
     mainEyebrow: 'LIVE COMMUNITY RANKING', mainTitle: 'Main', mainAccent: 'Demon List',
@@ -110,6 +115,11 @@ const ru = {
     topRankings: 'Лучшие игроки', mainLeaders: 'Лидеры основного списка', communityLeaders: 'Лидеры списка сообщества',
     fullLeaderboard: 'Полный рейтинг', mainUnavailable: 'Основной рейтинг временно недоступен.', communityUnavailable: 'Рейтинг сообщества временно недоступен.',
     ready: 'ГОТОВЫ К СЛЕДУЮЩЕМУ ДЕМОНУ?', makeRun: 'Добавьте своё прохождение в список.', myProfile: 'Мой профиль',
+    devLogEyebrow: 'ПОСЛЕДНЕЕ ОБНОВЛЕНИЕ', devLogTitle: 'Дневник разработчиков', devLogDate: '3 сентября 2026 г.',
+    devLogCountryTitle: 'Рейтинг стран', devLogCountryText: 'Изучайте основной рейтинг и рейтинг сообщества по странам и находите ведущих игроков.',
+    devLogLanguageTitle: 'Английский и русский', devLogLanguageText: 'Переключайте язык на главной странице — текст адаптируется к любому размеру экрана.',
+    devLogUiTitle: 'Улучшенные списки', devLogUiText: 'Обновлены изображения уровней, размеры навигации и прямые ссылки по всему сайту.',
+    devLogLink: 'История разработки',
   },
   list: {
     mainEyebrow: 'РЕЙТИНГ СООБЩЕСТВА', mainTitle: 'Основной', mainAccent: 'список демонов',
