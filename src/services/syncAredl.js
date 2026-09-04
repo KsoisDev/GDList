@@ -1,3 +1,5 @@
+import { roundPoints } from '../utils/communityPoints'
+
 const AREDL_API = 'https://api.aredl.net/v2/api'
 
 export async function searchAredlUsers(query) {
@@ -82,6 +84,95 @@ export function computeSyncPlan(aredlProfile, mainLevels) {
   }
 
   return { matched, unmatched }
+}
+
+function slugify(name) {
+  return String(name || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 60) || 'level'
+}
+
+function asName(value) {
+  if (!value) return ''
+  if (typeof value === 'string') return value
+  if (typeof value.name === 'string') return value.name
+  return ''
+}
+
+// Index the AREDL catalogue (same mapped data the admin auto-fill and the
+// "Sync Main List from AREDL" button use, so points/position scale matches
+// our list) for enriching levels missing from Firestore.
+export function indexAredlMeta(metaList) {
+  const byGameId = new Map()
+  const bySlug = new Map()
+  const byName = new Map()
+  for (const m of metaList || []) {
+    if (m?.gameId) byGameId.set(String(m.gameId), m)
+    if (m?.levelId != null) byGameId.set(String(m.levelId), m)
+    if (m?.id) bySlug.set(String(m.id), m)
+    if (m?.name) {
+      const key = normalizeLevelName(m.name)
+      if (key && !byName.has(key)) byName.set(key, m)
+    }
+  }
+  return { byGameId, bySlug, byName }
+}
+
+export function findAredlMeta(aredlRecord, index) {
+  if (!index) return null
+  const level = aredlRecord?.level || {}
+  const gdId = String(level.level_id || '')
+  if (gdId && index.byGameId.has(gdId)) return index.byGameId.get(gdId)
+  const name = normalizeLevelName(level.name)
+  if (name && index.byName.has(name)) return index.byName.get(name)
+  return null
+}
+
+// Build a Firestore `levels` doc for an AREDL record with no match in our
+// list. Points/position come from the AREDL catalogue; unknown creator or
+// points fall back to placeholders and mark the doc for review.
+const MAIN_LEVEL_ID_PREFIX = 'main_'
+
+export function buildMissingLevelDoc(aredlRecord, meta) {
+  const recordLevel = aredlRecord?.level || {}
+  const name = meta?.name || recordLevel.name || 'Unknown'
+  const slug = meta?.id || slugify(name)
+  const gameId = String(meta?.gameId ?? meta?.levelId ?? recordLevel.level_id ?? '')
+  const creator = asName(meta?.creators?.[0])
+    || (Array.isArray(recordLevel.creators) ? asName(recordLevel.creators[0]) : '')
+    || recordLevel.creator
+    || 'Unknown'
+  const verifier = asName(meta?.verifier) || recordLevel.verifier || 'Unknown'
+  const position = Number(meta?.position ?? recordLevel.position) || 0
+  const hasMetaPoints = meta?.points != null
+  const points = hasMetaPoints ? roundPoints(meta.points) : 0
+  const now = new Date()
+  return {
+    id: `${MAIN_LEVEL_ID_PREFIX}${slug}`,
+    slug,
+    gameId,
+    data: {
+      type: 'main',
+      name,
+      creator,
+      verifier,
+      difficulty: 'extreme',
+      gameId,
+      thumbnail: '',
+      position,
+      points,
+      victoryCount: 0,
+      victors: [],
+      firstCompletedAt: now,
+      isActive: true,
+      percentage: 100,
+      autoCreated: true,
+      createdVia: 'aredl_sync',
+      needsReview: !hasMetaPoints || creator === 'Unknown',
+    },
+  }
 }
 
 export async function applySync(userId, matched, existingCompletions, { addCompletion, updateLevelVictors }) {

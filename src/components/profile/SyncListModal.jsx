@@ -3,10 +3,11 @@ import { ArrowLeft, Lock, RefreshCw, CheckCircle2, AlertCircle, Link2 } from 'lu
 import Modal from '../ui/Modal'
 import Button from '../ui/Button'
 import Spinner from '../ui/Spinner'
-import { fetchAredlProfile, computeSyncPlan } from '../../services/syncAredl'
+import { fetchAredlProfile, computeSyncPlan, indexAredlMeta, findAredlMeta, buildMissingLevelDoc } from '../../services/syncAredl'
+import { fetchAredlLevels } from '../../services/aredl'
 import { fetchGdlPlayer } from '../../services/syncGdl'
-import { loadMainLevels } from '../../services/readCache'
-import { createDocument, updateDocument } from '../../services/firestore'
+import { loadMainLevels, invalidateCache } from '../../services/readCache'
+import { createDocument, getDocument, updateDocument } from '../../services/firestore'
 import { startDiscordLogin, getStoredDiscordUser, clearDiscordUser } from '../../services/discordAuth'
 import styles from './SyncListModal.module.css'
 
@@ -117,16 +118,69 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
   }
 
   const handleSync = async () => {
-    if (!syncPlan || !syncPlan.matched.length) return
+    if (!syncPlan || (!syncPlan.matched.length && !syncPlan.unmatched.length)) return
     setSyncing(true)
+    setSearchError('')
     try {
       let added = 0
+      let createdLevels = 0
       let victorErrors = 0
+      const stillUnmatched = []
       const existingLevelIds = new Set(existingCompletions.map(c => c.levelId))
       // Load the user's public profile so the victor snapshot has real data.
       const userDoc = await getDocument('users', userId)
 
-      for (const { aredlRecord, gdLevel } of syncPlan.matched) {
+      // Re-match against fresh levels so docs created by a concurrent sync
+      // are reused instead of duplicated.
+      const mainLevels = await loadMainLevels()
+      const plan = computeSyncPlan(profile, mainLevels)
+      setSyncPlan(plan)
+
+      // Enrich records missing from our list with AREDL catalogue data
+      // (points/position scale matches our list) and create their level docs.
+      let metaIndex = null
+      if (plan.unmatched.length > 0) {
+        try {
+          metaIndex = indexAredlMeta(await fetchAredlLevels())
+        } catch (metaErr) {
+          console.error('[aredl-sync] AREDL catalogue unavailable:', metaErr)
+        }
+      }
+
+      const toProcess = [...plan.matched]
+      for (const rec of plan.unmatched) {
+        if (!rec?.level?.name) { stillUnmatched.push(rec); continue }
+        const meta = findAredlMeta(rec, metaIndex)
+        let { id, slug, gameId, data } = buildMissingLevelDoc(rec, meta)
+        let gdLevel = null
+        try {
+          const existingDoc = await getDocument('levels', id).catch(() => null)
+          if (existingDoc) {
+            const sameGame = !gameId || !existingDoc.gameId || String(existingDoc.gameId) === String(gameId)
+            if (sameGame) {
+              gdLevel = { id, ...existingDoc }
+            } else {
+              id = `main_${slug}_${gameId || Date.now()}`
+              const retryDoc = await getDocument('levels', id).catch(() => null)
+              if (retryDoc) gdLevel = { id, ...retryDoc }
+            }
+          }
+          if (!gdLevel) {
+            await createDocument('levels', id, data)
+            createdLevels++
+            gdLevel = { id, ...data }
+          }
+        } catch (levelErr) {
+          console.error('[aredl-sync] level auto-create failed:', levelErr)
+          stillUnmatched.push(rec)
+          continue
+        }
+        toProcess.push({ aredlRecord: rec, gdLevel })
+      }
+
+      if (createdLevels > 0) invalidateCache('mainLevels')
+
+      for (const { aredlRecord, gdLevel } of toProcess) {
         if (existingLevelIds.has(gdLevel.id)) continue
         const completionId = `aredl_sync_${userId}_${gdLevel.id}`
         await createDocument('completions', completionId, {
@@ -178,9 +232,10 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
 
       setSyncResult({
         added,
-        skipped: syncPlan.matched.length - added,
+        skipped: toProcess.length - added,
         victorErrors,
-        unmatched: syncPlan.unmatched.length,
+        createdLevels,
+        unmatched: stillUnmatched.length,
       })
       setStep('done')
       if (onComplete) onComplete()
@@ -427,7 +482,7 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
                 <div className={styles.syncSummary}>
                   <span className={styles.matchedCount}>{syncPlan.matched.length} matched</span> with your GDList levels
                   {syncPlan.unmatched.length > 0 && (
-                    <> &middot; <span className={styles.unmatchedCount}>{syncPlan.unmatched.length} unmatched</span></>
+                    <> &middot; <span className={styles.unmatchedCount}>{syncPlan.unmatched.length} new will be added to the list</span></>
                   )}
                 </div>
               )}
@@ -444,7 +499,7 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
                     icon={RefreshCw}
                     onClick={handleSync}
                     loading={syncing}
-                    disabled={!syncPlan || syncPlan.matched.length === 0}
+                    disabled={!syncPlan || (syncPlan.matched.length === 0 && syncPlan.unmatched.length === 0)}
                   >
                     Sync Records
                   </Button>
@@ -470,7 +525,8 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
             {syncResult?.linked
               ? 'Your Global Demon List profile is now linked.'
               : `${syncResult?.added} record${syncResult?.added === 1 ? '' : 's'} added, ${syncResult?.skipped} skipped.`}
-            {syncResult?.unmatched > 0 && ` ${syncResult.unmatched} not on the main list.`}
+            {syncResult?.createdLevels > 0 && ` ${syncResult.createdLevels} new level${syncResult.createdLevels === 1 ? '' : 's'} added to the main list.`}
+            {syncResult?.unmatched > 0 && ` ${syncResult.unmatched} could not be imported.`}
             {syncResult?.victorErrors > 0 && ` ${syncResult.victorErrors} victor update${syncResult.victorErrors === 1 ? '' : 's'} deferred.`}
           </p>
           <Button variant="primary" size="sm" onClick={handleClose}>Done</Button>
