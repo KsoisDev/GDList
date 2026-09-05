@@ -175,6 +175,26 @@ export function buildMissingLevelDoc(aredlRecord, meta) {
   }
 }
 
+// Human-readable cause for a sync failure, so the modal can show WHY a
+// record could not be imported instead of failing silently.
+export function describeSyncError(err) {
+  const code = String(err?.code || '')
+  const message = String(err?.message || '')
+  if (code === 'permission-denied' || /permission|insufficient/i.test(message)) {
+    return 'missing Firestore permissions'
+  }
+  if (code === 'unauthenticated' || /auth|sign[ -]?in|token|expired/i.test(message)) {
+    return 'authentication expired — sign in again'
+  }
+  if (code === 'unavailable' || code === 'deadline-exceeded'
+    || /network|timeout|offline|unreachable|failed to fetch|load failed/i.test(message)) {
+    return 'network/timeout reaching Firestore'
+  }
+  if (code === 'not-found') return 'document not found'
+  if (code === 'resource-exhausted' || /quota/i.test(message)) return 'Firestore quota exceeded'
+  return message ? message.slice(0, 140) : 'unknown error'
+}
+
 export async function applySync(userId, matched, existingCompletions, { addCompletion, updateLevelVictors }) {
   const existingLevelIds = new Set(existingCompletions.map(c => c.levelId))
   const toAdd = matched.filter(m => !existingLevelIds.has(m.gdLevel.id))

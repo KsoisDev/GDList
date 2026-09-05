@@ -3,7 +3,7 @@ import { ArrowLeft, Lock, RefreshCw, CheckCircle2, AlertCircle, Link2 } from 'lu
 import Modal from '../ui/Modal'
 import Button from '../ui/Button'
 import Spinner from '../ui/Spinner'
-import { fetchAredlProfile, computeSyncPlan, indexAredlMeta, findAredlMeta, buildMissingLevelDoc } from '../../services/syncAredl'
+import { fetchAredlProfile, computeSyncPlan, indexAredlMeta, findAredlMeta, buildMissingLevelDoc, describeSyncError } from '../../services/syncAredl'
 import { fetchAredlLevels } from '../../services/aredl'
 import { fetchGdlPlayer } from '../../services/syncGdl'
 import { loadMainLevels, invalidateCache } from '../../services/readCache'
@@ -126,6 +126,16 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
       let createdLevels = 0
       let victorErrors = 0
       const stillUnmatched = []
+      // reason -> { count, sample } so the done step can explain failures.
+      const failureReasons = {}
+      const trackFailure = (rec, err) => {
+        const reason = err ? describeSyncError(err) : 'no level data in AREDL record'
+        if (!failureReasons[reason]) {
+          failureReasons[reason] = { count: 0, sample: rec?.level?.name || 'Unknown level' }
+        }
+        failureReasons[reason].count++
+        stillUnmatched.push(rec)
+      }
       const existingLevelIds = new Set(existingCompletions.map(c => c.levelId))
       // Load the user's public profile so the victor snapshot has real data.
       const userDoc = await getDocument('users', userId)
@@ -149,7 +159,7 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
 
       const toProcess = [...plan.matched]
       for (const rec of plan.unmatched) {
-        if (!rec?.level?.name) { stillUnmatched.push(rec); continue }
+        if (!rec?.level?.name) { trackFailure(rec, null); continue }
         const meta = findAredlMeta(rec, metaIndex)
         let { id, slug, gameId, data } = buildMissingLevelDoc(rec, meta)
         let gdLevel = null
@@ -172,7 +182,7 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
           }
         } catch (levelErr) {
           console.error('[aredl-sync] level auto-create failed:', levelErr)
-          stillUnmatched.push(rec)
+          trackFailure(rec, levelErr)
           continue
         }
         toProcess.push({ aredlRecord: rec, gdLevel })
@@ -236,11 +246,17 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
         victorErrors,
         createdLevels,
         unmatched: stillUnmatched.length,
+        failures: Object.entries(failureReasons).map(([reason, { count, sample }]) => ({
+          reason,
+          count,
+          sample,
+        })),
       })
       setStep('done')
       if (onComplete) onComplete()
     } catch (err) {
-      setSearchError('Sync failed. Try again.')
+      console.error('[aredl-sync] sync aborted:', err)
+      setSearchError(`Sync failed: ${describeSyncError(err)}.`)
     } finally {
       setSyncing(false)
     }
@@ -529,6 +545,11 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
             {syncResult?.unmatched > 0 && ` ${syncResult.unmatched} could not be imported.`}
             {syncResult?.victorErrors > 0 && ` ${syncResult.victorErrors} victor update${syncResult.victorErrors === 1 ? '' : 's'} deferred.`}
           </p>
+          {syncResult?.failures?.length > 0 && (
+            <p style={{ fontSize: '0.75rem', color: '#fca5a5', marginBottom: 16 }}>
+              Why: {syncResult.failures.map(f => `${f.count}× ${f.reason} (e.g. ${f.sample})`).join('; ')}
+            </p>
+          )}
           <Button variant="primary" size="sm" onClick={handleClose}>Done</Button>
         </div>
       )}
