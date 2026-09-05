@@ -410,7 +410,7 @@ export default function Home() {
         </div>
         <a
           className={styles.devLogLink}
-          href="https://github.com/defnotsquishy/GDList/commits/beta-site"
+          href="https://github.com/ksois/GDList/commits/main"
           target="_blank"
           rel="noopener noreferrer"
         >
