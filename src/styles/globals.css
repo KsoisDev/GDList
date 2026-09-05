@@ -58,6 +58,12 @@
   }
 }
 
+@media (max-width: 768px) {
+  :root {
+    --navbar-height: 64px;
+  }
+}
+
 html {
   scroll-behavior: smooth;
 }

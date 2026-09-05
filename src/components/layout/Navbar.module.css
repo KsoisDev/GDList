@@ -269,6 +269,32 @@
   align-items: center;
 }
 
+.hamburgerBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--border-glass);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.hamburgerBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-glass);
+  border-color: var(--border-glass-hover);
+}
+
+.hamburgerBtn:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
 .bellBtn {
   position: relative;
   display: flex;
@@ -349,6 +375,84 @@
   justify-content: space-between;
   padding: 12px 16px;
   border-bottom: 1px solid var(--border-glass);
+}
+
+.mobileMenu {
+  position: fixed;
+  z-index: 999;
+  top: calc(var(--navbar-height) + 8px);
+  left: 12px;
+  right: 12px;
+  max-height: calc(100vh - var(--navbar-height) - 24px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px;
+  border: 1px solid rgba(100, 155, 235, 0.2);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(55, 126, 237, 0.12), transparent 38%),
+    rgba(8, 15, 28, 0.97);
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+  backdrop-filter: blur(24px);
+  isolation: isolate;
+}
+
+.mobileNavLink {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all 150ms ease;
+}
+
+.mobileNavLink:hover {
+  background: rgba(68, 136, 255, 0.12);
+  color: var(--text-primary);
+}
+
+.mobileDivider {
+  height: 1px;
+  background: var(--border-glass);
+  margin: 8px 6px;
+}
+
+.mobileSubmit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: var(--accent-blue);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 150ms ease;
+}
+
+.mobileSubmit svg {
+  flex-shrink: 0;
+}
+
+.mobileSubmit:hover {
+  background: rgba(68, 136, 255, 0.12);
+}
+
+.mobileAuth {
+  display: flex;
+  gap: 8px;
+  padding: 4px 2px 2px;
 }
 
 .notifTitle {
@@ -543,5 +647,22 @@
   :global(html[lang='ru']) .submitBtn {
     padding-inline: 8px;
     font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    grid-template-areas: 'logo actions';
+    grid-template-columns: minmax(0, 1fr) max-content;
+    grid-template-rows: 1fr;
+    gap: 0;
+  }
+
+  .desktopNav {
+    display: none;
+  }
+
+  .hamburgerBtn {
+    display: flex;
   }
 }

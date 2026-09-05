@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LogOut, User, Shield, ChevronDown, Plus, Bell, Check, X as XIcon, Clock, Flag } from 'lucide-react'
+import { LogOut, User, Shield, ChevronDown, Plus, Bell, Check, X as XIcon, Clock, Flag, Menu } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useSiteConfig } from '../../hooks/useSiteConfig'
 import { useLanguage } from '../../hooks/useLanguage'
@@ -22,11 +22,14 @@ export default function Navbar() {
   const navigate = useNavigate()
   const [profileOpen, setProfileOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const [notifications, setNotifications] = useState([])
   const [notificationError, setNotificationError] = useState('')
   const [signingOut, setSigningOut] = useState(false)
   const notifRef = useRef(null)
   const profileRef = useRef(null)
+  const mobileMenuRef = useRef(null)
+  const mobileBtnRef = useRef(null)
 
   const isActive = (path) => location.pathname === path
   const accountSuspended = userData?.banned === true
@@ -69,16 +72,29 @@ export default function Navbar() {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setProfileOpen(false)
       }
+      const inMenu = mobileMenuRef.current?.contains(e.target) ?? false
+      const inToggle = mobileBtnRef.current?.contains(e.target) ?? false
+      if (!inMenu && !inToggle) {
+        setMobileOpen(false)
+      }
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
   useEffect(() => {
+    if (!mobileOpen) return undefined
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = previousOverflow }
+  }, [mobileOpen])
+
+  useEffect(() => {
     function handleKeyDown(event) {
       if (event.key !== 'Escape') return
       setProfileOpen(false)
       setNotifOpen(false)
+      setMobileOpen(false)
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
@@ -87,6 +103,7 @@ export default function Navbar() {
   useEffect(() => {
     setProfileOpen(false)
     setNotifOpen(false)
+    setMobileOpen(false)
   }, [location.pathname])
 
   const unreadCount = notifications.filter(n => !n.read).length
@@ -295,8 +312,64 @@ export default function Navbar() {
               <Button to="/register" variant="primary" size="sm">{t('nav.join')}</Button>
             </div>
           )}
+          <button
+            type="button"
+            ref={mobileBtnRef}
+            className={styles.hamburgerBtn}
+            onClick={() => { setMobileOpen(value => !value); setNotifOpen(false); setProfileOpen(false) }}
+            aria-label={mobileOpen ? t('nav.closeMenu') : t('nav.openMenu')}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-menu"
+          >
+            {mobileOpen ? <XIcon size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </div>
+
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            ref={mobileMenuRef}
+            className={styles.mobileMenu}
+            id="mobile-menu"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+          >
+            {NAV_LINKS.map(link => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`${styles.mobileNavLink} ${isActive(link.path) ? styles.active : ''}`}
+              >
+                {t(link.labelKey)}
+              </Link>
+            ))}
+            {canSubmit && (
+              <>
+                <div className={styles.mobileDivider} />
+                <Link to="/submit" className={styles.mobileSubmit}>
+                  <Plus size={16} />
+                  {t('nav.record')}
+                </Link>
+                <Link to="/submit-level" className={styles.mobileSubmit}>
+                  <Plus size={16} />
+                  {t('nav.level')}
+                </Link>
+              </>
+            )}
+            {!user && (
+              <>
+                <div className={styles.mobileDivider} />
+                <div className={styles.mobileAuth}>
+                  <Button to="/login" variant="ghost" size="sm" fullWidth>{t('nav.signIn')}</Button>
+                  <Button to="/register" variant="primary" size="sm" fullWidth>{t('nav.join')}</Button>
+                </div>
+              </>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   )
 }
