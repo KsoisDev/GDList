@@ -5,7 +5,7 @@ import styles from './SearchSelect.module.css'
 
 export default function SearchSelect({
   label,
-  options,
+  options = [],
   value,
   onChange,
   placeholder = 'Search...',
@@ -24,13 +24,16 @@ export default function SearchSelect({
   const listboxId = `${triggerId}-listbox`
   const errorId = `${triggerId}-error`
 
-  const selected = options.find(o => o.value === value)
+  const safeOptions = Array.isArray(options) ? options : []
+  const optionLabel = (o) => String(o?.label ?? '')
+
+  const selected = safeOptions.find(o => o?.value === value)
 
   const filtered = query
-    ? options.filter(o =>
-        o.label.toLowerCase().includes(query.toLowerCase())
+    ? safeOptions.filter(o =>
+        optionLabel(o).toLowerCase().includes(query.toLowerCase())
       )
-    : options
+    : safeOptions
 
   useEffect(() => {
     function handleClick(e) {
@@ -63,7 +66,7 @@ export default function SearchSelect({
 
   const openSelect = () => {
     if (loading) return
-    setActiveIndex(Math.max(0, filtered.findIndex(option => option.value === value)))
+    setActiveIndex(Math.max(0, filtered.findIndex(option => option?.value === value)))
     setOpen(true)
   }
 
@@ -163,15 +166,15 @@ export default function SearchSelect({
                   <button
                     type="button"
                     tabIndex={-1}
-                    key={opt.value}
+                    key={opt?.value ?? index}
                     id={`${triggerId}-option-${index}`}
                     role="option"
-                    aria-selected={opt.value === value}
-                    className={`${styles.option} ${opt.value === value ? styles.optionActive : ''} ${index === activeIndex ? styles.optionFocused : ''}`}
-                    onClick={() => handleSelect(opt.value)}
+                    aria-selected={opt?.value === value}
+                    className={`${styles.option} ${opt?.value === value ? styles.optionActive : ''} ${index === activeIndex ? styles.optionFocused : ''}`}
+                    onClick={() => handleSelect(opt?.value)}
                     onMouseEnter={() => setActiveIndex(index)}
                   >
-                    {opt.label}
+                    {optionLabel(opt)}
                   </button>
                 ))
               )}

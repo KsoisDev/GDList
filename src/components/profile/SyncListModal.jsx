@@ -103,7 +103,10 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
       setProfile(profileData)
       const mainLevels = await loadMainLevels()
       const plan = computeSyncPlan(profileData, mainLevels)
-      setSyncPlan(plan)
+      setSyncPlan({
+        matched: Array.isArray(plan?.matched) ? plan.matched : [],
+        unmatched: Array.isArray(plan?.unmatched) ? plan.unmatched : [],
+      })
     } catch (err) {
       setSearchError('Failed to load AREDL profile.')
       setStep('auth')
@@ -117,7 +120,9 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
   }
 
   const handleSync = async () => {
-    if (!syncPlan || (!syncPlan.matched.length && !syncPlan.unmatched.length)) return
+    const matched = Array.isArray(syncPlan?.matched) ? syncPlan.matched : []
+    const unmatched = Array.isArray(syncPlan?.unmatched) ? syncPlan.unmatched : []
+    if (matched.length === 0 && unmatched.length === 0) return
     setSyncing(true)
     setSearchError('')
     try {
@@ -134,7 +139,11 @@ export default function SyncListModal({ isOpen, onClose, userId, existingComplet
       })
       // Refresh the displayed plan counts after the sync.
       const mainLevels = await loadMainLevels()
-      setSyncPlan(computeSyncPlan(profile, mainLevels))
+      const refreshed = computeSyncPlan(profile, mainLevels)
+      setSyncPlan({
+        matched: Array.isArray(refreshed?.matched) ? refreshed.matched : [],
+        unmatched: Array.isArray(refreshed?.unmatched) ? refreshed.unmatched : [],
+      })
       setSyncResult(result)
       setStep('done')
       if (onComplete) onComplete()

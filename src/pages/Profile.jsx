@@ -157,9 +157,10 @@ export default function Profile() {
   }
 
   const stats = profile.stats || {}
-  const mainPointsFromCompletions = mainComps.reduce((sum, completion) => sum + (completion.points || 0), 0)
-  const mainPoints = stats.mainPoints || mainPointsFromCompletions
-  const communityPointsLive = communityComps.reduce((sum, c) => sum + (c.points || 0), 0)
+  const numPoints = (value) => Number(value) || 0
+  const mainPointsFromCompletions = mainComps.reduce((sum, completion) => sum + numPoints(completion.points), 0)
+  const mainPoints = numPoints(stats.mainPoints) || mainPointsFromCompletions
+  const communityPointsLive = communityComps.reduce((sum, c) => sum + numPoints(c.points), 0)
   const totalPointsLive = parseFloat((mainPoints + communityPointsLive).toFixed(2))
 
   return (

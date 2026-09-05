@@ -84,11 +84,11 @@ export default function MergeMainLevels() {
         </Card>
       ) : (
         <div className={styles.submissionsList}>
-          {groups.map((group, gi) => (
+          {groups.filter(group => Array.isArray(group) && group.length > 0).map((group, gi) => (
             <Card key={gi} padding="md" className={styles.submissionCard}>
               <div className={styles.subHeader}>
                 <div className={styles.subInfo}>
-                  <span className={styles.subLevel}>{group[0].name}</span>
+                  <span className={styles.subLevel}>{group[0]?.name || 'Unknown'}</span>
                   <span className={styles.subUser}>{group.length} docs</span>
                 </div>
               </div>

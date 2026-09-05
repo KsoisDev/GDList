@@ -106,7 +106,7 @@ export default function ManageUsers() {
     }
   }
 
-  if (authLoading || loading) {
+  if (authLoading || loading || !user) {
     return <PageShell><div className={styles.loading}><Spinner size="lg" /></div></PageShell>
   }
 

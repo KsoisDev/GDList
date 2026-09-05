@@ -27,20 +27,19 @@
     <script>
       (() => {
         try {
+          // Restore the inner route saved by 404.html so reloads and direct
+          // links land back on the same page instead of the homepage.
+          // Works both on the custom domain (base '/') and subpath deploys.
           const redirect = sessionStorage.getItem('gdlist.redirect') || sessionStorage.getItem('redirect')
           sessionStorage.removeItem('gdlist.redirect')
           sessionStorage.removeItem('redirect')
           if (!redirect) return
 
-          const base = '%BASE_URL%'
-          if (base === '/') return
-
-          const target = new URL(redirect)
-          const basePath = base.endsWith('/') ? base.slice(0, -1) : base
-          const isAppPath = target.pathname === basePath || target.pathname.startsWith(`${basePath}/`)
-          if (target.origin === location.origin && isAppPath) {
-            history.replaceState(null, '', `${target.pathname}${target.search}${target.hash}`)
-          }
+          const target = new URL(redirect, location.origin)
+          if (target.origin !== location.origin) return
+          const path = `${target.pathname}${target.search}${target.hash}`
+          if (!path || path === '/' || !path.startsWith('/')) return
+          history.replaceState(null, '', path)
         } catch {
           // Continue at the app root if storage or URL parsing is unavailable.
         }

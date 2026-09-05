@@ -344,7 +344,7 @@ export default function MyProfile() {
     )
   }
 
-  if (!userData) {
+  if (!user || !userData) {
     return (
       <PageShell className={theme.pageShell}>
         <div className={theme.glow} aria-hidden="true" />
@@ -358,11 +358,12 @@ export default function MyProfile() {
   }
 
   const stats = userData.stats || {}
+  const numPoints = (value) => Number(value) || 0
   const mainComps = completions.filter(c => c.levelType === 'main')
   const communityComps = completions.filter(c => c.levelType === 'community')
-  const communityPointsLive = communityComps.reduce((sum, c) => sum + (c.points || 0), 0)
-  const mainPointsFromCompletions = mainComps.reduce((sum, completion) => sum + (completion.points || 0), 0)
-  const mainPoints = stats.mainPoints || mainPointsFromCompletions
+  const communityPointsLive = communityComps.reduce((sum, c) => sum + numPoints(c.points), 0)
+  const mainPointsFromCompletions = mainComps.reduce((sum, completion) => sum + numPoints(completion.points), 0)
+  const mainPoints = numPoints(stats.mainPoints) || mainPointsFromCompletions
   const totalPointsLive = parseFloat((mainPoints + communityPointsLive).toFixed(2))
   const passwordAccount = usesPasswordProvider(user)
 

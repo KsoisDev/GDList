@@ -153,14 +153,14 @@ export default function SubmitRecord() {
 
   const getLevelOptions = () => {
     if (levelType === 'community') {
-      return communityLevels.map(l => ({
-        value: l.id,
-        label: `#${l.position} - ${l.name}`,
+      return (Array.isArray(communityLevels) ? communityLevels : []).map(l => ({
+        value: l?.id,
+        label: `#${l?.position ?? '?'} - ${l?.name ?? 'Unknown'}`,
       }))
     }
-    return demons.map(d => ({
-      value: String(d.id),
-      label: `#${d.position} - ${d.name}`,
+    return (Array.isArray(demons) ? demons : []).map(d => ({
+      value: String(d?.id ?? ''),
+      label: `#${d?.position ?? '?'} - ${d?.name ?? 'Unknown'}`,
     }))
   }
 
@@ -240,7 +240,7 @@ export default function SubmitRecord() {
       setManualMode(false)
       setGameId('')
     } catch (err) {
-      setError(err.message)
+      setError(err?.message || 'Submission failed. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -269,9 +269,10 @@ export default function SubmitRecord() {
   }
 
   const levelOptions = getLevelOptions()
-  const selectionError = error === 'Please select a level' ? error : ''
-  const levelNameError = error === 'Please enter the level name' ? error : ''
-  const videoError = error.startsWith('Please provide a valid video URL') ? error : ''
+  const errorText = typeof error === 'string' ? error : ''
+  const selectionError = errorText === 'Please select a level' ? errorText : ''
+  const levelNameError = errorText === 'Please enter the level name' ? errorText : ''
+  const videoError = errorText.startsWith('Please provide a valid video URL') ? errorText : ''
   const externalLinkError = error === 'Link must be from demonlist.org' ? error : ''
   const hasFieldError = !!(selectionError || levelNameError || videoError || externalLinkError)
 

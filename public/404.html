@@ -4,12 +4,23 @@
   <meta charset="UTF-8" />
   <title>Basement List</title>
   <script>
-    const host = location.hostname
-    if (host.includes('ksois.github.io')) {
-      location.replace('https://blist.ksois.com/')
-    } else {
-      location.replace('/' + location.search + location.hash)
-    }
+    (function () {
+      var host = location.hostname
+      if (host.includes('ksois.github.io')) {
+        location.replace('https://blist.ksois.com/')
+        return
+      }
+      // GitHub Pages has no SPA rewrites: remember the full inner route so
+      // the app can restore it after landing on /. Query + hash included so
+      // flows like Discord OAuth (?discord_token=...) keep working.
+      try {
+        sessionStorage.setItem(
+          'gdlist.redirect',
+          location.pathname + location.search + location.hash
+        )
+      } catch (e) {}
+      location.replace('/')
+    })()
   </script>
 </head>
 <body></body>
