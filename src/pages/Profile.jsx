@@ -17,6 +17,7 @@ import { communityPoints } from '../utils/communityPoints'
 import { computeBadges } from '../utils/badges'
 import { formatNumber, formatDate, getDisplayName } from '../utils/format'
 import { getFlagUrl } from '../utils/countries'
+import { getGdlProfileUrl } from '../services/syncGdl'
 import { hasAccess } from '../utils/constants'
 import Modal from '../components/ui/Modal'
 import Button from '../components/ui/Button'
@@ -189,6 +190,60 @@ export default function Profile() {
                   <Badge variant="blue" size="sm" title="Verified a community level">
                     <Shield size={12} /> Verifier
                   </Badge>
+                )}
+                {profile.aredlSync && (
+                  <a
+                    href={`https://aredl.net/profile/user/${encodeURIComponent(profile.aredlSync.username)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.aredlBadge}
+                    title="View AREDL Profile"
+                  >
+                    <img
+                      src="https://aredl.net/assets/logo.webp"
+                      alt="ARED"
+                      className={styles.aredlLogo}
+                    />
+                    <span className={styles.aredlUser}>
+                      {profile.aredlSync.globalName || profile.aredlSync.username}
+                    </span>
+                  </a>
+                )}
+                {profile.gdlSync && (
+                  <a
+                    href={getGdlProfileUrl(profile.gdlSync.playerId, profile.gdlSync.playerName)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.gdlBadge}
+                    title="View Global Demon List Profile"
+                  >
+                    <img
+                      src="https://discord.do/wp-content/uploads/2023/09/Global-Demonlist.jpg"
+                      alt="GDL"
+                      className={styles.gdlLogo}
+                    />
+                    <span className={styles.gdlUser}>
+                      {profile.gdlSync.playerName}
+                    </span>
+                  </a>
+                )}
+                {profile.pointercrateSync && (
+                  <a
+                    href={`https://www.pointercrate.com/demonlist/statsviewer/?player=${profile.pointercrateSync.playerId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.pointerBadge}
+                    title="View Pointercrate Profile"
+                  >
+                    <img
+                      src="https://www.pointercrate.com/static/images/logo.png"
+                      alt="Pointercrate"
+                      className={styles.pointerLogo}
+                    />
+                    <span className={styles.pointerUser}>
+                      Pointercrate
+                    </span>
+                  </a>
                 )}
                 <span className={styles.joinDate}>
                   <Calendar size={14} /> Joined {formatDate(profile.createdAt)}
