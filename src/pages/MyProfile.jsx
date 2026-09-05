@@ -13,8 +13,8 @@ import Input from '../components/ui/Input'
 import Select from '../components/ui/Select'
 import Spinner from '../components/ui/Spinner'
 import { useAuth } from '../hooks/useAuth'
-import { createDocument, updateDocument, getCollection, getDocument, where } from '../services/firestore'
-import { loadCommunityLevels, invalidateCache } from '../services/readCache'
+import { updateDocument, getCollection, where } from '../services/firestore'
+import { loadCommunityLevels } from '../services/readCache'
 import { communityPoints } from '../utils/communityPoints'
 import { computeBadges } from '../utils/badges'
 import { getDisplayName, formatNumber, formatDate } from '../utils/format'
@@ -33,9 +33,9 @@ import {
 import Modal from '../components/ui/Modal'
 import SyncListModal from '../components/profile/SyncListModal'
 import { completeDiscordLogin, hasPendingDiscordLogin, clearPendingDiscordLogin, getStoredDiscordUser } from '../services/discordAuth'
-import { fetchAredlProfileByDiscordId, computeSyncPlan } from '../services/syncAredl'
+import { fetchAredlProfileByDiscordId, runAredlSync } from '../services/syncAredl'
 import { getGdlProfileUrl } from '../services/syncGdl'
-import { loadMainLevels } from '../services/readCache'
+
 import { hasAccess } from '../utils/constants'
 import { saveRepresentedCountry } from '../utils/preferences'
 import styles from './Profile.module.css'
@@ -113,74 +113,36 @@ export default function MyProfile() {
           return
         }
 
-        const mainLevels = await loadMainLevels()
-        const plan = computeSyncPlan(aredlProfile, mainLevels)
-
         const existingComps = await getCollection('completions', [where('userId', '==', user.uid)])
-        const existingLevelIds = new Set(existingComps.map(c => c.levelId))
-        let added = 0
-        let victorErrors = 0
-        for (const { aredlRecord, gdLevel } of plan.matched) {
-          if (existingLevelIds.has(gdLevel.id)) continue
-          const completionId = `aredl_sync_${user.uid}_${gdLevel.id}`
-          await createDocument('completions', completionId, {
-            userId: user.uid,
-            levelId: gdLevel.id,
-            levelType: 'main',
-            levelName: gdLevel.name,
-            points: gdLevel.points || 0,
-            videoURL: aredlRecord.video_url || '',
-            completedAt: new Date(),
-            source: 'aredl_sync',
-          })
-          added++
-
-          try {
-            const levelDoc = await getDocument('levels', gdLevel.id)
-            const existingVictors = levelDoc?.victors || []
-            if (!existingVictors.some(v => v.userId === user.uid)) {
-              const now = new Date()
-              await updateDocument('levels', gdLevel.id, {
-                victoryCount: (levelDoc?.victoryCount || 0) + 1,
-                victors: [...existingVictors, {
-                  userId: user.uid,
-                  username: userData.username || userData.displayName || user.uid.slice(0, 6),
-                  displayName: userData.displayName || userData.username || 'Player',
-                  country: userData.country || '',
-                  avatarURL: userData.avatarURL || '',
-                  completionId,
-                  completedAt: now,
-                  videoURL: aredlRecord.video_url || '',
-                }],
-              })
-            }
-          } catch (victorErr) {
-            victorErrors++
-            console.error('AREDL sync: could not update victors for', gdLevel.id, victorErr)
-          }
-        }
-
-        await updateDocument('users', user.uid, {
-          aredlSync: {
+        const result = await runAredlSync({
+          userId: user.uid,
+          aredlProfile,
+          existingCompletions: existingComps,
+          syncStamp: {
             discordId: discordUser.id,
             username: aredlProfile.username || '',
             globalName: aredlProfile.global_name || aredlProfile.username || '',
             avatar: discordUser.avatar || '',
-            syncedAt: new Date(),
           },
         })
 
-        const importedNote = added > 0
-          ? `${added} record${added === 1 ? '' : 's'} imported`
+        const importedNote = result.added > 0
+          ? `${result.added} record${result.added === 1 ? '' : 's'} imported`
           : 'No new records to import'
-        const unmatchedNote = plan.unmatched.length > 0
-          ? ` · ${plan.unmatched.length} not found on the main list`
+        const createdNote = result.createdLevels > 0
+          ? ` · ${result.createdLevels} new level${result.createdLevels === 1 ? '' : 's'} added to the main list`
           : ''
-        const victorNote = victorErrors > 0
-          ? ` · ${victorErrors} victor update${victorErrors === 1 ? '' : 's'} deferred`
+        const unmatchedNote = result.unmatched > 0
+          ? ` · ${result.unmatched} could not be imported`
+          : ''
+        const failuresNote = result.failures.length > 0
+          ? ` (Why: ${result.failures.map(f => `${f.count}× ${f.reason} (e.g. ${f.sample})`).join('; ')})`
+          : ''
+        const victorNote = result.victorErrors > 0
+          ? ` · ${result.victorErrors} victor update${result.victorErrors === 1 ? '' : 's'} deferred`
           : ''
         setProfileError('')
-        setProfileMessage(`AREDL sync complete! ${importedNote}${unmatchedNote}${victorNote}.`)
+        setProfileMessage(`AREDL sync complete! ${importedNote}${createdNote}${unmatchedNote}${victorNote}.${failuresNote}`)
         await loadCompletions()
         await refreshUserData()
       } catch (err) {

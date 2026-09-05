@@ -1,4 +1,7 @@
 import { roundPoints } from '../utils/communityPoints'
+import { createDocument, getDocument, updateDocument } from './firestore'
+import { loadMainLevels, invalidateCache } from './readCache'
+import { fetchAredlLevels as fetchAredlCatalogue } from './aredl'
 
 const AREDL_API = 'https://api.aredl.net/v2/api'
 
@@ -193,6 +196,147 @@ export function describeSyncError(err) {
   if (code === 'not-found') return 'document not found'
   if (code === 'resource-exhausted' || /quota/i.test(message)) return 'Firestore quota exceeded'
   return message ? message.slice(0, 140) : 'unknown error'
+}
+
+// Full AREDL sync in one place, shared by every caller (profile auto-sync,
+// sync modal). Imports ALL records: matched ones plus missing levels, which
+// are auto-created from AREDL catalogue data. Returns a result summary with
+// per-failure reasons. Never deletes anything.
+export async function runAredlSync({ userId, aredlProfile, existingCompletions = [], syncStamp = null }) {
+  if (!userId) throw new Error('Missing user')
+  if (!aredlProfile) throw new Error('Missing AREDL profile')
+
+  let added = 0
+  let createdLevels = 0
+  let victorErrors = 0
+  const stillUnmatched = []
+  const failureReasons = {}
+  const trackFailure = (rec, err) => {
+    const reason = err ? describeSyncError(err) : 'no level data in AREDL record'
+    if (!failureReasons[reason]) {
+      failureReasons[reason] = { count: 0, sample: rec?.level?.name || 'Unknown level' }
+    }
+    failureReasons[reason].count++
+    stillUnmatched.push(rec)
+  }
+
+  const existingLevelIds = new Set((existingCompletions || []).map(c => c.levelId))
+  // Load the user's public profile so the victor snapshot has real data.
+  const userDoc = await getDocument('users', userId)
+
+  // Re-match against fresh levels so docs created by a concurrent sync
+  // are reused instead of duplicated.
+  const mainLevels = await loadMainLevels()
+  const plan = computeSyncPlan(aredlProfile, mainLevels)
+
+  // Enrich records missing from our list with AREDL catalogue data
+  // (points/position scale matches our list) and create their level docs.
+  let metaIndex = null
+  if (plan.unmatched.length > 0) {
+    try {
+      metaIndex = indexAredlMeta(await fetchAredlCatalogue())
+    } catch (metaErr) {
+      console.error('[aredl-sync] AREDL catalogue unavailable:', metaErr)
+    }
+  }
+
+  const toProcess = [...plan.matched]
+  for (const rec of plan.unmatched) {
+    if (!rec?.level?.name) { trackFailure(rec, null); continue }
+    const meta = findAredlMeta(rec, metaIndex)
+    let { id, slug, gameId, data } = buildMissingLevelDoc(rec, meta)
+    let gdLevel = null
+    try {
+      const existingDoc = await getDocument('levels', id).catch(() => null)
+      if (existingDoc) {
+        const sameGame = !gameId || !existingDoc.gameId || String(existingDoc.gameId) === String(gameId)
+        if (sameGame) {
+          gdLevel = { id, ...existingDoc }
+        } else {
+          id = `main_${slug}_${gameId || Date.now()}`
+          const retryDoc = await getDocument('levels', id).catch(() => null)
+          if (retryDoc) gdLevel = { id, ...retryDoc }
+        }
+      }
+      if (!gdLevel) {
+        await createDocument('levels', id, data)
+        createdLevels++
+        gdLevel = { id, ...data }
+      }
+    } catch (levelErr) {
+      console.error('[aredl-sync] level auto-create failed:', levelErr)
+      trackFailure(rec, levelErr)
+      continue
+    }
+    toProcess.push({ aredlRecord: rec, gdLevel })
+  }
+
+  if (createdLevels > 0) invalidateCache('mainLevels')
+
+  for (const { aredlRecord, gdLevel } of toProcess) {
+    if (existingLevelIds.has(gdLevel.id)) continue
+    const completionId = `aredl_sync_${userId}_${gdLevel.id}`
+    try {
+      await createDocument('completions', completionId, {
+        userId,
+        levelId: gdLevel.id,
+        levelType: 'main',
+        levelName: gdLevel.name,
+        points: gdLevel.points || 0,
+        videoURL: aredlRecord.video_url || '',
+        completedAt: new Date(),
+        source: 'aredl_sync',
+      })
+    } catch (compErr) {
+      console.error('[aredl-sync] completion create failed:', compErr)
+      trackFailure(aredlRecord, compErr)
+      continue
+    }
+    added++
+
+    try {
+      const levelDoc = await getDocument('levels', gdLevel.id)
+      const existingVictors = levelDoc?.victors || []
+      if (!existingVictors.some(v => v.userId === userId)) {
+        const now = new Date()
+        await updateDocument('levels', gdLevel.id, {
+          victoryCount: (levelDoc?.victoryCount || 0) + 1,
+          victors: [...existingVictors, {
+            userId,
+            username: userDoc?.username || userDoc?.displayName || userId.slice(0, 6),
+            displayName: userDoc?.displayName || userDoc?.username || 'Player',
+            country: userDoc?.country || '',
+            avatarURL: userDoc?.avatarURL || '',
+            completionId,
+            completedAt: now,
+            videoURL: aredlRecord.video_url || '',
+          }],
+        })
+      }
+    } catch (victorErr) {
+      victorErrors++
+      console.error('[aredl-sync] victor update failed:', victorErr)
+    }
+  }
+
+  if (syncStamp) {
+    await updateDocument('users', userId, {
+      aredlSync: { ...syncStamp, syncedAt: new Date() },
+    })
+  }
+
+  return {
+    added,
+    skipped: toProcess.length - added,
+    victorErrors,
+    createdLevels,
+    unmatched: stillUnmatched.length,
+    failures: Object.entries(failureReasons).map(([reason, { count, sample }]) => ({
+      reason,
+      count,
+      sample,
+    })),
+  }
 }
 
 export async function applySync(userId, matched, existingCompletions, { addCompletion, updateLevelVictors }) {
