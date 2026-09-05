@@ -12,6 +12,7 @@ import { useLanguage } from '../hooks/useLanguage'
 import { loadMainLevels } from '../services/readCache'
 import { getGlobalLevelArtworkIndex } from '../services/globalDemonList'
 import { formatNumber } from '../utils/format'
+import { getVideoThumbnail } from '../utils/video'
 import { DIFFICULTY_COLORS } from '../utils/constants'
 import styles from './List.module.css'
 
@@ -143,6 +144,9 @@ export default function MainList() {
           <div className={styles.mainLevelCards}>
           {filtered.map((level, i) => {
             const completed = !!user && (level.victors || []).some(v => v.userId === user.uid)
+            // GDL artwork first; fall back to the first victor's video thumbnail.
+            const thumbnail = level._gdlArtwork?.thumbnail
+              || getVideoThumbnail((level.victors || [])[0]?.videoURL)
             return (
             <motion.div
               key={level.id}
@@ -152,9 +156,9 @@ export default function MainList() {
               transition={{ delay: Math.min(i, 12) * 0.02 }}
             >
               <Link to={`/levels/${level.id}`} className={`${styles.mainLevelCard} ${completed ? styles.completed : ''}`}>
-                {level._gdlArtwork?.thumbnail && (
+                {thumbnail && (
                   <img
-                    src={level._gdlArtwork.thumbnail}
+                    src={thumbnail}
                     alt=""
                     className={styles.mainLevelThumbnail}
                     loading="lazy"

@@ -14,7 +14,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { db } from '../../services/firebase'
 import { getCollection, updateDocument, getDocument, createDocument } from '../../services/firestore'
 import { insertCommunityLevel, setCommunityPosition } from '../../services/communityList'
-import { findMainLevelByName } from '../../services/mainLevels'
+import { findMainLevelByName, mirrorCompletionToLinked } from '../../services/mainLevels'
 import { lookupAredlLevel } from '../../services/aredl'
 import { communityPoints } from '../../utils/communityPoints'
 import { formatDateRelative, parseDecimal, getDisplayName } from '../../utils/format'
@@ -522,6 +522,24 @@ export default function ReviewSubmissions() {
               [`${sub.levelType}Completions`]: (stats[`${sub.levelType}Completions`] || 0) + 1,
             },
           })
+        }
+
+        // Mirror the victor onto the linked counterpart list
+        // (community <-> main) with that list's own points.
+        try {
+          await mirrorCompletionToLinked({
+            levelId,
+            userId: sub.userId,
+            username: submitterName,
+            displayName: submitterName,
+            country: submitter?.country || '',
+            avatarURL: submitter?.avatarURL || '',
+            videoURL: sub.videoURL || '',
+            completedAt: now,
+            submissionId: subId,
+          })
+        } catch (mirrorErr) {
+          console.error('[mirror] linked completion failed:', mirrorErr)
         }
       }
 

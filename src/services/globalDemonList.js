@@ -43,7 +43,11 @@ export async function getGlobalLevelArtworkIndex() {
     }
     if (level.gameId) byGameId.set(String(level.gameId), artwork)
     const nameKey = normalizeName(level.name)
-    if (nameKey && !byName.has(nameKey)) byName.set(nameKey, artwork)
+    if (!nameKey) return
+    // Duplicate names exist in the data (re-uploads, stale rows). Prefer an
+    // entry that actually yields a thumbnail over the first occurrence.
+    const prev = byName.get(nameKey)
+    if (!prev || (!prev.thumbnail && artwork.thumbnail)) byName.set(nameKey, artwork)
   })
 
   return {

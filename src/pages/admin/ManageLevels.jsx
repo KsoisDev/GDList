@@ -2,11 +2,12 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Sortable from 'sortablejs'
-import { Plus, Edit3, Trash2, Save, X, RefreshCw, GripVertical } from 'lucide-react'
+import { Plus, Edit3, Trash2, Save, X, RefreshCw, GripVertical, ArrowUpRight } from 'lucide-react'
 import PageShell from '../../components/layout/PageShell'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
+import Modal from '../../components/ui/Modal'
 import Spinner from '../../components/ui/Spinner'
 import { useAuth } from '../../hooks/useAuth'
 import { updateDocument, getCollection } from '../../services/firestore'
@@ -14,6 +15,7 @@ import {
   getCommunityLevels, insertCommunityLevel, deleteCommunityLevel, moveCommunityLevel,
   setCommunityPosition, renumberCommunityLevels,
 } from '../../services/communityList'
+import { promoteCommunityLevelToMain } from '../../services/mainLevels'
 import { hasAccess } from '../../utils/constants'
 import styles from './Admin.module.css'
 
@@ -26,6 +28,9 @@ export default function ManageLevels() {
   const [form, setForm] = useState({ name: '', creator: '', verifier: '', gameId: '', description: '', position: '', videoURL: '', tags: [] })
   const [editing, setEditing] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [promote, setPromote] = useState(null)
+  const [promoteForm, setPromoteForm] = useState({ position: '', points: '' })
+  const [promoting, setPromoting] = useState(false)
   const inFlightRef = useRef(false)
   const listRef = useRef(null)
 
@@ -178,6 +183,28 @@ export default function ManageLevels() {
     }
   }
 
+  const openPromote = (level) => {
+    setPromote({ id: level.id, name: level.name })
+    setPromoteForm({ position: '', points: '' })
+  }
+
+  const handlePromote = async () => {
+    if (!promote || promoting) return
+    setPromoting(true)
+    try {
+      await promoteCommunityLevelToMain(promote.id, {
+        position: promoteForm.position,
+        points: promoteForm.points,
+      })
+      setPromote(null)
+      await loadLevels()
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setPromoting(false)
+    }
+  }
+
   const handleRenumber = async () => {
     if (!confirm('Renumber all community levels (1..n) and recalculate points by position?')) return
     try {
@@ -311,11 +338,51 @@ export default function ManageLevels() {
                 icon={Trash2}
                 aria-label={`Delete ${level.name}`}
               />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => openPromote(level)}
+                icon={ArrowUpRight}
+                disabled={!!level.mainLevelId}
+                title={level.mainLevelId ? 'Already on the main list' : `Promote ${level.name} to the main list`}
+                aria-label={`Promote ${level.name} to the main list`}
+              />
             </span>
           </motion.div>
         ))}
         </div>
       </div>
+
+      <Modal
+        isOpen={!!promote}
+        onClose={() => setPromote(null)}
+        title={promote ? `Promote "${promote.name}" to the main list` : 'Promote to main list'}
+      >
+        <div className={styles.formGrid}>
+          <Input
+            label="Main list position"
+            type="number"
+            value={promoteForm.position}
+            onChange={e => setPromoteForm({ ...promoteForm, position: e.target.value })}
+            placeholder="e.g. 150"
+          />
+          <Input
+            label="Main list points"
+            type="number"
+            value={promoteForm.points}
+            onChange={e => setPromoteForm({ ...promoteForm, points: e.target.value })}
+            placeholder="e.g. 25"
+          />
+        </div>
+        <div className={styles.formActions}>
+          <Button variant="ghost" size="sm" onClick={() => setPromote(null)} icon={X}>
+            Cancel
+          </Button>
+          <Button variant="primary" size="sm" onClick={handlePromote} loading={promoting} icon={ArrowUpRight}>
+            Promote
+          </Button>
+        </div>
+      </Modal>
     </PageShell>
   )
 }
